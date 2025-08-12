@@ -1,60 +1,92 @@
-import type { Config } from "tailwindcss";
+import type { Config } from "tailwindcss"
 
-/**
- * Tailwind CSS Configuration
- * 
- * This configuration centralizes all theme colors for the mini app.
- * To change the app's color scheme, simply update the 'primary' color value below.
- * 
- * Example theme changes:
- * - Blue theme: primary: "#3182CE"
- * - Green theme: primary: "#059669" 
- * - Red theme: primary: "#DC2626"
- * - Orange theme: primary: "#EA580C"
- */
-export default {
-    darkMode: "media",
-    content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+const config = {
+  darkMode: ["class"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+    "*.{js,ts,jsx,tsx,mdx}",
   ],
+  prefix: "",
   theme: {
-  	extend: {
-  		colors: {
-  			// Main theme color - change this to update the entire app's color scheme
-  			primary: "#8b5cf6", // Main brand color
-  			"primary-light": "#a78bfa", // For hover states
-  			"primary-dark": "#7c3aed", // For active states
-  			
-  			// Secondary colors for backgrounds and text
-  			secondary: "#f8fafc", // Light backgrounds
-  			"secondary-dark": "#334155", // Dark backgrounds
-  			
-  			// Legacy CSS variables for backward compatibility
-  			background: 'var(--background)',
-  			foreground: 'var(--foreground)'
-  		},
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
-  		},
-  		// Custom spacing for consistent layout
-  		spacing: {
-  			'18': '4.5rem',
-  			'88': '22rem',
-  		},
-  		// Custom container sizes
-  		maxWidth: {
-  			'xs': '20rem',
-  			'sm': '24rem',
-  			'md': '28rem',
-  			'lg': '32rem',
-  			'xl': '36rem',
-  			'2xl': '42rem',
-  		}
-  	}
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        // Custom Fartree Colors
+        "fartree-background": "#FADDE6", // Light pink for desktop background
+        "fartree-window-background": "#FFFBF0", // Light beige/cream for window content
+        "fartree-window-header": "#E0E0E0", // Light gray for window header
+        "fartree-border-dark": "#333333", // Dark border for windows
+        "fartree-primary-purple": "#8465CB",
+        "fartree-accent-purple": "#a478e8",
+        "fartree-text-primary": "#333333", // Darker text for light background
+        "fartree-text-secondary": "#666666", // Medium gray text
+        "fartree-success-green": "#28a745", // Adjusted for better contrast
+        "fartree-warning-amber": "#ffc107", // Adjusted for better contrast
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+    },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config;
+} satisfies Config
+
+export default config
