@@ -285,92 +285,6 @@ export const authOptions: AuthOptions = {
         };
       },
     }),
-    CredentialsProvider({
-      id: 'neynar',
-      name: 'Sign in with Neynar',
-      credentials: {
-        message: {
-          label: 'Message',
-          type: 'text',
-          placeholder: '0x0',
-        },
-        signature: {
-          label: 'Signature',
-          type: 'text',
-          placeholder: '0x0',
-        },
-        nonce: {
-          label: 'Nonce',
-          type: 'text',
-          placeholder: 'Custom nonce (optional)',
-        },
-        fid: {
-          label: 'FID',
-          type: 'text',
-          placeholder: '0',
-        },
-        signers: {
-          label: 'Signers',
-          type: 'text',
-          placeholder: 'JSON string of signers',
-        },
-        user: {
-          label: 'User Data',
-          type: 'text',
-          placeholder: 'JSON string of user data',
-        },
-      },
-      async authorize(credentials) {
-        const nonce = credentials?.nonce;
-
-        if (!nonce) {
-          console.error('No nonce or CSRF token provided for Neynar auth');
-          return null;
-        }
-
-        // For Neynar, we can use a different validation approach
-        // This could involve validating against Neynar's API or using their SDK
-        try {
-          // Validate the signature using Farcaster's auth client (same as Farcaster provider)
-          const appClient = createAppClient({
-            ethereum: viemConnector(),
-          });
-
-          const domain = getDomainFromUrl(process.env.NEXTAUTH_URL);
-
-          const verifyResponse = await appClient.verifySignInMessage({
-            message: credentials?.message as string,
-            signature: credentials?.signature as `0x${string}`,
-            domain,
-            nonce,
-          });
-
-          const { success, fid } = verifyResponse;
-
-          if (!success) {
-            return null;
-          }
-
-          // Validate that the provided FID matches the verified FID
-          if (credentials?.fid && parseInt(credentials.fid) !== fid) {
-            console.error('FID mismatch in Neynar auth');
-            return null;
-          }
-
-          return {
-            id: fid.toString(),
-            provider: 'neynar',
-            signers: credentials?.signers
-              ? JSON.parse(credentials.signers)
-              : undefined,
-            user: credentials?.user ? JSON.parse(credentials.user) : undefined,
-          };
-        } catch (error) {
-          console.error('Error in Neynar auth:', error);
-          return null;
-        }
-      },
-    }),
   ],
   callbacks: {
     session: async ({ session, token }) => {
@@ -382,10 +296,6 @@ export const authOptions: AuthOptions = {
         session.user = {
           fid: parseInt(token.sub ?? ''),
         };
-      } else if (token.provider === 'neynar') {
-        // For Neynar, use full user data structure from user
-        session.user = token.user as typeof session.user;
-        session.signers = token.signers as typeof session.signers;
       }
 
       return session;
