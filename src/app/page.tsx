@@ -1,8 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { WindowFrame } from "@/components/window-frame"
+import { Button } from "../components/ui/Button"
+import { WindowFrame } from "../components/window-frame"
 import { ArrowRight, Sparkles, LinkIcon, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 
