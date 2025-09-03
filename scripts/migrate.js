@@ -5,13 +5,19 @@
  * Runs the initial database schema setup
  */
 
-const { Pool } = require('@neondatabase/serverless');
-const fs = require('fs');
-const path = require('path');
+import { Pool } from '@neondatabase/serverless';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { config } from 'dotenv';
+
+// ES module equivalent of __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function runMigration() {
   // Load environment variables
-  require('dotenv').config({ path: '.env.local' });
+  config({ path: '.env.local' });
 
   const databaseUrl = process.env.DATABASE_URL;
   

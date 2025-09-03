@@ -86,7 +86,7 @@ body {
   }
   
   .btn-primary {
-    @apply bg-primary text-white hover:bg-primary-dark focus:ring-primary;
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-primary;
   }
   
   .btn-secondary {
