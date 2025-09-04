@@ -2,7 +2,7 @@ import type React from "react"
 import { Card, CardContent } from "~/components/ui/card"
 import { cn } from "~/lib/utils"
 import { Link, Eye, Pencil, GripVertical } from "lucide-react"
-import { Button } from "~/components/ui/button"
+import { Button } from "~/components/ui/Button"
 
 interface LinkCardProps extends React.HTMLAttributes<HTMLDivElement> {
   icon?: React.ElementType
@@ -77,16 +77,16 @@ export function LinkCard({
         {editable && (
           <div className="flex-shrink-0 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button
-              variant="ghost"
-              size="icon"
+              variant="outline"
+              size="sm"
               className="w-8 h-8 text-fartree-text-secondary hover:text-fartree-accent-purple"
             >
               <Pencil className="w-4 h-4" />
               <span className="sr-only">Edit</span>
             </Button>
             <Button
-              variant="ghost"
-              size="icon"
+              variant="outline"
+              size="sm"
               className="w-8 h-8 text-fartree-text-secondary hover:text-fartree-accent-purple"
             >
               <Eye className="w-4 h-4" />

@@ -14,7 +14,7 @@ export default function LandingPage() {
         <header className="flex items-center justify-between p-4 border-b-2 border-fartree-border-dark bg-fartree-window-header">
           <div className="text-2xl font-bold text-fartree-primary-purple">Fartree</div>
           <nav>
-            <Button variant="ghost" className="text-fartree-text-primary hover:text-fartree-accent-purple">
+            <Button variant="outline" className="text-fartree-text-primary hover:text-fartree-accent-purple">
               Sign In
             </Button>
           </nav>

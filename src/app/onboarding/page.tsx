@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "~/components/ui/button"
+import { Button } from "~/components/ui/Button"
 import { WindowFrame } from "~/components/window-frame"
 import { CheckCircle, Loader2, LinkIcon, User, Sparkles, ArrowRight, ArrowLeft } from "lucide-react"
 import { cn } from "~/lib/utils"
@@ -136,7 +136,7 @@ export default function OnboardingFlow() {
 
           {step > 1 && (
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={handleBack}
               className="mt-4 text-fartree-text-secondary hover:text-fartree-accent-purple"
             >
