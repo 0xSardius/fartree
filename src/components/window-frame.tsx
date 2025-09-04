@@ -1,6 +1,6 @@
 import type React from "react"
 import { X, Minus, Square } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "~/lib/utils"
 
 interface WindowFrameProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string

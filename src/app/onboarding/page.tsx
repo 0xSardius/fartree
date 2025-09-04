@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { WindowFrame } from "@/components/window-frame"
+import { Button } from "~/components/ui/button"
+import { WindowFrame } from "~/components/window-frame"
 import { CheckCircle, Loader2, LinkIcon, User, Sparkles, ArrowRight, ArrowLeft } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "~/lib/utils"
 import { useRouter } from "next/navigation"
 
 export default function OnboardingFlow() {

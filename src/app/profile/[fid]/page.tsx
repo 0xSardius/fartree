@@ -1,7 +1,7 @@
 import Link from "next/link"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LinkCard } from "@/components/link-card"
-import { WindowFrame } from "@/components/window-frame"
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+import { LinkCard } from "~/components/link-card"
+import { WindowFrame } from "~/components/window-frame"
 import { Twitter, Github, Globe, Users, Figma, Wallet, Zap } from "lucide-react"
 
 // Dummy data for demonstration

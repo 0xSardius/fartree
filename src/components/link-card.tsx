@@ -1,8 +1,8 @@
 import type React from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { cn } from "@/lib/utils"
+import { Card, CardContent } from "~/components/ui/card"
+import { cn } from "~/lib/utils"
 import { Link, Eye, Pencil, GripVertical } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { Button } from "~/components/ui/button"
 
 interface LinkCardProps extends React.HTMLAttributes<HTMLDivElement> {
   icon?: React.ElementType

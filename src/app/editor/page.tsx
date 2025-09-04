@@ -1,13 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { WindowFrame } from "@/components/window-frame"
-import { LinkCard } from "@/components/link-card"
+import { Button } from "~/components/ui/button"
+import { Input } from "~/components/ui/input"
+import { Label } from "~/components/ui/label"
+import { Switch } from "~/components/ui/switch"
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+import { WindowFrame } from "~/components/window-frame"
+import { LinkCard } from "~/components/link-card"
 import {
   Save,
   Eye,
