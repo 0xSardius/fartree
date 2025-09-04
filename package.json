@@ -32,6 +32,7 @@
     "@farcaster/frame-wagmi-connector": ">=0.0.19 <1.0.0",
     "@farcaster/mini-app-solana": "^0.0.5",
     "@farcaster/miniapp-wagmi-connector": "^1.0.0",
+    "@farcaster/quick-auth": "^0.0.7",
     "@neondatabase/serverless": "^1.0.1",
     "@neynar/nodejs-sdk": "^2.19.0",
     "@neynar/react": "^1.2.2",

@@ -19,6 +19,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://auth.farcaster.xyz" />
+      </head>
       <body>
         <Providers session={session}>{children}</Providers>
       </body>
