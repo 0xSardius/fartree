@@ -1,18 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '~/lib/db';
+import { getNeynarUser } from '~/lib/neynar';
 
-// Helper function to get user from Farcaster API (you could also use Neynar)
-async function getFarcasterUser(fid: number) {
-  try {
-    // Using the free Farcaster API endpoint
-    const response = await fetch(`https://api.farcaster.xyz/v2/user?fid=${fid}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch user from Farcaster API');
+// Helper function to auto-detect and create social links from Neynar data
+async function autoDetectSocialLinks(profileId: string, neynarUser: any) {
+  const linksToCreate = [];
+  
+  // Add X (Twitter) if verified
+  if (neynarUser.verified_accounts) {
+    const xAccount = neynarUser.verified_accounts.find((acc: any) => acc.platform === 'x');
+    if (xAccount) {
+      linksToCreate.push({
+        title: 'X (Twitter)',
+        url: `https://x.com/${xAccount.username}`,
+        category: 'social',
+        auto_detected: true
+      });
     }
-    const data = await response.json();
-    return data.result?.user;
+  }
+  
+  // Add primary ETH address if available
+  if (neynarUser.verified_addresses?.primary?.eth_address) {
+    const ethAddress = neynarUser.verified_addresses.primary.eth_address;
+    linksToCreate.push({
+      title: 'ETH Address',
+      url: `https://etherscan.io/address/${ethAddress}`,
+      category: 'crypto',
+      auto_detected: true
+    });
+  }
+  
+  // Add primary SOL address if available
+  if (neynarUser.verified_addresses?.primary?.sol_address) {
+    const solAddress = neynarUser.verified_addresses.primary.sol_address;
+    linksToCreate.push({
+      title: 'SOL Address',
+      url: `https://solscan.io/account/${solAddress}`,
+      category: 'crypto',
+      auto_detected: true
+    });
+  }
+  
+  // Create the links in database
+  for (let i = 0; i < linksToCreate.length; i++) {
+    const link = linksToCreate[i];
+    
+    // Check if link already exists to avoid duplicates
+    const existingLink = await query(
+      'SELECT id FROM profile_links WHERE profile_id = $1 AND url = $2',
+      [profileId, link.url]
+    );
+    
+    if (existingLink.rows.length === 0) {
+      await query(`
+        INSERT INTO profile_links (profile_id, title, url, category, position, auto_detected)
+        VALUES ($1, $2, $3, $4, $5, $6)
+      `, [profileId, link.title, link.url, link.category, i, link.auto_detected]);
+    }
+  }
+  
+  console.log(`Auto-detected ${linksToCreate.length} social links for profile ${profileId}`);
+}
+
+// Helper function to extract FID from Quick Auth JWT
+function extractFidFromJWT(authHeader: string): number | null {
+  try {
+    if (!authHeader.startsWith('Bearer ')) {
+      return null;
+    }
+    
+    const token = authHeader.substring(7);
+    
+    // For now, we'll use a test FID. In production, you'd verify the JWT
+    // and extract the FID from the payload
+    // const payload = jwt.verify(token, process.env.JWT_SECRET);
+    // return payload.fid;
+    
+    // TODO: Replace with actual JWT verification
+    return 6841; // Test FID for development
   } catch (error) {
-    console.error('Error fetching Farcaster user:', error);
+    console.error('Error extracting FID from JWT:', error);
     return null;
   }
 }
@@ -20,52 +87,99 @@ async function getFarcasterUser(fid: number) {
 // GET /api/auth/me - Get current authenticated user
 export async function GET(request: NextRequest) {
   try {
-    // For now, we'll simulate getting the FID from the Mini App context
-    // In a real implementation, you'd verify the Quick Auth JWT here
+    // Get FID from Quick Auth JWT
+    const authorization = request.headers.get('authorization');
+    let fid: number | null = null;
     
-    // TODO: Replace this with actual Quick Auth JWT verification
-    // const authorization = request.headers.get('authorization');
-    // if (!authorization?.startsWith('Bearer ')) {
-    //   return NextResponse.json({ error: 'Missing authorization' }, { status: 401 });
-    // }
+    if (authorization) {
+      fid = extractFidFromJWT(authorization);
+    }
     
-    // For development, let's use a test FID
-    const testFid = 6841; // Replace with actual FID from JWT
+    // Fallback to test FID for development
+    if (!fid) {
+      fid = 6841; // Test FID for development
+      console.log('Using test FID for development:', fid);
+    }
     
     // Check if user exists in our database
     let profile = await query(
       'SELECT * FROM profiles WHERE fid = $1',
-      [testFid]
+      [fid]
     );
 
     if (profile.rows.length === 0) {
-      // User doesn't exist in our DB, let's fetch from Farcaster and create profile
-      const farcasterUser = await getFarcasterUser(testFid);
+      // User doesn't exist in our DB, let's fetch from Neynar and create profile
+      console.log('Creating new profile for FID:', fid);
+      const neynarUser = await getNeynarUser(fid);
       
-      if (farcasterUser) {
+      if (neynarUser) {
+        console.log('Got Neynar user data:', { 
+          username: neynarUser.username, 
+          displayName: neynarUser.display_name,
+          bio: neynarUser.profile?.bio?.text?.substring(0, 50) + '...'
+        });
+        
         const createResult = await query(`
           INSERT INTO profiles (fid, username, display_name, bio, avatar_url, theme)
           VALUES ($1, $2, $3, $4, $5, $6)
           RETURNING *
         `, [
-          testFid,
-          farcasterUser.username || `user${testFid}`,
-          farcasterUser.displayName || farcasterUser.username || `User ${testFid}`,
-          farcasterUser.profile?.bio?.text || null,
-          farcasterUser.pfp?.url || null,
+          fid,
+          neynarUser.username || `user${fid}`,
+          neynarUser.display_name || neynarUser.username || `User ${fid}`,
+          neynarUser.profile?.bio?.text || null,
+          neynarUser.pfp_url || null,
           'dark' // Default theme
         ]);
         
         profile = createResult;
+        
+        // Auto-detect and create social links from Neynar data
+        await autoDetectSocialLinks(profile.rows[0].id, neynarUser);
       } else {
-        // Fallback if Farcaster API fails
+        console.log('Neynar user fetch failed, creating basic profile for FID:', fid);
+        // Fallback if Neynar API fails
         const createResult = await query(`
           INSERT INTO profiles (fid, username, display_name, theme)
           VALUES ($1, $2, $3, $4)
           RETURNING *
-        `, [testFid, `user${testFid}`, `User ${testFid}`, 'dark']);
+        `, [fid, `user${fid}`, `User ${fid}`, 'dark']);
         
         profile = createResult;
+      }
+    } else {
+      console.log('Found existing profile for FID:', fid);
+      
+      // Optionally refresh profile data from Neynar (e.g., every 24 hours)
+      const existingUser = profile.rows[0];
+      const lastUpdated = new Date(existingUser.updated_at);
+      const now = new Date();
+      const hoursSinceUpdate = (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60);
+      
+      if (hoursSinceUpdate > 24) {
+        console.log('Profile is stale, refreshing from Neynar...');
+        const neynarUser = await getNeynarUser(fid);
+        
+        if (neynarUser) {
+          const updateResult = await query(`
+            UPDATE profiles 
+            SET username = $2, display_name = $3, bio = $4, avatar_url = $5, updated_at = CURRENT_TIMESTAMP
+            WHERE fid = $1
+            RETURNING *
+          `, [
+            fid,
+            neynarUser.username || existingUser.username,
+            neynarUser.display_name || existingUser.display_name,
+            neynarUser.profile?.bio?.text || existingUser.bio,
+            neynarUser.pfp_url || existingUser.avatar_url
+          ]);
+          
+          profile = updateResult;
+          console.log('Profile refreshed from Neynar');
+          
+          // Also refresh auto-detected links
+          await autoDetectSocialLinks(existingUser.id, neynarUser);
+        }
       }
     }
 
