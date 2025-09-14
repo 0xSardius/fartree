@@ -22,7 +22,9 @@
     "cleanup": "node scripts/cleanup.js",
     "db:migrate": "node scripts/migrate.js",
     "db:test": "node -e \"require('./src/lib/db.ts').testConnection()\"",
-    "test:auto-populate": "node scripts/test-auto-populate.js"
+    "test:auto-populate": "node scripts/test-auto-populate.js",
+    "test:onboarding": "node scripts/test-onboarding-flow.js",
+    "test:quick-auth": "node scripts/test-quick-auth-environments.js"
   },
   "dependencies": {
     "@farcaster/auth-client": ">=0.3.0 <1.0.0",

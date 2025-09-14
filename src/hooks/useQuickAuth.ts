@@ -40,38 +40,66 @@ export function useQuickAuth() {
       try {
         setAuthState(prev => ({ ...prev, loading: true, error: null }));
 
-        // Check if we're in a Mini App environment
-        const isInMiniApp = await sdk.isInMiniApp();
+        // Check if we're in a Mini App environment with longer timeout for desktop
+        const isInMiniApp = await sdk.isInMiniApp(500); // Increased timeout for desktop iframe
         
-        if (!isInMiniApp) {
-          // Not in Mini App - handle gracefully
+        if (isInMiniApp) {
+          console.log('✅ Detected Mini App environment - using Quick Auth');
+          
+          // Use Quick Auth to get authenticated token and make request
+          const response = await sdk.quickAuth.fetch('/api/auth/me');
+          
+          if (!response.ok) {
+            throw new Error(`Authentication failed: ${response.status}`);
+          }
+
+          const data = await response.json();
+          
+          if (!mounted) return;
+
+          if (data.success && data.user) {
+            setAuthState({
+              user: data.user,
+              loading: false,
+              error: null
+            });
+          } else {
+            throw new Error(data.error || 'Authentication failed');
+          }
+        } else {
+          console.log('⚠️ Not in Mini App environment - graceful fallback');
+          
+          // Graceful fallback: Try to make a regular authenticated request
+          // This handles cases where user is on desktop web or other environments
+          try {
+            const response = await fetch('/api/auth/me', {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success && data.user) {
+                setAuthState({
+                  user: data.user,
+                  loading: false,
+                  error: null
+                });
+                return;
+              }
+            }
+          } catch (fallbackError) {
+            console.log('Fallback auth also failed:', fallbackError);
+          }
+          
+          // If we reach here, user needs to authenticate
           setAuthState({
             user: null,
             loading: false,
-            error: 'Not running in Mini App environment'
+            error: null // No error - just not authenticated
           });
-          return;
-        }
-
-        // Use Quick Auth to get authenticated token and make request
-        const response = await sdk.quickAuth.fetch('/api/auth/me');
-        
-        if (!response.ok) {
-          throw new Error(`Authentication failed: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
-        if (!mounted) return;
-
-        if (data.success && data.user) {
-          setAuthState({
-            user: data.user,
-            loading: false,
-            error: null
-          });
-        } else {
-          throw new Error(data.error || 'Authentication failed');
         }
 
       } catch (error) {

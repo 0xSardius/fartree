@@ -1,24 +1,56 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "~/components/ui/Button"
 import { WindowFrame } from "~/components/window-frame"
 import { CheckCircle, Loader2, LinkIcon, User, Sparkles, ArrowRight, ArrowLeft } from "lucide-react"
 import { cn } from "~/lib/utils"
 import { useRouter } from "next/navigation"
+import { useQuickAuth } from "~/hooks/useQuickAuth"
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 
 export default function OnboardingFlow() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [profileData, setProfileData] = useState<any>(null)
   const router = useRouter()
+  
+  // Use Quick Auth for real authentication
+  const { user, loading: authLoading, error: authError, isAuthenticated, refetch } = useQuickAuth()
+  
+  // Auto-advance to step 2 when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && user && step === 1) {
+      setStep(2)
+      handleAutoScan()
+    }
+  }, [isAuthenticated, user, step])
+
+  // Real auto-scanning function
+  const handleAutoScan = async () => {
+    setLoading(true)
+    try {
+      // The user data from useQuickAuth already contains the auto-populated profile
+      // But let's refetch to ensure we have the latest data
+      await refetch()
+      
+      // Simulate some scanning time for better UX
+      setTimeout(() => {
+        setProfileData(user)
+        setLoading(false)
+        setStep(3) // Move to review step
+      }, 2000)
+    } catch (error) {
+      console.error('Auto-scan failed:', error)
+      setLoading(false)
+      // Still advance but show error state
+      setStep(3)
+    }
+  }
 
   const handleNext = () => {
     if (step === 2) {
-      setLoading(true)
-      setTimeout(() => {
-        setLoading(false)
-        setStep(step + 1)
-      }, 2000) // Simulate scanning time
+      handleAutoScan()
     } else {
       setStep(step + 1)
     }
@@ -33,38 +65,21 @@ export default function OnboardingFlow() {
       id: 1,
       title: "Welcome to Fartree!",
       icon: <Sparkles className="w-16 h-16 text-fartree-primary-purple mb-6" />,
-      description: "The Linktree for Farcaster. Connect all your Web3 activities in one shareable profile.",
-      buttonText: "Connect Farcaster Account",
-      action: async () => {
-        // Simulate Neynar SIWN success and profile creation/retrieval
-        const simulatedFarcasterData = {
-          fid: 12345, // Replace with actual FID from Neynar
-          username: "alicesmith", // Replace with actual username
-          displayName: "Alice Smith",
-          bio: "Web3 enthusiast, builder, and cat lover.",
-          avatarUrl: "/placeholder-user.jpg",
-        }
-
-        try {
-          const response = await fetch("/api/auth/neynar-siwn", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(simulatedFarcasterData),
-          })
-
-          const data = await response.json()
-          if (data.success) {
-            console.log("Simulated Farcaster Sign-In successful:", data)
-            setStep(2) // Move to the next step (auto-scanning)
-          } else {
-            console.error("Simulated Farcaster Sign-In failed:", data.error)
-            alert("Sign-in failed: " + data.error)
-          }
-        } catch (error) {
-          console.error("Error during simulated Farcaster Sign-In:", error)
-          alert("An error occurred during sign-in.")
+      description: isAuthenticated 
+        ? `Welcome back, ${user?.display_name || user?.username}! Let's set up your Fartree profile.`
+        : "The Linktree for Farcaster. Connect all your Web3 activities in one shareable profile.",
+      buttonText: authLoading 
+        ? "Connecting..." 
+        : isAuthenticated 
+          ? "Continue Setup" 
+          : "Connect Farcaster Account",
+      action: () => {
+        if (isAuthenticated) {
+          setStep(2)
+          handleAutoScan()
+        } else {
+          // Quick Auth should happen automatically in miniapp environment
+          console.log("Waiting for Quick Auth...")
         }
       },
     },
@@ -86,8 +101,43 @@ export default function OnboardingFlow() {
     {
       id: 3,
       title: "Review Your Auto-Generated Profile",
-      icon: <User className="w-16 h-16 text-fartree-primary-purple mb-6" />,
-      description: "Take a look at the links and information we've pulled. You can edit or add more in the next step.",
+      icon: profileData?.avatar_url ? (
+        <Avatar className="w-16 h-16 mb-6">
+          <AvatarImage src={profileData.avatar_url} alt={profileData.display_name} />
+          <AvatarFallback className="bg-fartree-primary-purple text-white text-2xl">
+            {profileData.display_name?.[0] || profileData.username?.[0] || 'U'}
+          </AvatarFallback>
+        </Avatar>
+      ) : (
+        <User className="w-16 h-16 text-fartree-primary-purple mb-6" />
+      ),
+      description: profileData ? (
+        <div className="text-left max-w-md">
+          <h3 className="font-semibold text-fartree-text-primary mb-2">
+            {profileData.display_name || profileData.username}
+          </h3>
+          {profileData.bio && (
+            <p className="text-sm text-fartree-text-secondary mb-3">
+              {profileData.bio.length > 100 ? profileData.bio.substring(0, 100) + '...' : profileData.bio}
+            </p>
+          )}
+          <div className="text-sm text-fartree-text-secondary">
+            <strong>Auto-detected {profileData.links?.length || 0} links:</strong>
+            {profileData.links?.slice(0, 3).map((link: any, index: number) => (
+              <div key={index} className="flex items-center mt-1">
+                <span className="text-xs">🔗</span>
+                <span className="ml-2 truncate">{link.title}</span>
+                {link.auto_detected && <span className="ml-1 text-xs">🤖</span>}
+              </div>
+            ))}
+            {(profileData.links?.length || 0) > 3 && (
+              <div className="text-xs mt-1">...and {(profileData.links?.length || 0) - 3} more</div>
+            )}
+          </div>
+        </div>
+      ) : (
+        "Take a look at the links and information we've pulled. You can edit or add more in the next step."
+      ),
       buttonText: "Customize My Profile",
       action: handleNext,
     },
@@ -97,11 +147,47 @@ export default function OnboardingFlow() {
       icon: <LinkIcon className="w-16 h-16 text-fartree-primary-purple mb-6" />,
       description: "Drag-and-drop to reorder, add new links, and personalize your Fartree to perfection!",
       buttonText: "Go to Editor",
-      action: () => console.log("Go to Editor"), // In a real app, navigate to /editor
+      action: () => router.push('/editor'),
     },
   ]
 
   const currentStep = steps[step - 1]
+
+  // Show loading state while authenticating
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
+        <WindowFrame title="Fartree Onboarding" className="w-full max-w-xl h-[calc(100vh-4rem)] flex flex-col">
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+            <Loader2 className="w-16 h-16 text-fartree-primary-purple animate-spin mb-6" />
+            <h1 className="text-3xl font-bold text-fartree-text-primary mb-4">Connecting to Farcaster</h1>
+            <p className="text-lg text-fartree-text-secondary">Setting up your account...</p>
+          </div>
+        </WindowFrame>
+      </div>
+    )
+  }
+
+  // Show error state if authentication fails
+  if (authError) {
+    return (
+      <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
+        <WindowFrame title="Fartree Onboarding" className="w-full max-w-xl h-[calc(100vh-4rem)] flex flex-col">
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+            <div className="text-red-500 text-6xl mb-6">⚠️</div>
+            <h1 className="text-3xl font-bold text-fartree-text-primary mb-4">Connection Error</h1>
+            <p className="text-lg text-fartree-text-secondary mb-8">{authError}</p>
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-fartree-primary-purple text-white px-6 py-3 rounded hover:bg-fartree-accent-purple"
+            >
+              Try Again
+            </Button>
+          </div>
+        </WindowFrame>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">

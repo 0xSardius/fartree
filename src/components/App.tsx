@@ -68,10 +68,11 @@ export default function App(
   useEffect(() => {
     async function initializeSDK() {
       try {
-        // Check if we're in a Mini App environment
-        const isInMiniApp = await sdk.isInMiniApp();
+        // Check if we're in a Mini App environment with longer timeout
+        const isInMiniApp = await sdk.isInMiniApp(500);
         
         if (isInMiniApp) {
+          console.log('✅ Mini App environment detected');
           // Get Mini App context
           const miniAppContext = sdk.context;
           setContext(miniAppContext);
@@ -80,6 +81,9 @@ export default function App(
           if (user || authError) {
             await sdk.actions.ready();
           }
+        } else {
+          console.log('⚠️ Not in Mini App environment - running as web app');
+          // Still set SDK as loaded for web app functionality
         }
         
         setIsSDKLoaded(true);

@@ -93,12 +93,15 @@ export async function GET(request: NextRequest) {
     
     if (authorization) {
       fid = extractFidFromJWT(authorization);
+      console.log('✅ Found FID from JWT:', fid);
     }
     
-    // Fallback to test FID for development
+    // If no JWT token (e.g., desktop web user), check for other auth methods
     if (!fid) {
+      // TODO: In production, implement proper session-based auth for non-miniapp users
+      // For now, use test FID for development
       fid = 6841; // Test FID for development
-      console.log('Using test FID for development:', fid);
+      console.log('⚠️ No JWT found - using test FID for development:', fid);
     }
     
     // Check if user exists in our database

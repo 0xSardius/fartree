@@ -5,17 +5,41 @@ import { Button } from "../components/ui/Button"
 import { WindowFrame } from "../components/window-frame"
 import { ArrowRight, Sparkles, LinkIcon, User } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useQuickAuth } from "../hooks/useQuickAuth"
+import { useEffect } from "react"
 
 export default function LandingPage() {
   const router = useRouter()
+  const { user, loading: authLoading, isAuthenticated, error } = useQuickAuth()
+
+  // Redirect authenticated users to the main app
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      // Check if user has completed onboarding (has links or is returning user)
+      if (user.links && user.links.length > 0) {
+        router.push('/app') // Go to main app
+      } else {
+        router.push('/onboarding') // Go to onboarding for new users
+      }
+    }
+  }, [isAuthenticated, user, router])
+
+  // If there's an auth error, still show the landing page
+  // This handles desktop users who might not be in a miniapp environment
+
   return (
     <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
       <WindowFrame title="Fartree OS" className="w-full max-w-4xl h-[calc(100vh-4rem)] flex flex-col">
         <header className="flex items-center justify-between p-4 border-b-2 border-fartree-border-dark bg-fartree-window-header">
           <div className="text-2xl font-bold text-fartree-primary-purple">Fartree</div>
           <nav>
-            <Button variant="outline" className="text-fartree-text-primary hover:text-fartree-accent-purple">
-              Sign In
+            <Button 
+              variant="outline" 
+              className="text-fartree-text-primary hover:text-fartree-accent-purple"
+              onClick={() => router.push('/onboarding')}
+              disabled={authLoading}
+            >
+              {authLoading ? "Connecting..." : isAuthenticated ? "Go to App" : "Sign In"}
             </Button>
           </nav>
         </header>
@@ -30,45 +54,34 @@ export default function LandingPage() {
               auto-generated from your FID.
             </p>
             <Button
-              onClick={async () => {
-                // Simulate Neynar SIWN success and profile creation/retrieval
-                // In a real app, this would involve a redirect to Neynar and a callback
-                const simulatedFarcasterData = {
-                  fid: 12345, // Replace with actual FID from Neynar
-                  username: "alicesmith", // Replace with actual username
-                  displayName: "Alice Smith",
-                  bio: "Web3 enthusiast, builder, and cat lover.",
-                  avatarUrl: "/placeholder-user.jpg",
-                }
-
-                try {
-                  const response = await fetch("/api/auth/neynar-siwn", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(simulatedFarcasterData),
-                  })
-
-                  const data = await response.json()
-                  if (data.success) {
-                    console.log("Simulated Farcaster Sign-In successful:", data)
-                    // Redirect to onboarding or editor based on whether it's a new user
-                    router.push("/onboarding") // Or '/editor' if already onboarded
+              onClick={() => {
+                if (authLoading) return
+                
+                if (isAuthenticated) {
+                  // User is already authenticated, redirect appropriately
+                  if (user?.links && user.links.length > 0) {
+                    router.push('/app')
                   } else {
-                    console.error("Simulated Farcaster Sign-In failed:", data.error)
-                    alert("Sign-in failed: " + data.error)
+                    router.push('/onboarding')
                   }
-                } catch (error) {
-                  console.error("Error during simulated Farcaster Sign-In:", error)
-                  alert("An error occurred during sign-in.")
+                } else {
+                  // In a miniapp environment, Quick Auth should happen automatically
+                  // For web, redirect to onboarding where auth will be handled
+                  router.push('/onboarding')
                 }
               }}
+              disabled={authLoading}
               className="relative inline-flex h-12 overflow-hidden rounded-md p-[1px] focus:outline-none focus:ring-2 focus:ring-fartree-accent-purple focus:ring-offset-2 focus:ring-offset-fartree-background"
             >
               <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#8465CB_0%,#a478e8_50%,#8465CB_100%)]" />
               <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-md bg-fartree-primary-purple px-8 py-2 text-lg font-medium text-fartree-text-primary backdrop-blur-3xl hover:bg-fartree-accent-purple transition-colors duration-300">
-                Sign in with Farcaster <ArrowRight className="ml-2 h-5 w-5" />
+                {authLoading 
+                  ? "Connecting..." 
+                  : isAuthenticated 
+                    ? "Continue to App" 
+                    : "Sign in with Farcaster"
+                } 
+                {!authLoading && <ArrowRight className="ml-2 h-5 w-5" />}
               </span>
             </Button>
           </section>
