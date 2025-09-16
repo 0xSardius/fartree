@@ -4,20 +4,11 @@ import { notFound } from 'next/navigation'
 // Server-side function to get profile by username
 async function getProfileByUsername(username: string) {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    const response = await fetch(`${baseUrl}/api/profiles/${username}`, {
-      cache: 'no-store',
-    })
+    // Use direct database query instead of internal API call
+    const { query } = await import('~/lib/db')
     
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null
-      }
-      throw new Error(`Failed to fetch profile: ${response.status}`)
-    }
-    
-    const data = await response.json()
-    return data.success ? data.profile : null
+    const result = await query('SELECT * FROM profiles WHERE username = $1', [username])
+    return result.rows.length > 0 ? result.rows[0] : null
   } catch (error) {
     console.error('Error fetching profile by username:', error)
     return null

@@ -44,20 +44,22 @@ interface ProfileData {
 // Server-side data fetching functions
 async function getProfile(identifier: string): Promise<ProfileData | null> {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    const response = await fetch(`${baseUrl}/api/profiles/${identifier}`, {
-      cache: 'no-store', // Always fetch fresh data
-    })
+    // Use direct database query instead of internal API call
+    const { query } = await import('~/lib/db')
     
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null
-      }
-      throw new Error(`Failed to fetch profile: ${response.status}`)
+    // Helper function to determine if identifier is FID (numeric) or username
+    const isNumeric = (str: string): boolean => {
+      return !isNaN(Number(str)) && !isNaN(parseFloat(str))
+    }
+
+    let result
+    if (isNumeric(identifier)) {
+      result = await query('SELECT * FROM profiles WHERE fid = $1', [parseInt(identifier)])
+    } else {
+      result = await query('SELECT * FROM profiles WHERE username = $1', [identifier])
     }
     
-    const data = await response.json()
-    return data.success ? data.profile : null
+    return result.rows.length > 0 ? result.rows[0] : null
   } catch (error) {
     console.error('Error fetching profile:', error)
     return null
@@ -66,20 +68,37 @@ async function getProfile(identifier: string): Promise<ProfileData | null> {
 
 async function getProfileLinks(identifier: string): Promise<ProfileLink[]> {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-    const response = await fetch(`${baseUrl}/api/profiles/${identifier}/links`, {
-      cache: 'no-store', // Always fetch fresh data
-    })
+    // Use direct database query instead of internal API call
+    const { query } = await import('~/lib/db')
     
-    if (!response.ok) {
-      if (response.status === 404) {
-        return []
-      }
-      throw new Error(`Failed to fetch links: ${response.status}`)
+    // Helper function to determine if identifier is FID (numeric) or username
+    const isNumeric = (str: string): boolean => {
+      return !isNaN(Number(str)) && !isNaN(parseFloat(str))
+    }
+
+    // First get the profile ID
+    let profileResult
+    if (isNumeric(identifier)) {
+      profileResult = await query('SELECT id FROM profiles WHERE fid = $1', [parseInt(identifier)])
+    } else {
+      profileResult = await query('SELECT id FROM profiles WHERE username = $1', [identifier])
     }
     
-    const data = await response.json()
-    return data.success ? (data.links || []) : []
+    if (profileResult.rows.length === 0) {
+      return []
+    }
+    
+    const profileId = profileResult.rows[0].id
+    
+    // Get the links for this profile
+    const linksResult = await query(`
+      SELECT id, title, url, category, position, is_visible, click_count, auto_detected, created_at
+      FROM profile_links 
+      WHERE profile_id = $1 AND is_visible = true
+      ORDER BY position ASC, created_at ASC
+    `, [profileId])
+    
+    return linksResult.rows
   } catch (error) {
     console.error('Error fetching links:', error)
     return []
