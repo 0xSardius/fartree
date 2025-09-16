@@ -28,7 +28,7 @@ export function Providers({
     <SessionProvider session={session}>
       <WagmiProvider>
         <MiniAppProvider
-          analyticsEnabled={ANALYTICS_ENABLED}
+          analyticsEnabled={false}
           backButtonEnabled={true}
         >
           <SafeFarcasterSolanaProvider endpoint={solanaEndpoint}>

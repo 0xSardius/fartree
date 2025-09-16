@@ -44,7 +44,7 @@ export default function LandingPage() {
     if (isAuthenticated && user) {
       // Check if user has completed onboarding (has links or is returning user)
       if (user.links && user.links.length > 0) {
-        router.push('/app') // Go to main app
+        router.push('/editor') // Go to editor for existing users
       } else {
         router.push('/onboarding') // Go to onboarding for new users
       }
