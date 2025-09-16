@@ -1,130 +1,304 @@
 import Link from "next/link"
+import { notFound } from "next/navigation"
+import { Metadata } from "next"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { LinkCard } from "~/components/link-card"
 import { WindowFrame } from "~/components/window-frame"
-import { Twitter, Github, Globe, Users, Figma, Wallet, Zap } from "lucide-react"
+import { Button } from "~/components/ui/Button"
+import { Twitter, Github, Globe, Users, Figma, Wallet, Zap, Share2, Edit, AlertCircle } from "lucide-react"
 
-// Dummy data for demonstration
-const dummyProfile = {
-  fid: "12345",
-  name: "Alice Smith",
-  username: "@alicesmith",
-  bio: "Web3 enthusiast, builder, and cat lover. Exploring the decentralized future.",
-  avatarUrl: "/placeholder-user.jpg",
-  followerCount: 1234,
-  links: [
-    {
-      id: "1",
-      icon: Twitter,
-      title: "Follow me on X",
-      description: "Latest thoughts and updates.",
-      url: "https://x.com/alicesmith",
-      clickCount: 567,
-      category: "Social",
-      isAutoDetected: true,
-    },
-    {
-      id: "2",
-      icon: Github,
-      title: "My GitHub Repos",
-      description: "Open-source contributions and projects.",
-      url: "https://github.com/alicesmith",
-      clickCount: 321,
-      category: "Content",
-      isAutoDetected: true,
-    },
-    {
-      id: "3",
-      icon: Wallet,
-      title: "My Crypto Wallet",
-      description: "View my public wallet address.",
-      url: "https://etherscan.io/address/0x...",
-      clickCount: 189,
-      category: "Crypto",
-      isAutoDetected: true,
-    },
-    {
-      id: "4",
-      icon: Figma,
-      title: "Figma Design Portfolio",
-      description: "My latest UI/UX design projects.",
-      url: "https://figma.com/alicesmith",
-      clickCount: 98,
-      category: "Content",
-      isAutoDetected: false,
-    },
-    {
-      id: "5",
-      icon: Users,
-      title: "DAO Contributions",
-      description: "Active in various decentralized autonomous organizations.",
-      url: "https://snapshot.org/#/alicesmith",
-      clickCount: 75,
-      category: "Collabs",
-      isAutoDetected: true,
-    },
-    {
-      id: "6",
-      icon: Globe,
-      title: "Personal Website",
-      description: "My blog and professional portfolio.",
-      url: "https://alicesmith.com",
-      clickCount: 450,
-      category: "Content",
-      isAutoDetected: false,
-    },
-  ],
+// Link category icons mapping (same as editor)
+const categoryIcons = {
+  social: Twitter,
+  crypto: Wallet,
+  content: Globe,
+  collabs: Users,
+  default: Globe,
 }
 
-export default function PublicProfileView({ params }: { params: { fid: string } }) {
-  // In a real app, you'd fetch profile data based on params.fid
-  const profile = dummyProfile // Using dummy data for now
+// Interface for our data structures
+interface ProfileLink {
+  id: string;
+  title: string;
+  url: string;
+  category?: string;
+  position?: number;
+  is_visible?: boolean;
+  click_count?: number;
+  auto_detected?: boolean;
+  created_at?: string;
+}
+
+interface ProfileData {
+  id: string;
+  fid: number;
+  username?: string;
+  display_name?: string;
+  bio?: string;
+  avatar_url?: string;
+  theme?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Server-side data fetching functions
+async function getProfile(identifier: string): Promise<ProfileData | null> {
+  try {
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const response = await fetch(`${baseUrl}/api/profiles/${identifier}`, {
+      cache: 'no-store', // Always fetch fresh data
+    })
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null
+      }
+      throw new Error(`Failed to fetch profile: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    return data.success ? data.profile : null
+  } catch (error) {
+    console.error('Error fetching profile:', error)
+    return null
+  }
+}
+
+async function getProfileLinks(identifier: string): Promise<ProfileLink[]> {
+  try {
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const response = await fetch(`${baseUrl}/api/profiles/${identifier}/links`, {
+      cache: 'no-store', // Always fetch fresh data
+    })
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        return []
+      }
+      throw new Error(`Failed to fetch links: ${response.status}`)
+    }
+    
+    const data = await response.json()
+    return data.success ? (data.links || []) : []
+  } catch (error) {
+    console.error('Error fetching links:', error)
+    return []
+  }
+}
+
+// Get icon for category
+function getIconForCategory(category?: string) {
+  if (!category) return categoryIcons.default
+  const lowerCategory = category.toLowerCase()
+  return categoryIcons[lowerCategory as keyof typeof categoryIcons] || categoryIcons.default
+}
+
+// Generate metadata for SEO and social sharing
+export async function generateMetadata({ params }: { params: { fid: string } }): Promise<Metadata> {
+  const { fid } = params
+  
+  try {
+    const profile = await getProfile(fid)
+    
+    if (!profile) {
+      return {
+        title: 'Profile Not Found - Fartree',
+        description: 'This Fartree profile does not exist.',
+      }
+    }
+    
+    const profileName = profile.display_name || profile.username || `User ${profile.fid}`
+    const description = profile.bio || `${profileName}'s Fartree profile - Web3 links and digital identity`
+    
+    return {
+      title: `${profileName} - Fartree`,
+      description,
+      openGraph: {
+        title: `${profileName} - Fartree`,
+        description,
+        images: profile.avatar_url ? [profile.avatar_url] : undefined,
+        type: 'profile',
+      },
+      twitter: {
+        card: 'summary',
+        title: `${profileName} - Fartree`,
+        description,
+        images: profile.avatar_url ? [profile.avatar_url] : undefined,
+      },
+    }
+  } catch (error) {
+    return {
+      title: 'Fartree Profile',
+      description: 'Web3 profile and links',
+    }
+  }
+}
+
+// Component for handling link clicks with analytics
+function TrackableLink({ link, profileFid, children }: { link: ProfileLink; profileFid: number; children: React.ReactNode }) {
+  const handleClick = async () => {
+    try {
+      // Track the click - use the correct API endpoint
+      await fetch(`/api/profiles/${profileFid}/links/${link.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    } catch (error) {
+      // Fail silently for analytics
+      console.error('Failed to track click:', error)
+    }
+  }
+
+  return (
+    <Link 
+      href={link.url} 
+      target="_blank" 
+      rel="noopener noreferrer" 
+      className="block transition-transform hover:scale-[1.02]"
+      onClick={handleClick}
+    >
+      {children}
+    </Link>
+  )
+}
+
+// Main component - now using server-side rendering
+export default async function PublicProfileView({ params }: { params: { fid: string } }) {
+  const { fid } = params
+
+  // Fetch profile and links data server-side
+  const [profile, links] = await Promise.all([
+    getProfile(fid),
+    getProfileLinks(fid),
+  ])
+
+  // Handle profile not found
+  if (!profile) {
+    notFound()
+  }
+
+  // Filter to only show visible links, sorted by position
+  const visibleLinks = links
+    .filter(link => link.is_visible !== false)
+    .sort((a, b) => (a.position || 0) - (b.position || 0))
+
+  const profileName = profile.display_name || profile.username || `User ${profile.fid}`
 
   return (
     <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
       <WindowFrame
-        title={`${profile.name}'s Fartree`}
+        title={`${profileName}'s Fartree`}
         className="w-full max-w-md mx-auto h-[calc(100vh-4rem)] flex flex-col"
       >
+        {/* Header with share button */}
+        <div className="flex items-center justify-between p-3 border-b-2 border-fartree-border-dark bg-fartree-window-header">
+          <div className="text-sm text-fartree-text-primary font-medium">
+            FID: {profile.fid}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const url = window.location.href
+                navigator.clipboard.writeText(url)
+                // You could add a toast notification here
+                console.log('Profile URL copied to clipboard')
+              }}
+              className="text-xs"
+            >
+              <Share2 className="w-3 h-3 mr-1" /> Share
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.location.href = '/editor'}
+              className="text-xs"
+            >
+              <Edit className="w-3 h-3 mr-1" /> Edit
+            </Button>
+          </div>
+        </div>
+
         <div className="flex-1 flex flex-col items-center p-6 overflow-auto bg-fartree-window-background">
+          {/* Profile Header */}
           <Avatar className="w-24 h-24 border-4 border-fartree-primary-purple mb-4 shadow-lg">
-            <AvatarImage src={profile.avatarUrl || "/placeholder.svg"} alt={profile.name} />
-            <AvatarFallback>
-              {profile.name
+            <AvatarImage src={profile.avatar_url || "/placeholder.svg"} alt={profileName} />
+            <AvatarFallback className="bg-fartree-primary-purple text-white text-2xl">
+              {profileName
                 .split(" ")
                 .map((n) => n[0])
                 .join("")}
             </AvatarFallback>
           </Avatar>
-          <h1 className="text-2xl font-bold text-fartree-text-primary mb-1">{profile.name}</h1>
-          <p className="text-fartree-text-secondary text-sm mb-2">{profile.username}</p>
-          <p className="text-fartree-text-secondary text-center max-w-xs mb-4">{profile.bio}</p>
-          <div className="flex items-center gap-2 text-fartree-text-secondary text-sm mb-6">
-            <Users className="w-4 h-4" />
-            <span>{profile.followerCount} Followers</span>
+          
+          <h1 className="text-2xl font-bold text-fartree-text-primary mb-1">{profileName}</h1>
+          
+          {profile.username && (
+            <p className="text-fartree-text-secondary text-sm mb-2">@{profile.username}</p>
+          )}
+          
+          {profile.bio && (
+            <p className="text-fartree-text-secondary text-center max-w-xs mb-4">{profile.bio}</p>
+          )}
+
+          {/* Stats */}
+          <div className="flex items-center gap-4 text-fartree-text-secondary text-sm mb-6">
+            <div className="flex items-center gap-1">
+              <Globe className="w-4 h-4" />
+              <span>{visibleLinks.length} Links</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Zap className="w-4 h-4" />
+              <span>{links.reduce((acc, link) => acc + (link.click_count || 0), 0)} Total Clicks</span>
+            </div>
           </div>
 
-          <div className="grid gap-4 w-full">
-            {profile.links.map((link) => (
-              <Link key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="block">
-                <LinkCard
-                  icon={link.icon}
-                  title={link.title}
-                  description={link.description}
-                  clickCount={link.clickCount}
-                  category={link.category}
-                  isAutoDetected={link.isAutoDetected}
-                  className="w-full"
-                />
-              </Link>
-            ))}
-          </div>
+          {/* Links */}
+          {visibleLinks.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center text-center">
+              <div>
+                <Globe className="w-12 h-12 mx-auto mb-4 text-fartree-text-secondary" />
+                <h3 className="text-lg font-medium text-fartree-text-primary mb-2">No links yet</h3>
+                <p className="text-fartree-text-secondary mb-4">This profile hasn't added any links yet.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-4 w-full">
+              {visibleLinks.map((link) => {
+                const IconComponent = getIconForCategory(link.category)
+                return (
+                  <TrackableLink key={link.id} link={link} profileFid={profile.fid}>
+                    <LinkCard
+                      icon={IconComponent}
+                      title={link.title}
+                      description={link.url}
+                      clickCount={link.click_count}
+                      category={link.category}
+                      isAutoDetected={link.auto_detected}
+                      className="w-full hover:border-fartree-accent-purple cursor-pointer"
+                    />
+                  </TrackableLink>
+                )
+              })}
+            </div>
+          )}
         </div>
 
+        {/* Footer */}
         <footer className="p-4 border-t-2 border-fartree-border-dark text-fartree-text-secondary text-xs text-center bg-fartree-window-header">
-          <p className="flex items-center justify-center gap-1">
-            Powered by <Zap className="w-3 h-3 text-fartree-primary-purple" /> Fartree
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="flex items-center gap-1">
+              Powered by <Zap className="w-3 h-3 text-fartree-primary-purple" /> Fartree
+            </p>
+            {profile.updated_at && (
+              <p className="text-[10px]">
+                Updated {new Date(profile.updated_at).toLocaleDateString()}
+              </p>
+            )}
+          </div>
         </footer>
       </WindowFrame>
     </div>
