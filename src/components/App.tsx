@@ -69,7 +69,7 @@ export default function App(
     async function initializeSDK() {
       try {
         // Check if we're in a Mini App environment with longer timeout
-        const isInMiniApp = await sdk.isInMiniApp(500);
+        const isInMiniApp = await sdk.isInMiniApp();
         
         if (isInMiniApp) {
           console.log('✅ Mini App environment detected');
@@ -77,10 +77,10 @@ export default function App(
           const miniAppContext = sdk.context;
           setContext(miniAppContext);
           
-          // Call ready to hide splash screen once we have user data
-          if (user || authError) {
-            await sdk.actions.ready();
-          }
+          // Call ready to hide splash screen - always call when SDK is loaded
+          // The app will handle loading states in the UI
+          console.log('📱 Calling sdk.actions.ready() to hide splash screen');
+          await sdk.actions.ready();
         } else {
           console.log('⚠️ Not in Mini App environment - running as web app');
           // Still set SDK as loaded for web app functionality
@@ -94,7 +94,7 @@ export default function App(
     }
 
     initializeSDK();
-  }, [user, authError]);
+  }, []); // Only run once on mount
 
   // --- Early Returns ---
   if (!isSDKLoaded || authLoading) {

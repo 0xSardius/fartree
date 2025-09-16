@@ -6,11 +6,38 @@ import { WindowFrame } from "../components/window-frame"
 import { ArrowRight, Sparkles, LinkIcon, User } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useQuickAuth } from "../hooks/useQuickAuth"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import { sdk } from "@farcaster/miniapp-sdk"
 
 export default function LandingPage() {
   const router = useRouter()
   const { user, loading: authLoading, isAuthenticated, error } = useQuickAuth()
+  const [isSDKReady, setIsSDKReady] = useState(false)
+
+  // Initialize Farcaster SDK and call ready()
+  useEffect(() => {
+    async function initializeSDK() {
+      try {
+        console.log('🚀 Landing page: Initializing Farcaster SDK...')
+        const isInMiniApp = await sdk.isInMiniApp()
+        
+        if (isInMiniApp) {
+          console.log('✅ Landing page: Mini App environment detected')
+          console.log('📱 Landing page: Calling sdk.actions.ready() to hide splash screen')
+          await sdk.actions.ready()
+        } else {
+          console.log('⚠️ Landing page: Not in Mini App environment - running as web app')
+        }
+        
+        setIsSDKReady(true)
+      } catch (error) {
+        console.error('❌ Landing page: Failed to initialize SDK:', error)
+        setIsSDKReady(true) // Still mark as ready to avoid blocking UI
+      }
+    }
+
+    initializeSDK()
+  }, [])
 
   // Redirect authenticated users to the main app
   useEffect(() => {
@@ -23,6 +50,18 @@ export default function LandingPage() {
       }
     }
   }, [isAuthenticated, user, router])
+
+  // Show loading while SDK initializes
+  if (!isSDKReady) {
+    return (
+      <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 mx-auto mb-4 border-4 border-fartree-primary-purple border-t-transparent rounded-full"></div>
+          <p className="text-fartree-text-primary">Loading Fartree...</p>
+        </div>
+      </div>
+    )
+  }
 
   // If there's an auth error, still show the landing page
   // This handles desktop users who might not be in a miniapp environment

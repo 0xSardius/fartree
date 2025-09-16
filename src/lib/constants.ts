@@ -20,25 +20,25 @@ export const APP_URL = process.env.NEXT_PUBLIC_URL!;
  * The name of the mini app as displayed to users.
  * Used in titles, headers, and app store listings.
  */
-export const APP_NAME = 'shreyas-testing-mini-app';
+export const APP_NAME = 'Fartree';
 
 /**
  * A brief description of the mini app's functionality.
  * Used in app store listings and metadata.
  */
-export const APP_DESCRIPTION = 'A Farcaster mini app created with Neynar';
+export const APP_DESCRIPTION = 'The Linktree for Farcaster - Connect all your Web3 activities, mini-apps, tokens, and collaborations in one shareable profile.';
 
 /**
  * The primary category for the mini app.
  * Used for app store categorization and discovery.
  */
-export const APP_PRIMARY_CATEGORY = '';
+export const APP_PRIMARY_CATEGORY = 'social';
 
 /**
  * Tags associated with the mini app.
  * Used for search and discovery in app stores.
  */
-export const APP_TAGS = ['neynar', 'starter-kit', 'demo'];
+export const APP_TAGS = ['social', 'profile', 'linktree', 'web3', 'farcaster'];
 
 // --- Asset URLs ---
 /**
@@ -63,14 +63,14 @@ export const APP_SPLASH_URL = `${APP_URL}/splash.png`;
  * Background color for the splash screen.
  * Used as fallback when splash image is loading.
  */
-export const APP_SPLASH_BACKGROUND_COLOR = '#f7f7f7';
+export const APP_SPLASH_BACKGROUND_COLOR = '#1a1a1a';
 
 // --- UI Configuration ---
 /**
  * Text displayed on the main action button.
  * Used for the primary call-to-action in the mini app.
  */
-export const APP_BUTTON_TEXT = 'Launch Mini App';
+export const APP_BUTTON_TEXT = '🌳 Build Your Tree';
 
 // --- Integration Configuration ---
 /**

@@ -36,7 +36,7 @@ interface MiniAppManifest {
     payload: string;
     signature: string;
   };
-  frame: MiniAppMetadata;
+  miniapp: MiniAppMetadata;
 }
 
 export function cn(...inputs: ClassValue[]) {
@@ -93,13 +93,13 @@ export async function getFarcasterMetadata(): Promise<MiniAppManifest> {
       payload: "",
       signature: "",
     },
-    frame: {
+    miniapp: {
       version: "1",
-      name: APP_NAME ?? "Neynar Starter Kit",
+      name: APP_NAME ?? "Fartree",
       iconUrl: APP_ICON_URL,
       homeUrl: APP_URL,
       imageUrl: APP_OG_IMAGE_URL,
-      buttonTitle: APP_BUTTON_TEXT ?? "Launch Mini App",
+      buttonTitle: APP_BUTTON_TEXT ?? "🌳 Build Your Tree",
       splashImageUrl: APP_SPLASH_URL,
       splashBackgroundColor: APP_SPLASH_BACKGROUND_COLOR,
       webhookUrl: APP_WEBHOOK_URL,

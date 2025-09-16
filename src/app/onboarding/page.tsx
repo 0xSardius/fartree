@@ -8,15 +8,42 @@ import { cn } from "~/lib/utils"
 import { useRouter } from "next/navigation"
 import { useQuickAuth } from "~/hooks/useQuickAuth"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+import { sdk } from "@farcaster/miniapp-sdk"
 
 export default function OnboardingFlow() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [profileData, setProfileData] = useState<any>(null)
+  const [isSDKReady, setIsSDKReady] = useState(false)
   const router = useRouter()
   
   // Use Quick Auth for real authentication
   const { user, loading: authLoading, error: authError, isAuthenticated, refetch } = useQuickAuth()
+
+  // Initialize Farcaster SDK and call ready()
+  useEffect(() => {
+    async function initializeSDK() {
+      try {
+        console.log('🚀 Onboarding page: Initializing Farcaster SDK...')
+        const isInMiniApp = await sdk.isInMiniApp()
+        
+        if (isInMiniApp) {
+          console.log('✅ Onboarding page: Mini App environment detected')
+          console.log('📱 Onboarding page: Calling sdk.actions.ready() to hide splash screen')
+          await sdk.actions.ready()
+        } else {
+          console.log('⚠️ Onboarding page: Not in Mini App environment - running as web app')
+        }
+        
+        setIsSDKReady(true)
+      } catch (error) {
+        console.error('❌ Onboarding page: Failed to initialize SDK:', error)
+        setIsSDKReady(true) // Still mark as ready to avoid blocking UI
+      }
+    }
+
+    initializeSDK()
+  }, [])
   
   // Auto-advance to step 2 when user is authenticated
   useEffect(() => {
@@ -152,6 +179,18 @@ export default function OnboardingFlow() {
   ]
 
   const currentStep = steps[step - 1]
+
+  // Show loading state while SDK initializes
+  if (!isSDKReady) {
+    return (
+      <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 mx-auto mb-4 border-4 border-fartree-primary-purple border-t-transparent rounded-full"></div>
+          <p className="text-fartree-text-primary">Loading Fartree...</p>
+        </div>
+      </div>
+    )
+  }
 
   // Show loading state while authenticating
   if (authLoading) {

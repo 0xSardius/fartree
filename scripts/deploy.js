@@ -19,7 +19,7 @@ async function generateFarcasterMetadata(domain, webhookUrl) {
   const tags = process.env.NEXT_PUBLIC_MINI_APP_TAGS?.split(',');
 
   return {
-    frame: {
+    miniapp: {
       version: '1',
       name: process.env.NEXT_PUBLIC_MINI_APP_NAME,
       iconUrl: `https://${trimmedDomain}/icon.png`,
@@ -27,7 +27,7 @@ async function generateFarcasterMetadata(domain, webhookUrl) {
       imageUrl: `https://${trimmedDomain}/api/opengraph-image`,
       buttonTitle: process.env.NEXT_PUBLIC_MINI_APP_BUTTON_TEXT,
       splashImageUrl: `https://${trimmedDomain}/splash.png`,
-      splashBackgroundColor: '#f7f7f7',
+      splashBackgroundColor: '#1a1a1a',
       webhookUrl: webhookUrl?.trim(),
       description: process.env.NEXT_PUBLIC_MINI_APP_DESCRIPTION,
       primaryCategory: process.env.NEXT_PUBLIC_MINI_APP_PRIMARY_CATEGORY,
