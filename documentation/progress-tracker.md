@@ -5,8 +5,8 @@
 ## 🎯 Project Status Overview
 
 **Current Phase**: Core Profile Builder (Phase 1) - ✅ **COMPLETE**  
-**Next Phase**: Public Profiles & Auto-Detection  
-**Overall Progress**: 12/23 tasks completed (52%)
+**Next Phase**: Public Profiles & Auto-Detection - 🔄 **IN PROGRESS**  
+**Overall Progress**: 15/23 tasks completed (65%)
 
 ---
 
@@ -32,6 +32,11 @@
 - [x] **Neynar Auth Removal** - Cleaned up old SIWN components
 - [x] **Profile Creation Flow** - Real auto-scanning with Farcaster data
 - [x] **Test Infrastructure** - Multiple test scripts for different components
+
+### Miniapp Integration (NEW)
+- [x] **SDK Ready() Fix** - Fixed splash screen hiding across all entry points
+- [x] **Navigation Fix** - Corrected routing from /app to /editor
+- [x] **Neynar Provider Fix** - Resolved fetch errors and analytics issues
 
 ---
 
@@ -193,9 +198,9 @@ src/components/ui/tabs/HomeTab.tsx - Works but could be enhanced 📋
 
 ## 🚀 Next Session Priorities
 
-1. **Start with `link-management`** - Complete drag-and-drop functionality
-2. **Connect editor page** - Make profile editing fully functional
-3. **Test public profiles** - Ensure [fid] pages work with real data
+1. **Fix Current Page UX** - Enable link adding/editing on current interface ⚠️ BLOCKING
+2. **Complete Public Profile Pages** - Make [fid] pages fully functional
+3. **Connect editor page** - Make profile editing fully functional  
 4. **Add click tracking** - Basic analytics for link engagement
 
 ---

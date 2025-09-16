@@ -99,7 +99,7 @@ export default function LandingPage() {
                 if (isAuthenticated) {
                   // User is already authenticated, redirect appropriately
                   if (user?.links && user.links.length > 0) {
-                    router.push('/app')
+                    router.push('/editor')
                   } else {
                     router.push('/onboarding')
                   }
