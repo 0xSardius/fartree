@@ -24,7 +24,8 @@
     "db:test": "node -e \"require('./src/lib/db.ts').testConnection()\"",
     "test:auto-populate": "node scripts/test-auto-populate.js",
     "test:onboarding": "node scripts/test-onboarding-flow.js",
-    "test:quick-auth": "node scripts/test-quick-auth-environments.js"
+    "test:quick-auth": "node scripts/test-quick-auth-environments.js",
+    "test:link-management": "node scripts/test-link-management.js"
   },
   "dependencies": {
     "@farcaster/auth-client": ">=0.3.0 <1.0.0",

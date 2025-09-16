@@ -1,13 +1,14 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "~/components/ui/button"
+import { useState, useEffect, useCallback } from "react"
+import { Button } from "~/components/ui/Button"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import { Switch } from "~/components/ui/switch"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { WindowFrame } from "~/components/window-frame"
 import { LinkCard } from "~/components/link-card"
+import { useQuickAuth } from "~/hooks/useQuickAuth"
 import {
   Save,
   Eye,
@@ -22,94 +23,284 @@ import {
   Palette,
   Settings,
   LayoutGrid,
+  Loader2,
+  AlertCircle,
 } from "lucide-react"
 
-// Dummy data for demonstration
-const dummyProfile = {
-  fid: "12345",
-  name: "Alice Smith",
-  username: "@alicesmith",
-  bio: "Web3 enthusiast, builder, and cat lover. Exploring the decentralized future.",
-  avatarUrl: "/placeholder-user.jpg",
-  followerCount: 1234,
-  links: [
-    {
-      id: "1",
-      icon: Twitter,
-      title: "Follow me on X",
-      description: "Latest thoughts and updates.",
-      url: "https://x.com/alicesmith",
-      clickCount: 567,
-      category: "Social",
-      isAutoDetected: true,
-    },
-    {
-      id: "2",
-      icon: Github,
-      title: "My GitHub Repos",
-      description: "Open-source contributions and projects.",
-      url: "https://github.com/alicesmith",
-      clickCount: 321,
-      category: "Content",
-      isAutoDetected: true,
-    },
-    {
-      id: "3",
-      icon: Wallet,
-      title: "My Crypto Wallet",
-      description: "View my public wallet address.",
-      url: "https://etherscan.io/address/0x...",
-      clickCount: 189,
-      category: "Crypto",
-      isAutoDetected: true,
-    },
-    {
-      id: "4",
-      icon: Figma,
-      title: "Figma Design Portfolio",
-      description: "My latest UI/UX design projects.",
-      url: "https://figma.com/alicesmith",
-      clickCount: 98,
-      category: "Content",
-      isAutoDetected: false,
-    },
-    {
-      id: "5",
-      icon: Users,
-      title: "DAO Contributions",
-      description: "Active in various decentralized autonomous organizations.",
-      url: "https://snapshot.org/#/alicesmith",
-      clickCount: 75,
-      category: "Collabs",
-      isAutoDetected: true,
-    },
-    {
-      id: "6",
-      icon: Globe,
-      title: "Personal Website",
-      description: "My blog and professional portfolio.",
-      url: "https://alicesmith.com",
-      clickCount: 450,
-      category: "Content",
-      isAutoDetected: false,
-    },
-  ],
+// Link category icons mapping
+const categoryIcons = {
+  social: Twitter,
+  crypto: Wallet,
+  content: Globe,
+  collabs: Users,
+  default: Globe,
+}
+
+// Interface for our link data structure
+interface ProfileLink {
+  id: string;
+  title: string;
+  url: string;
+  category?: string;
+  position?: number;
+  is_visible?: boolean;
+  click_count?: number;
+  auto_detected?: boolean;
+  created_at?: string;
+}
+
+interface ProfileData {
+  id: string;
+  fid: number;
+  username?: string;
+  display_name?: string;
+  bio?: string;
+  avatar_url?: string;
+  theme?: string;
+  links?: ProfileLink[];
 }
 
 export default function ProfileEditorInterface() {
-  const [profile, setProfile] = useState(dummyProfile)
+  // Authentication and state management
+  const { user, loading: authLoading, isAuthenticated } = useQuickAuth()
+  const [profile, setProfile] = useState<ProfileData | null>(null)
+  const [links, setLinks] = useState<ProfileLink[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [draggedItem, setDraggedItem] = useState<string | null>(null)
 
-  const handleLinkReorder = (draggedId: string, targetId: string) => {
-    const draggedIndex = profile.links.findIndex((link) => link.id === draggedId)
-    const targetIndex = profile.links.findIndex((link) => link.id === targetId)
+  // Load profile and links data
+  const loadProfileData = useCallback(async () => {
+    if (!user?.fid) return
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      // Load profile data
+      const profileResponse = await fetch(`/api/profiles/${user.fid}`)
+      if (!profileResponse.ok) {
+        throw new Error('Failed to load profile')
+      }
+      const profileData = await profileResponse.json()
+
+      // Load links data
+      const linksResponse = await fetch(`/api/profiles/${user.fid}/links?include_hidden=true`)
+      if (!linksResponse.ok) {
+        throw new Error('Failed to load links')
+      }
+      const linksData = await linksResponse.json()
+
+      setProfile(profileData.profile)
+      setLinks(linksData.links || [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load data')
+    } finally {
+      setLoading(false)
+    }
+  }, [user?.fid])
+
+  // Load data on component mount and when user changes
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadProfileData()
+    }
+  }, [isAuthenticated, user, loadProfileData])
+
+  // Save profile changes
+  const handleSaveProfile = async () => {
+    if (!profile || !user?.fid) return
+
+    setSaving(true)
+    try {
+      const response = await fetch(`/api/profiles/${user.fid}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          display_name: profile.display_name,
+          bio: profile.bio,
+          theme: profile.theme,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to save profile')
+      }
+
+      // Show success message (you could add a toast here)
+      console.log('Profile saved successfully')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save profile')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Reorder links with API call
+  const handleLinkReorder = async (draggedId: string, targetId: string) => {
+    const draggedIndex = links.findIndex((link) => link.id === draggedId)
+    const targetIndex = links.findIndex((link) => link.id === targetId)
 
     if (draggedIndex === -1 || targetIndex === -1) return
 
-    const newLinks = Array.from(profile.links)
+    // Optimistically update UI
+    const newLinks = Array.from(links)
     const [reorderedItem] = newLinks.splice(draggedIndex, 1)
     newLinks.splice(targetIndex, 0, reorderedItem)
 
-    setProfile({ ...profile, links: newLinks })
+    // Update positions
+    const updatedLinks = newLinks.map((link, index) => ({
+      ...link,
+      position: index
+    }))
+
+    setLinks(updatedLinks)
+
+    // Save to backend
+    try {
+      for (let i = 0; i < updatedLinks.length; i++) {
+        const link = updatedLinks[i]
+        await fetch(`/api/profiles/${user?.fid}/links/${link.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            position: i
+          }),
+        })
+      }
+    } catch (err) {
+      console.error('Failed to save link order:', err)
+      // Revert on error
+      loadProfileData()
+    }
+  }
+
+  // Add new link
+  const handleAddLink = async (linkData: { title: string; url: string; category?: string }) => {
+    if (!user?.fid) return
+
+    try {
+      const response = await fetch(`/api/profiles/${user.fid}/links`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(linkData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to add link')
+      }
+
+      // Reload data to get the new link
+      loadProfileData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add link')
+    }
+  }
+
+  // Delete link
+  const handleDeleteLink = async (linkId: string) => {
+    if (!user?.fid) return
+
+    try {
+      const response = await fetch(`/api/profiles/${user.fid}/links/${linkId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete link')
+      }
+
+      // Remove from state
+      setLinks(links.filter(link => link.id !== linkId))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete link')
+    }
+  }
+
+  // Toggle link visibility
+  const handleToggleVisibility = async (linkId: string) => {
+    const link = links.find(l => l.id === linkId)
+    if (!link || !user?.fid) return
+
+    try {
+      const response = await fetch(`/api/profiles/${user.fid}/links/${linkId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          is_visible: !link.is_visible
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update link visibility')
+      }
+
+      // Update state
+      setLinks(links.map(l => 
+        l.id === linkId 
+          ? { ...l, is_visible: !l.is_visible }
+          : l
+      ))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update link visibility')
+    }
+  }
+
+  // Get icon for category
+  const getIconForCategory = (category?: string) => {
+    if (!category) return categoryIcons.default
+    const lowerCategory = category.toLowerCase()
+    return categoryIcons[lowerCategory as keyof typeof categoryIcons] || categoryIcons.default
+  }
+
+  // Loading state
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen bg-fartree-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-fartree-primary-purple" />
+          <p className="text-fartree-text-primary">Loading your profile...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-fartree-background flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-8 h-8 mx-auto mb-4 text-red-500" />
+          <p className="text-fartree-text-primary mb-4">Error: {error}</p>
+          <Button onClick={loadProfileData} className="bg-fartree-primary-purple hover:bg-fartree-accent-purple">
+            Try Again
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Not authenticated
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-fartree-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-fartree-text-primary mb-4">Please sign in to edit your profile</p>
+          <Button onClick={() => window.location.href = '/'} className="bg-fartree-primary-purple hover:bg-fartree-accent-purple">
+            Go to Sign In
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -118,11 +309,24 @@ export default function ProfileEditorInterface() {
         {/* Top Toolbar */}
         <div className="flex items-center justify-between p-3 border-b-2 border-fartree-border-dark bg-fartree-window-header">
           <div className="flex gap-2">
-            <Button className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary">
-              <Save className="w-4 h-4 mr-2" /> Save
+            <Button 
+              onClick={handleSaveProfile}
+              disabled={saving}
+              className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" /> Save
+                </>
+              )}
             </Button>
             <Button
               variant="outline"
+              onClick={() => window.open(`/profile/${user?.fid}`, '_blank')}
               className="border-fartree-border-dark text-fartree-text-primary hover:bg-fartree-window-background hover:text-fartree-accent-purple bg-transparent"
             >
               <Eye className="w-4 h-4 mr-2" /> Preview
@@ -130,6 +334,12 @@ export default function ProfileEditorInterface() {
           </div>
           <Button
             variant="outline"
+            onClick={() => {
+              const url = `${window.location.origin}/profile/${user?.fid}`
+              navigator.clipboard.writeText(url)
+              // You could add a toast notification here
+              console.log('Profile URL copied to clipboard')
+            }}
             className="border-fartree-border-dark text-fartree-text-primary hover:bg-fartree-window-background hover:text-fartree-accent-purple bg-transparent"
           >
             <Share2 className="w-4 h-4 mr-2" /> Share
@@ -142,67 +352,134 @@ export default function ProfileEditorInterface() {
             <h2 className="text-lg font-semibold text-fartree-text-primary mb-4">Profile Preview</h2>
             <div className="flex flex-col items-center text-center mb-6">
               <Avatar className="w-20 h-20 border-2 border-fartree-primary-purple mb-3">
-                <AvatarImage src={profile.avatarUrl || "/placeholder.svg"} alt={profile.name} />
+                <AvatarImage src={profile?.avatar_url || user?.avatar_url || "/placeholder.svg"} alt={profile?.display_name || user?.display_name} />
                 <AvatarFallback>
-                  {profile.name
+                  {(profile?.display_name || user?.display_name || 'U')
                     .split(" ")
                     .map((n) => n[0])
                     .join("")}
                 </AvatarFallback>
               </Avatar>
-              <h3 className="text-xl font-bold text-fartree-text-primary">{profile.name}</h3>
-              <p className="text-fartree-text-secondary text-sm">{profile.username}</p>
-              <p className="text-fartree-text-secondary text-xs mt-2">{profile.bio}</p>
+              <h3 className="text-xl font-bold text-fartree-text-primary">{profile?.display_name || user?.display_name}</h3>
+              <p className="text-fartree-text-secondary text-sm">@{profile?.username || user?.username}</p>
+              <p className="text-fartree-text-secondary text-xs mt-2">{profile?.bio || user?.bio}</p>
             </div>
             <div className="flex-1 grid gap-3">
-              {profile.links.slice(0, 3).map(
-                (
-                  link, // Show a few links as preview
-                ) => (
+              {links.slice(0, 3).map((link) => {
+                const IconComponent = getIconForCategory(link.category)
+                return (
                   <LinkCard
                     key={link.id}
-                    icon={link.icon}
+                    icon={IconComponent}
                     title={link.title}
-                    description={link.description}
+                    description={link.url}
                     category={link.category}
-                    className="!bg-fartree-window-background" // Ensure consistent background
+                    clickCount={link.click_count}
+                    isAutoDetected={link.auto_detected}
+                    className="!bg-fartree-window-background"
                   />
-                ),
+                )
+              })}
+              {links.length > 3 && (
+                <p className="text-xs text-fartree-text-secondary text-center">
+                  +{links.length - 3} more links
+                </p>
               )}
             </div>
           </div>
 
           {/* Center Area: Link Management */}
           <div className="flex flex-col p-4 bg-fartree-window-background overflow-auto">
-            <h2 className="text-lg font-semibold text-fartree-text-primary mb-4">Your Links</h2>
-            <Button className="mb-4 bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary">
-              <Plus className="w-4 h-4 mr-2" /> Add New Link
-            </Button>
-            <div className="grid gap-4 flex-1">
-              {profile.links.map((link) => (
-                <div
-                  key={link.id}
-                  draggable
-                  onDragStart={(e) => e.dataTransfer.setData("linkId", link.id)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    const draggedId = e.dataTransfer.getData("linkId")
-                    handleLinkReorder(draggedId, link.id)
-                  }}
-                  className="cursor-grab active:cursor-grabbing"
-                >
-                  <LinkCard
-                    icon={link.icon}
-                    title={link.title}
-                    description={link.description}
-                    clickCount={link.clickCount}
-                    category={link.category}
-                    isAutoDetected={link.isAutoDetected}
-                    editable
-                  />
-                </div>
-              ))}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-fartree-text-primary">Your Links ({links.length})</h2>
+              <Button 
+                onClick={() => {
+                  // Simple add link - you could enhance this with a modal
+                  const title = prompt('Link title:')
+                  const url = prompt('Link URL:')
+                  if (title && url) {
+                    handleAddLink({ title, url, category: 'content' })
+                  }
+                }}
+                className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary"
+              >
+                <Plus className="w-4 h-4 mr-2" /> Add New Link
+              </Button>
             </div>
+            
+            {links.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center text-center">
+                <div>
+                  <Globe className="w-12 h-12 mx-auto mb-4 text-fartree-text-secondary" />
+                  <h3 className="text-lg font-medium text-fartree-text-primary mb-2">No links yet</h3>
+                  <p className="text-fartree-text-secondary mb-4">Add your first link to get started!</p>
+                  <Button 
+                    onClick={() => {
+                      const title = prompt('Link title:')
+                      const url = prompt('Link URL:')
+                      if (title && url) {
+                        handleAddLink({ title, url, category: 'content' })
+                      }
+                    }}
+                    className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary"
+                  >
+                    <Plus className="w-4 h-4 mr-2" /> Add Your First Link
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-4 flex-1">
+                {links.map((link) => {
+                  const IconComponent = getIconForCategory(link.category)
+                  return (
+                    <div
+                      key={link.id}
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData("linkId", link.id)
+                        setDraggedItem(link.id)
+                      }}
+                      onDragEnd={() => setDraggedItem(null)}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => {
+                        const draggedId = e.dataTransfer.getData("linkId")
+                        if (draggedId !== link.id) {
+                          handleLinkReorder(draggedId, link.id)
+                        }
+                      }}
+                      className={`cursor-grab active:cursor-grabbing transition-opacity ${
+                        draggedItem === link.id ? 'opacity-50' : 'opacity-100'
+                      }`}
+                    >
+                      <LinkCard
+                        icon={IconComponent}
+                        title={link.title}
+                        description={link.url}
+                        clickCount={link.click_count}
+                        category={link.category}
+                        isAutoDetected={link.auto_detected}
+                        editable
+                        onEdit={() => {
+                          // Simple edit - you could enhance this with a modal
+                          const newTitle = prompt('Edit title:', link.title)
+                          if (newTitle && newTitle !== link.title) {
+                            // Add edit functionality here
+                            console.log('Edit link:', link.id, newTitle)
+                          }
+                        }}
+                        onToggleVisibility={() => handleToggleVisibility(link.id)}
+                        onDelete={() => {
+                          if (confirm(`Delete "${link.title}"?`)) {
+                            handleDeleteLink(link.id)
+                          }
+                        }}
+                        className={!link.is_visible ? 'opacity-60' : ''}
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
           {/* Right Panel: Customization Options */}

@@ -12,6 +12,9 @@ interface LinkCardProps extends React.HTMLAttributes<HTMLDivElement> {
   category?: "Social" | "Crypto" | "Content" | "Collabs" | string
   isAutoDetected?: boolean
   editable?: boolean
+  onEdit?: () => void
+  onToggleVisibility?: () => void
+  onDelete?: () => void
 }
 
 export function LinkCard({
@@ -22,6 +25,9 @@ export function LinkCard({
   category,
   isAutoDetected = false,
   editable = false,
+  onEdit,
+  onToggleVisibility,
+  onDelete,
   className,
   ...props
 }: LinkCardProps) {
@@ -76,22 +82,41 @@ export function LinkCard({
         </div>
         {editable && (
           <div className="flex-shrink-0 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-8 h-8 text-fartree-text-secondary hover:text-fartree-accent-purple"
-            >
-              <Pencil className="w-4 h-4" />
-              <span className="sr-only">Edit</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-8 h-8 text-fartree-text-secondary hover:text-fartree-accent-purple"
-            >
-              <Eye className="w-4 h-4" />
-              <span className="sr-only">Toggle Visibility</span>
-            </Button>
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEdit}
+                className="w-8 h-8 text-fartree-text-secondary hover:text-fartree-accent-purple"
+              >
+                <Pencil className="w-4 h-4" />
+                <span className="sr-only">Edit</span>
+              </Button>
+            )}
+            {onToggleVisibility && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onToggleVisibility}
+                className="w-8 h-8 text-fartree-text-secondary hover:text-fartree-accent-purple"
+              >
+                <Eye className="w-4 h-4" />
+                <span className="sr-only">Toggle Visibility</span>
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onDelete}
+                className="w-8 h-8 text-red-500 hover:text-red-700"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span className="sr-only">Delete</span>
+              </Button>
+            )}
           </div>
         )}
       </CardContent>
