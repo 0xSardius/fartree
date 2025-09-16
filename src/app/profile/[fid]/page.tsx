@@ -158,14 +158,21 @@ function TrackableLink({ link, profileFid, children }: { link: ProfileLink; prof
   const handleClick = async () => {
     try {
       // Track the click - use the correct API endpoint
+      // Use a timeout to prevent blocking the navigation
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 1000)
+      
       await fetch(`/api/profiles/${profileFid}/links/${link.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
+        signal: controller.signal,
       })
+      
+      clearTimeout(timeoutId)
     } catch (error) {
-      // Fail silently for analytics
+      // Fail silently for analytics - don't block user navigation
       console.error('Failed to track click:', error)
     }
   }
