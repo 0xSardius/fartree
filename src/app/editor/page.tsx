@@ -14,11 +14,8 @@ import {
   Eye,
   Share2,
   Plus,
-  Twitter,
-  Github,
   Globe,
   Wallet,
-  Figma,
   Users,
   Palette,
   Settings,
@@ -29,7 +26,6 @@ import {
 
 // Link category icons mapping
 const categoryIcons = {
-  social: Twitter,
   crypto: Wallet,
   content: Globe,
   collabs: Users,
@@ -304,15 +300,15 @@ export default function ProfileEditorInterface() {
   }
 
   return (
-    <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
-      <WindowFrame title="Fartree Editor" className="w-full max-w-6xl h-[calc(100vh-4rem)] flex flex-col">
+    <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-2 md:p-4 font-mono">
+      <WindowFrame title="Fartree Editor" className="w-full max-w-sm md:max-w-6xl h-[calc(100vh-2rem)] md:h-[calc(100vh-4rem)] flex flex-col">
         {/* Top Toolbar */}
-        <div className="flex items-center justify-between p-3 border-b-2 border-fartree-border-dark bg-fartree-window-header">
-          <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row items-center justify-between p-3 border-b-2 border-fartree-border-dark bg-fartree-window-header gap-2">
+          <div className="flex gap-2 w-full md:w-auto">
             <Button 
               onClick={handleSaveProfile}
               disabled={saving}
-              className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary"
+              className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary flex-1 md:flex-none"
             >
               {saving ? (
                 <>
@@ -327,7 +323,7 @@ export default function ProfileEditorInterface() {
             <Button
               variant="outline"
               onClick={() => window.open(`/profile/${user?.fid}`, '_blank')}
-              className="border-fartree-border-dark text-fartree-text-primary hover:bg-fartree-window-background hover:text-fartree-accent-purple bg-transparent"
+              className="border-fartree-border-dark text-fartree-text-primary hover:bg-fartree-window-background hover:text-fartree-accent-purple bg-transparent flex-1 md:flex-none"
             >
               <Eye className="w-4 h-4 mr-2" /> Preview
             </Button>
@@ -340,7 +336,7 @@ export default function ProfileEditorInterface() {
               // You could add a toast notification here
               console.log('Profile URL copied to clipboard')
             }}
-            className="border-fartree-border-dark text-fartree-text-primary hover:bg-fartree-window-background hover:text-fartree-accent-purple bg-transparent"
+            className="border-fartree-border-dark text-fartree-text-primary hover:bg-fartree-window-background hover:text-fartree-accent-purple bg-transparent w-full md:w-auto"
           >
             <Share2 className="w-4 h-4 mr-2" /> Share
           </Button>
@@ -393,12 +389,18 @@ export default function ProfileEditorInterface() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-fartree-text-primary">Your Links ({links.length})</h2>
               <Button 
-                onClick={() => {
-                  // Simple add link - you could enhance this with a modal
-                  const title = prompt('Link title:')
-                  const url = prompt('Link URL:')
-                  if (title && url) {
-                    handleAddLink({ title, url, category: 'content' })
+                onClick={async () => {
+                  try {
+                    const title = prompt('Link title:')
+                    const url = prompt('Link URL:')
+                    if (title && url) {
+                      console.log('Adding link:', { title, url })
+                      await handleAddLink({ title, url, category: 'content' })
+                      console.log('Link added successfully')
+                    }
+                  } catch (error) {
+                    console.error('Error adding link:', error)
+                    setError('Failed to add link: ' + (error instanceof Error ? error.message : 'Unknown error'))
                   }
                 }}
                 className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary"
@@ -414,11 +416,18 @@ export default function ProfileEditorInterface() {
                   <h3 className="text-lg font-medium text-fartree-text-primary mb-2">No links yet</h3>
                   <p className="text-fartree-text-secondary mb-4">Add your first link to get started!</p>
                   <Button 
-                    onClick={() => {
-                      const title = prompt('Link title:')
-                      const url = prompt('Link URL:')
-                      if (title && url) {
-                        handleAddLink({ title, url, category: 'content' })
+                    onClick={async () => {
+                      try {
+                        const title = prompt('Link title:')
+                        const url = prompt('Link URL:')
+                        if (title && url) {
+                          console.log('Adding first link:', { title, url })
+                          await handleAddLink({ title, url, category: 'content' })
+                          console.log('First link added successfully')
+                        }
+                      } catch (error) {
+                        console.error('Error adding first link:', error)
+                        setError('Failed to add link: ' + (error instanceof Error ? error.message : 'Unknown error'))
                       }
                     }}
                     className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary"
