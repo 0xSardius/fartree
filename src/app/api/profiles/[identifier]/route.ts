@@ -15,7 +15,7 @@ function isNumeric(str: string): boolean {
 // GET /api/profiles/[identifier] - Get profile by FID or username
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { identifier } = params;
+    const { identifier } = await params;
     
     if (!identifier) {
       return NextResponse.json(

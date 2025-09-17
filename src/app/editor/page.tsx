@@ -24,10 +24,11 @@ import {
   AlertCircle,
 } from "lucide-react"
 
-// Link category icons mapping
-const categoryIcons = {
-  crypto: Wallet,
-  content: Globe,
+  // Link category icons mapping
+  const categoryIcons = {
+    social: Users,
+    crypto: Wallet,
+    content: Globe,
   collabs: Users,
   default: Globe,
 }

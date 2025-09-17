@@ -28,7 +28,7 @@ async function getProfileId(identifier: string) {
 // GET /api/profiles/[identifier]/links - Get all links for a profile
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { identifier } = params;
+    const { identifier } = await params;
     
     if (!identifier) {
       return NextResponse.json(
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // POST /api/profiles/[identifier]/links - Create a new link for a profile
 export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
-    const { identifier } = params;
+    const { identifier } = await params;
     const body = await request.json();
     
     if (!identifier) {
