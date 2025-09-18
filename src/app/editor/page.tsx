@@ -66,6 +66,9 @@ export default function ProfileEditorInterface() {
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [addingLink, setAddingLink] = useState(false)
+  const [showAddLinkModal, setShowAddLinkModal] = useState(false)
+  const [newLinkTitle, setNewLinkTitle] = useState('')
+  const [newLinkUrl, setNewLinkUrl] = useState('')
   const [draggedItem, setDraggedItem] = useState<string | null>(null)
 
   // Load profile and links data
@@ -179,6 +182,29 @@ export default function ProfileEditorInterface() {
   }
 
   // Add new link
+  const handleAddLinkSubmit = async () => {
+    if (!newLinkTitle.trim() || !newLinkUrl.trim()) {
+      console.log('Title and URL are required')
+      return
+    }
+
+    try {
+      setAddingLink(true)
+      console.log('Adding link:', { title: newLinkTitle, url: newLinkUrl })
+      await handleAddLink({ title: newLinkTitle, url: newLinkUrl, category: 'content' })
+      
+      // Reset form and close modal
+      setNewLinkTitle('')
+      setNewLinkUrl('')
+      setShowAddLinkModal(false)
+      console.log('Link added successfully')
+    } catch (error) {
+      console.error('Error adding link:', error)
+    } finally {
+      setAddingLink(false)
+    }
+  }
+
   const handleAddLink = async (linkData: { title: string; url: string; category?: string }) => {
     console.log('handleAddLink called with:', linkData)
     console.log('User state:', { fid: user?.fid, isAuthenticated, user })
@@ -407,32 +433,9 @@ export default function ProfileEditorInterface() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-fartree-text-primary">Your Links ({links.length})</h2>
               <Button 
-                onClick={async () => {
-                  try {
-                    setAddingLink(true)
-                    console.log('Add New Link button clicked')
-                    
-                    const title = prompt('Link title:')
-                    if (!title) {
-                      console.log('User cancelled title prompt')
-                      return
-                    }
-                    
-                    const url = prompt('Link URL:')
-                    if (!url) {
-                      console.log('User cancelled URL prompt')
-                      return
-                    }
-                    
-                    console.log('Adding link:', { title, url })
-                    await handleAddLink({ title, url, category: 'content' })
-                    console.log('Link added successfully')
-                  } catch (error) {
-                    console.error('Error adding link:', error)
-                    setError('Failed to add link: ' + (error instanceof Error ? error.message : 'Unknown error'))
-                  } finally {
-                    setAddingLink(false)
-                  }
+                onClick={() => {
+                  console.log('Add New Link button clicked - opening modal')
+                  setShowAddLinkModal(true)
                 }}
                 disabled={addingLink}
                 className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary disabled:opacity-50"
@@ -448,32 +451,9 @@ export default function ProfileEditorInterface() {
                   <h3 className="text-lg font-medium text-fartree-text-primary mb-2">No links yet</h3>
                   <p className="text-fartree-text-secondary mb-4">Add your first link to get started!</p>
                   <Button 
-                    onClick={async () => {
-                      try {
-                        setAddingLink(true)
-                        console.log('Add Your First Link button clicked')
-                        
-                        const title = prompt('Link title:')
-                        if (!title) {
-                          console.log('User cancelled title prompt')
-                          return
-                        }
-                        
-                        const url = prompt('Link URL:')
-                        if (!url) {
-                          console.log('User cancelled URL prompt')
-                          return
-                        }
-                        
-                        console.log('Adding first link:', { title, url })
-                        await handleAddLink({ title, url, category: 'content' })
-                        console.log('First link added successfully')
-                      } catch (error) {
-                        console.error('Error adding first link:', error)
-                        setError('Failed to add link: ' + (error instanceof Error ? error.message : 'Unknown error'))
-                      } finally {
-                        setAddingLink(false)
-                      }
+                    onClick={() => {
+                      console.log('Add Your First Link button clicked - opening modal')
+                      setShowAddLinkModal(true)
                     }}
                     disabled={addingLink}
                     className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary disabled:opacity-50"
@@ -515,12 +495,9 @@ export default function ProfileEditorInterface() {
                         isAutoDetected={link.auto_detected}
                         editable
                         onEdit={() => {
-                          // Simple edit - you could enhance this with a modal
-                          const newTitle = prompt('Edit title:', link.title)
-                          if (newTitle && newTitle !== link.title) {
-                            // Add edit functionality here
-                            console.log('Edit link:', link.id, newTitle)
-                          }
+                          // TODO: Implement edit modal (similar to add modal)
+                          console.log('Edit link clicked:', link.id, link.title)
+                          console.log('Edit functionality needs proper modal implementation')
                         }}
                         onToggleVisibility={() => handleToggleVisibility(link.id)}
                         onDelete={() => {
@@ -588,6 +565,67 @@ export default function ProfileEditorInterface() {
           </div>
         </div>
       </WindowFrame>
+
+      {/* Add Link Modal */}
+      {showAddLinkModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-fartree-window-background border-2 border-fartree-border-dark rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-fartree-text-primary mb-4">Add New Link</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="link-title" className="text-fartree-text-secondary">
+                  Link Title
+                </Label>
+                <Input
+                  id="link-title"
+                  type="text"
+                  value={newLinkTitle}
+                  onChange={(e) => setNewLinkTitle(e.target.value)}
+                  placeholder="Enter link title..."
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="link-url" className="text-fartree-text-secondary">
+                  Link URL
+                </Label>
+                <Input
+                  id="link-url"
+                  type="url"
+                  value={newLinkUrl}
+                  onChange={(e) => setNewLinkUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <Button
+                onClick={() => {
+                  setShowAddLinkModal(false)
+                  setNewLinkTitle('')
+                  setNewLinkUrl('')
+                }}
+                variant="outline"
+                className="flex-1"
+                disabled={addingLink}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddLinkSubmit}
+                disabled={addingLink || !newLinkTitle.trim() || !newLinkUrl.trim()}
+                className="flex-1 bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary disabled:opacity-50"
+              >
+                {addingLink ? 'Adding...' : 'Add Link'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
