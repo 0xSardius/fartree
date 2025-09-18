@@ -8,7 +8,7 @@ import { Switch } from "~/components/ui/switch"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { WindowFrame } from "~/components/window-frame"
 import { LinkCard } from "~/components/link-card"
-import { useQuickAuth } from "~/hooks/useQuickAuth"
+import { useAuth } from "~/contexts/AuthContext"
 import {
   Save,
   Eye,
@@ -59,12 +59,13 @@ interface ProfileData {
 
 export default function ProfileEditorInterface() {
   // Authentication and state management
-  const { user, loading: authLoading, isAuthenticated } = useQuickAuth()
+  const { user, loading: authLoading, isAuthenticated } = useAuth()
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [links, setLinks] = useState<ProfileLink[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [addingLink, setAddingLink] = useState(false)
   const [draggedItem, setDraggedItem] = useState<string | null>(null)
 
   // Load profile and links data
@@ -179,9 +180,17 @@ export default function ProfileEditorInterface() {
 
   // Add new link
   const handleAddLink = async (linkData: { title: string; url: string; category?: string }) => {
-    if (!user?.fid) return
+    console.log('handleAddLink called with:', linkData)
+    console.log('User state:', { fid: user?.fid, isAuthenticated, user })
+    
+    if (!user?.fid) {
+      console.error('No user FID available')
+      setError('User not authenticated or missing FID')
+      return
+    }
 
     try {
+      console.log('Making API request to:', `/api/profiles/${user.fid}/links`)
       const response = await fetch(`/api/profiles/${user.fid}/links`, {
         method: 'POST',
         headers: {
@@ -190,13 +199,21 @@ export default function ProfileEditorInterface() {
         body: JSON.stringify(linkData),
       })
 
+      console.log('API response status:', response.status)
+      
       if (!response.ok) {
-        throw new Error('Failed to add link')
+        const errorData = await response.text()
+        console.error('API error response:', errorData)
+        throw new Error(`Failed to add link: ${response.status} ${errorData}`)
       }
 
+      const result = await response.json()
+      console.log('Link added successfully:', result)
+      
       // Reload data to get the new link
-      loadProfileData()
+      await loadProfileData()
     } catch (err) {
+      console.error('Error in handleAddLink:', err)
       setError(err instanceof Error ? err.message : 'Failed to add link')
     }
   }
@@ -392,19 +409,33 @@ export default function ProfileEditorInterface() {
               <Button 
                 onClick={async () => {
                   try {
+                    setAddingLink(true)
+                    console.log('Add New Link button clicked')
+                    
                     const title = prompt('Link title:')
-                    const url = prompt('Link URL:')
-                    if (title && url) {
-                      console.log('Adding link:', { title, url })
-                      await handleAddLink({ title, url, category: 'content' })
-                      console.log('Link added successfully')
+                    if (!title) {
+                      console.log('User cancelled title prompt')
+                      return
                     }
+                    
+                    const url = prompt('Link URL:')
+                    if (!url) {
+                      console.log('User cancelled URL prompt')
+                      return
+                    }
+                    
+                    console.log('Adding link:', { title, url })
+                    await handleAddLink({ title, url, category: 'content' })
+                    console.log('Link added successfully')
                   } catch (error) {
                     console.error('Error adding link:', error)
                     setError('Failed to add link: ' + (error instanceof Error ? error.message : 'Unknown error'))
+                  } finally {
+                    setAddingLink(false)
                   }
                 }}
-                className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary"
+                disabled={addingLink}
+                className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary disabled:opacity-50"
               >
                 <Plus className="w-4 h-4 mr-2" /> Add New Link
               </Button>
@@ -419,19 +450,33 @@ export default function ProfileEditorInterface() {
                   <Button 
                     onClick={async () => {
                       try {
+                        setAddingLink(true)
+                        console.log('Add Your First Link button clicked')
+                        
                         const title = prompt('Link title:')
-                        const url = prompt('Link URL:')
-                        if (title && url) {
-                          console.log('Adding first link:', { title, url })
-                          await handleAddLink({ title, url, category: 'content' })
-                          console.log('First link added successfully')
+                        if (!title) {
+                          console.log('User cancelled title prompt')
+                          return
                         }
+                        
+                        const url = prompt('Link URL:')
+                        if (!url) {
+                          console.log('User cancelled URL prompt')
+                          return
+                        }
+                        
+                        console.log('Adding first link:', { title, url })
+                        await handleAddLink({ title, url, category: 'content' })
+                        console.log('First link added successfully')
                       } catch (error) {
                         console.error('Error adding first link:', error)
                         setError('Failed to add link: ' + (error instanceof Error ? error.message : 'Unknown error'))
+                      } finally {
+                        setAddingLink(false)
                       }
                     }}
-                    className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary"
+                    disabled={addingLink}
+                    className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary disabled:opacity-50"
                   >
                     <Plus className="w-4 h-4 mr-2" /> Add Your First Link
                   </Button>

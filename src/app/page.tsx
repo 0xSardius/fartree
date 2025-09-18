@@ -3,41 +3,32 @@
 import Link from "next/link"
 import { Button } from "../components/ui/Button"
 import { WindowFrame } from "../components/window-frame"
-import { ArrowRight, Sparkles, LinkIcon, User } from "lucide-react"
+import { ArrowRight, Sparkles, LinkIcon, User, CheckCircle, AlertCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useQuickAuth } from "../hooks/useQuickAuth"
-import { useEffect, useState } from "react"
+import { useAuth } from "~/contexts/AuthContext"
+import { useEffect } from "react"
 import { sdk } from "@farcaster/miniapp-sdk"
 
 export default function LandingPage() {
   const router = useRouter()
-  const { user, loading: authLoading, isAuthenticated, error } = useQuickAuth()
-  const [isSDKReady, setIsSDKReady] = useState(false)
+  const { user, loading: authLoading, isAuthenticated, error } = useAuth()
 
-  // Initialize Farcaster SDK and call ready()
+  // Call sdk.actions.ready() once on main app entry point
   useEffect(() => {
-    async function initializeSDK() {
+    async function initializeApp() {
       try {
-        console.log('🚀 Landing page: Initializing Farcaster SDK...')
         const isInMiniApp = await sdk.isInMiniApp()
-        
         if (isInMiniApp) {
-          console.log('✅ Landing page: Mini App environment detected')
-          console.log('📱 Landing page: Calling sdk.actions.ready() to hide splash screen')
+          console.log('📱 Main app entry - calling sdk.actions.ready() to hide splash screen')
           await sdk.actions.ready()
-        } else {
-          console.log('⚠️ Landing page: Not in Mini App environment - running as web app')
         }
-        
-        setIsSDKReady(true)
       } catch (error) {
-        console.error('❌ Landing page: Failed to initialize SDK:', error)
-        setIsSDKReady(true) // Still mark as ready to avoid blocking UI
+        console.error('Failed to initialize app:', error)
       }
     }
-
-    initializeSDK()
-  }, [])
+    
+    initializeApp()
+  }, []) // Only run once on mount
 
   // Redirect authenticated users to the main app
   useEffect(() => {
@@ -51,8 +42,8 @@ export default function LandingPage() {
     }
   }, [isAuthenticated, user, router])
 
-  // Show loading while SDK initializes
-  if (!isSDKReady) {
+  // Show loading while authenticating
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
         <div className="text-center">
@@ -71,16 +62,36 @@ export default function LandingPage() {
       <WindowFrame title="Fartree OS" className="w-full max-w-4xl h-[calc(100vh-4rem)] flex flex-col">
         <header className="flex items-center justify-between p-4 border-b-2 border-fartree-border-dark bg-fartree-window-header">
           <div className="text-2xl font-bold text-fartree-primary-purple">Fartree</div>
-          <nav>
-            <Button 
-              variant="outline" 
-              className="text-fartree-text-primary hover:text-fartree-accent-purple"
-              onClick={() => router.push('/onboarding')}
-              disabled={authLoading}
-            >
-              {authLoading ? "Connecting..." : isAuthenticated ? "Go to App" : "Sign In"}
-            </Button>
-          </nav>
+          
+          <div className="flex items-center gap-4">
+            {/* Login Status Indicator */}
+            {isAuthenticated && user ? (
+              <div className="flex items-center gap-2 px-3 py-1 bg-green-100 border border-green-300 rounded-lg">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-sm font-medium text-green-800">
+                  Logged in as @{user.username}
+                </span>
+              </div>
+            ) : error ? (
+              <div className="flex items-center gap-2 px-3 py-1 bg-yellow-100 border border-yellow-300 rounded-lg">
+                <AlertCircle className="w-4 h-4 text-yellow-600" />
+                <span className="text-sm font-medium text-yellow-800">
+                  Not authenticated
+                </span>
+              </div>
+            ) : null}
+            
+            <nav>
+              <Button 
+                variant="outline" 
+                className="text-fartree-text-primary hover:text-fartree-accent-purple"
+                onClick={() => router.push('/onboarding')}
+                disabled={authLoading}
+              >
+                {authLoading ? "Connecting..." : isAuthenticated ? "Go to App" : "Sign In"}
+              </Button>
+            </nav>
+          </div>
         </header>
 
         <main className="flex-1 flex flex-col items-center justify-center text-center p-8 overflow-auto bg-fartree-window-background">

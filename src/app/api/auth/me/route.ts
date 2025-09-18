@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '~/lib/db';
 import { getNeynarUser } from '~/lib/neynar';
+import { createClient } from '@farcaster/quick-auth';
 
 // Helper function to auto-detect and create social links from Neynar data
 async function autoDetectSocialLinks(profileId: string, neynarUser: any) {
@@ -63,7 +64,7 @@ async function autoDetectSocialLinks(profileId: string, neynarUser: any) {
 }
 
 // Helper function to extract FID from Quick Auth JWT
-function extractFidFromJWT(authHeader: string): number | null {
+async function extractFidFromJWT(authHeader: string): Promise<number | null> {
   try {
     if (!authHeader.startsWith('Bearer ')) {
       return null;
@@ -71,13 +72,30 @@ function extractFidFromJWT(authHeader: string): number | null {
     
     const token = authHeader.substring(7);
     
-    // For now, we'll use a test FID. In production, you'd verify the JWT
-    // and extract the FID from the payload
-    // const payload = jwt.verify(token, process.env.JWT_SECRET);
-    // return payload.fid;
+    // Use the official Quick Auth client to verify the JWT
+    const client = createClient();
     
-    // TODO: Replace with actual JWT verification
-    return 6841; // Test FID for development
+    try {
+      const payload = await client.verifyJwt({
+        token,
+        domain: process.env.NEXT_PUBLIC_URL ? new URL(process.env.NEXT_PUBLIC_URL).hostname : 'localhost:3000',
+      });
+      
+      console.log('✅ JWT verified successfully, FID:', payload.sub);
+      return payload.sub; // The FID is in the 'sub' field
+      
+    } catch (jwtError) {
+      console.error('❌ JWT verification failed:', jwtError);
+      
+      // In development, fall back to test FID if JWT verification fails
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔧 Development mode: using test FID');
+        return 6841;
+      }
+      
+      return null;
+    }
+    
   } catch (error) {
     console.error('Error extracting FID from JWT:', error);
     return null;
@@ -92,7 +110,7 @@ export async function GET(request: NextRequest) {
     let fid: number | null = null;
     
     if (authorization) {
-      fid = extractFidFromJWT(authorization);
+      fid = await extractFidFromJWT(authorization);
       console.log('✅ Found FID from JWT:', fid);
     }
     

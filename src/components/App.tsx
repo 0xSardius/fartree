@@ -77,10 +77,8 @@ export default function App(
           const miniAppContext = sdk.context;
           setContext(miniAppContext);
           
-          // Call ready to hide splash screen - always call when SDK is loaded
-          // The app will handle loading states in the UI
-          console.log('📱 Calling sdk.actions.ready() to hide splash screen');
-          await sdk.actions.ready();
+          // Note: sdk.actions.ready() is called once on the main app page entry point
+          // This component just gets the context for display purposes
         } else {
           console.log('⚠️ Not in Mini App environment - running as web app');
           // Still set SDK as loaded for web app functionality

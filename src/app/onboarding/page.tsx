@@ -6,44 +6,17 @@ import { WindowFrame } from "~/components/window-frame"
 import { CheckCircle, Loader2, LinkIcon, User, Sparkles, ArrowRight, ArrowLeft } from "lucide-react"
 import { cn } from "~/lib/utils"
 import { useRouter } from "next/navigation"
-import { useQuickAuth } from "~/hooks/useQuickAuth"
+import { useAuth } from "~/contexts/AuthContext"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
-import { sdk } from "@farcaster/miniapp-sdk"
 
 export default function OnboardingFlow() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [profileData, setProfileData] = useState<any>(null)
-  const [isSDKReady, setIsSDKReady] = useState(false)
   const router = useRouter()
   
-  // Use Quick Auth for real authentication
-  const { user, loading: authLoading, error: authError, isAuthenticated, refetch } = useQuickAuth()
-
-  // Initialize Farcaster SDK and call ready()
-  useEffect(() => {
-    async function initializeSDK() {
-      try {
-        console.log('🚀 Onboarding page: Initializing Farcaster SDK...')
-        const isInMiniApp = await sdk.isInMiniApp()
-        
-        if (isInMiniApp) {
-          console.log('✅ Onboarding page: Mini App environment detected')
-          console.log('📱 Onboarding page: Calling sdk.actions.ready() to hide splash screen')
-          await sdk.actions.ready()
-        } else {
-          console.log('⚠️ Onboarding page: Not in Mini App environment - running as web app')
-        }
-        
-        setIsSDKReady(true)
-      } catch (error) {
-        console.error('❌ Onboarding page: Failed to initialize SDK:', error)
-        setIsSDKReady(true) // Still mark as ready to avoid blocking UI
-      }
-    }
-
-    initializeSDK()
-  }, [])
+  // Use centralized auth context
+  const { user, loading: authLoading, error: authError, isAuthenticated, refetch } = useAuth()
   
   // Auto-advance to step 2 when user is authenticated
   useEffect(() => {
@@ -180,29 +153,14 @@ export default function OnboardingFlow() {
 
   const currentStep = steps[step - 1]
 
-  // Show loading state while SDK initializes
-  if (!isSDKReady) {
+  // Show loading state while authenticating
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
         <div className="text-center">
           <div className="animate-spin h-8 w-8 mx-auto mb-4 border-4 border-fartree-primary-purple border-t-transparent rounded-full"></div>
           <p className="text-fartree-text-primary">Loading Fartree...</p>
         </div>
-      </div>
-    )
-  }
-
-  // Show loading state while authenticating
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
-        <WindowFrame title="Fartree Onboarding" className="w-full max-w-xl h-[calc(100vh-4rem)] flex flex-col">
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-            <Loader2 className="w-16 h-16 text-fartree-primary-purple animate-spin mb-6" />
-            <h1 className="text-3xl font-bold text-fartree-text-primary mb-4">Connecting to Farcaster</h1>
-            <p className="text-lg text-fartree-text-secondary">Setting up your account...</p>
-          </div>
-        </WindowFrame>
       </div>
     )
   }

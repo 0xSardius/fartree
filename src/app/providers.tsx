@@ -7,6 +7,7 @@ import { MiniAppProvider } from '@neynar/react';
 import { SafeFarcasterSolanaProvider } from '~/components/providers/SafeFarcasterSolanaProvider';
 import { ANALYTICS_ENABLED } from '~/lib/constants';
 import { AuthKitProvider } from '@farcaster/auth-kit';
+import { AuthProvider } from '~/contexts/AuthContext';
 
 const WagmiProvider = dynamic(
   () => import('~/components/providers/WagmiProvider'),
@@ -32,7 +33,11 @@ export function Providers({
           backButtonEnabled={true}
         >
           <SafeFarcasterSolanaProvider endpoint={solanaEndpoint}>
-            <AuthKitProvider config={{}}>{children}</AuthKitProvider>
+            <AuthKitProvider config={{}}>
+              <AuthProvider>
+                {children}
+              </AuthProvider>
+            </AuthKitProvider>
           </SafeFarcasterSolanaProvider>
         </MiniAppProvider>
       </WagmiProvider>
