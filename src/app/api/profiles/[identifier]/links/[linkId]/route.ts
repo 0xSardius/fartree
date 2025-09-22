@@ -29,7 +29,7 @@ async function getProfileId(identifier: string) {
 // GET /api/profiles/[identifier]/links/[linkId] - Get specific link
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const { identifier, linkId } = params;
+    const { identifier, linkId } = await params;
     
     if (!identifier || !linkId) {
       return NextResponse.json(
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT /api/profiles/[identifier]/links/[linkId] - Update specific link
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { identifier, linkId } = params;
+    const { identifier, linkId } = await params;
     const body = await request.json();
     
     if (!identifier || !linkId) {
@@ -183,7 +183,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/profiles/[identifier]/links/[linkId] - Delete specific link
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const { identifier, linkId } = params;
+    const { identifier, linkId } = await params;
     
     if (!identifier || !linkId) {
       return NextResponse.json(
@@ -240,7 +240,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 // PATCH /api/profiles/[identifier]/links/[linkId] - Special actions (like incrementing click count)
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
-    const { identifier, linkId } = params;
+    const { identifier, linkId } = await params;
     const body = await request.json();
     
     if (!identifier || !linkId) {

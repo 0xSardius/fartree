@@ -69,6 +69,11 @@ export default function ProfileEditorInterface() {
   const [showAddLinkModal, setShowAddLinkModal] = useState(false)
   const [newLinkTitle, setNewLinkTitle] = useState('')
   const [newLinkUrl, setNewLinkUrl] = useState('')
+  const [showEditLinkModal, setShowEditLinkModal] = useState(false)
+  const [editingLink, setEditingLink] = useState<ProfileLink | null>(null)
+  const [editLinkTitle, setEditLinkTitle] = useState('')
+  const [editLinkUrl, setEditLinkUrl] = useState('')
+  const [updatingLink, setUpdatingLink] = useState(false)
   const [draggedItem, setDraggedItem] = useState<string | null>(null)
 
   // Load profile and links data
@@ -202,6 +207,78 @@ export default function ProfileEditorInterface() {
       console.error('Error adding link:', error)
     } finally {
       setAddingLink(false)
+    }
+  }
+
+  // Edit link functions
+  const handleEditLinkClick = (link: ProfileLink) => {
+    console.log('Edit link clicked:', link.id, link.title)
+    setEditingLink(link)
+    setEditLinkTitle(link.title)
+    setEditLinkUrl(link.url)
+    setShowEditLinkModal(true)
+  }
+
+  const handleEditLinkSubmit = async () => {
+    if (!editLinkTitle.trim() || !editLinkUrl.trim() || !editingLink) {
+      console.log('Title, URL, and link selection are required')
+      return
+    }
+
+    try {
+      setUpdatingLink(true)
+      console.log('Updating link:', { id: editingLink.id, title: editLinkTitle, url: editLinkUrl })
+      await handleUpdateLink(editingLink.id, { title: editLinkTitle, url: editLinkUrl })
+      
+      // Reset form and close modal
+      setEditLinkTitle('')
+      setEditLinkUrl('')
+      setEditingLink(null)
+      setShowEditLinkModal(false)
+      console.log('Link updated successfully')
+    } catch (error) {
+      console.error('Error updating link:', error)
+    } finally {
+      setUpdatingLink(false)
+    }
+  }
+
+  const handleUpdateLink = async (linkId: string, linkData: { title: string; url: string }) => {
+    console.log('handleUpdateLink called with:', linkId, linkData)
+    console.log('User state:', { fid: user?.fid, isAuthenticated, user })
+    
+    if (!user?.fid) {
+      console.error('No user FID available')
+      setError('User not authenticated or missing FID')
+      return
+    }
+
+    try {
+      console.log('Making API request to:', `/api/profiles/${user.fid}/links/${linkId}`)
+      const response = await fetch(`/api/profiles/${user.fid}/links/${linkId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(linkData),
+      })
+
+      console.log('API response status:', response.status)
+      
+      if (!response.ok) {
+        const errorData = await response.text()
+        console.error('API error response:', errorData)
+        throw new Error(`Failed to update link: ${response.status} ${errorData}`)
+      }
+
+      const result = await response.json()
+      console.log('Link updated successfully:', result)
+      
+      // Reload data to get the updated link
+      await loadProfileData()
+    } catch (err) {
+      console.error('Error in handleUpdateLink:', err)
+      setError(err instanceof Error ? err.message : 'Failed to update link')
     }
   }
 
@@ -463,7 +540,7 @@ export default function ProfileEditorInterface() {
                 </div>
               </div>
             ) : (
-              <div className="grid gap-4 flex-1">
+              <div className="grid gap-3 md:gap-4 flex-1">
                 {links.map((link) => {
                   const IconComponent = getIconForCategory(link.category)
                   return (
@@ -494,11 +571,7 @@ export default function ProfileEditorInterface() {
                         category={link.category}
                         isAutoDetected={link.auto_detected}
                         editable
-                        onEdit={() => {
-                          // TODO: Implement edit modal (similar to add modal)
-                          console.log('Edit link clicked:', link.id, link.title)
-                          console.log('Edit functionality needs proper modal implementation')
-                        }}
+                        onEdit={() => handleEditLinkClick(link)}
                         onToggleVisibility={() => handleToggleVisibility(link.id)}
                         onDelete={() => {
                           if (confirm(`Delete "${link.title}"?`)) {
@@ -621,6 +694,68 @@ export default function ProfileEditorInterface() {
                 className="flex-1 bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary disabled:opacity-50"
               >
                 {addingLink ? 'Adding...' : 'Add Link'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Link Modal */}
+      {showEditLinkModal && editingLink && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-fartree-window-background border-2 border-fartree-border-dark rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-fartree-text-primary mb-4">Edit Link</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-link-title" className="text-fartree-text-secondary">
+                  Link Title
+                </Label>
+                <Input
+                  id="edit-link-title"
+                  type="text"
+                  value={editLinkTitle}
+                  onChange={(e) => setEditLinkTitle(e.target.value)}
+                  placeholder="Enter link title..."
+                  className="mt-1"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-link-url" className="text-fartree-text-secondary">
+                  Link URL
+                </Label>
+                <Input
+                  id="edit-link-url"
+                  type="url"
+                  value={editLinkUrl}
+                  onChange={(e) => setEditLinkUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <Button
+                onClick={() => {
+                  setShowEditLinkModal(false)
+                  setEditLinkTitle('')
+                  setEditLinkUrl('')
+                  setEditingLink(null)
+                }}
+                variant="outline"
+                className="flex-1"
+                disabled={updatingLink}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleEditLinkSubmit}
+                disabled={updatingLink || !editLinkTitle.trim() || !editLinkUrl.trim()}
+                className="flex-1 bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary disabled:opacity-50"
+              >
+                {updatingLink ? 'Updating...' : 'Update Link'}
               </Button>
             </div>
           </div>
