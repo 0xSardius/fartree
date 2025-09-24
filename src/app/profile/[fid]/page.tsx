@@ -4,8 +4,9 @@ import { Metadata } from "next"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { LinkCard } from "~/components/link-card"
 import { WindowFrame } from "~/components/window-frame"
+import { Twitter, Github, Globe, Users, Figma, Wallet, Zap, Edit } from "lucide-react"
 import { Button } from "~/components/ui/Button"
-import { Twitter, Github, Globe, Users, Figma, Wallet, Zap, Share2, Edit, AlertCircle } from "lucide-react"
+import { ShareProfileButton } from "~/components/profile/ShareProfileButton"
 
 // Link category icons mapping (same as editor)
 const categoryIcons = {
@@ -224,23 +225,15 @@ export default async function PublicProfileView({ params }: { params: { fid: str
             FID: {profile.fid}
           </div>
           <div className="flex gap-2">
+            <ShareProfileButton fid={profile.fid} profileName={profileName} />
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
-                const url = window.location.href
-                navigator.clipboard.writeText(url)
-                // You could add a toast notification here
-                console.log('Profile URL copied to clipboard')
+                if (typeof window !== 'undefined') {
+                  window.location.href = '/editor'
+                }
               }}
-              className="text-xs"
-            >
-              <Share2 className="w-3 h-3 mr-1" /> Share
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.location.href = '/editor'}
               className="text-xs"
             >
               <Edit className="w-3 h-3 mr-1" /> Edit

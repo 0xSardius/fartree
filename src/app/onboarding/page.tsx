@@ -9,10 +9,12 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "~/contexts/AuthContext"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 
+type AuthUser = ReturnType<typeof useAuth>["user"]
+
 export default function OnboardingFlow() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
-  const [profileData, setProfileData] = useState<any>(null)
+  const [profileData, setProfileData] = useState<AuthUser>(null)
   const router = useRouter()
   
   // Use centralized auth context
@@ -30,13 +32,12 @@ export default function OnboardingFlow() {
   const handleAutoScan = async () => {
     setLoading(true)
     try {
-      // The user data from useQuickAuth already contains the auto-populated profile
-      // But let's refetch to ensure we have the latest data
+      // Refetch to ensure we have the latest data
       await refetch()
       
       // Simulate some scanning time for better UX
       setTimeout(() => {
-        setProfileData(user)
+        setProfileData((prev) => (user ?? prev))
         setLoading(false)
         setStep(3) // Move to review step
       }, 2000)

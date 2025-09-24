@@ -241,7 +241,14 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
     const { identifier, linkId } = await params;
-    const body = await request.json();
+    let body: Record<string, unknown> = {};
+
+    try {
+      body = await request.json();
+    } catch (error) {
+      // Gracefully handle empty bodies for legacy clients
+      body = {};
+    }
     
     if (!identifier || !linkId) {
       return NextResponse.json(
@@ -262,7 +269,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const { action } = body;
+    const action = (body.action as string | undefined) ?? 'click';
 
     if (action === 'click') {
       // Increment click count
