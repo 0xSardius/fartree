@@ -62,6 +62,7 @@ export default function ProfileEditorInterface() {
   const { user, loading: authLoading, isAuthenticated } = useAuth()
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [links, setLinks] = useState<ProfileLink[]>([])
+  const totalClicks = useMemo(() => links.reduce((acc, link) => acc + (link.click_count || 0), 0), [links])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -507,8 +508,11 @@ export default function ProfileEditorInterface() {
 
           {/* Center Area: Link Management */}
           <div className="flex flex-col p-4 bg-fartree-window-background overflow-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-fartree-text-primary">Your Links ({links.length})</h2>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-lg font-semibold text-fartree-text-primary">Your Links ({links.length})</h2>
+                <p className="text-sm text-fartree-text-secondary">{totalClicks} total clicks</p>
+              </div>
               <Button 
                 onClick={() => {
                   console.log('Add New Link button clicked - opening modal')

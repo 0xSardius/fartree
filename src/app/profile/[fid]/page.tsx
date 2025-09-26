@@ -2,7 +2,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Metadata } from "next"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
-import { LinkCard } from "~/components/link-card"
+import { ProfileLinkList } from "~/components/profile/ProfileLinkList"
 import { WindowFrame } from "~/components/window-frame"
 import { Twitter, Github, Globe, Users, Figma, Wallet, Zap, Edit } from "lucide-react"
 import { Button } from "~/components/ui/Button"
@@ -276,34 +276,12 @@ export default async function PublicProfileView({ params }: { params: { fid: str
           </div>
 
           {/* Links */}
-          {visibleLinks.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-center">
-              <div>
-                <Globe className="w-12 h-12 mx-auto mb-4 text-fartree-text-secondary" />
-                <h3 className="text-lg font-medium text-fartree-text-primary mb-2">No links yet</h3>
-                <p className="text-fartree-text-secondary mb-4">This profile hasn't added any links yet.</p>
-              </div>
-            </div>
-          ) : (
-            <div className="grid gap-4 w-full">
-              {visibleLinks.map((link) => {
-                const IconComponent = getIconForCategory(link.category)
-                return (
-                  <TrackableLink key={link.id} link={link} profileFid={profile.fid}>
-                    <LinkCard
-                      icon={IconComponent}
-                      title={link.title}
-                      description={link.url}
-                      clickCount={link.click_count}
-                      category={link.category}
-                      isAutoDetected={link.auto_detected}
-                      className="w-full hover:border-fartree-accent-purple cursor-pointer"
-                    />
-                  </TrackableLink>
-                )
-              })}
-            </div>
-          )}
+          <ProfileLinkList
+            initialLinks={visibleLinks}
+            profileFid={profile.fid}
+            getIconForCategory={getIconForCategory}
+            showSummary={false}
+          />
         </div>
 
         {/* Footer */}

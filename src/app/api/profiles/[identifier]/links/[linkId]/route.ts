@@ -272,13 +272,21 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const action = (body.action as string | undefined) ?? 'click';
 
     if (action === 'click') {
+      let incrementBy = 1;
+      if (typeof body.count === 'number' && Number.isFinite(body.count)) {
+        const normalized = Math.floor(body.count);
+        if (normalized > 1) {
+          incrementBy = normalized;
+        }
+      }
+
       // Increment click count
       const result = await query(`
         UPDATE profile_links 
-        SET click_count = click_count + 1
+        SET click_count = click_count + $3
         WHERE id = $1 AND profile_id = $2
         RETURNING id, title, url, click_count
-      `, [linkId, profileId]);
+      `, [linkId, profileId, incrementBy]);
 
       if (result.rows.length === 0) {
         return NextResponse.json(
