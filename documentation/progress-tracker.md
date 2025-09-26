@@ -44,8 +44,8 @@
 ## 🔄 In Progress / Next Priority
 
 ### Immediate (Next Session)
-1. **Link Analytics UX** - Debounce client tracking and surface click metrics in editor/public views
-2. **Auto-Detection Experience** - Progressive scanning steps + celebration animation in onboarding
+1. **Progressive Auto-Scan** - Build staged scanning messages and celebration per onboarding plan
+2. **Profile Storytelling UI** - Group links into Empire/Collaborations/Viral sections with badges
 3. **Production Hardening** - Replace test FID with session auth, add JWT verification/logging/rate limits
 
 ### Short Term (1-2 Sessions)
@@ -54,9 +54,9 @@
 6. **Theme Customization** - Dark theme with purple accents
 
 ### Medium Term (3-5 Sessions)
-7. **Cross-Profile Discovery** - Internal directory/search to explore other creators
-8. **Mobile Optimization** - PWA features and responsive design
-9. **Performance Optimization** - Caching, lazy loading, image optimization
+7. **Hero Metrics & Achievements** - Surface builder badges, “Most clicked this week”, rich analytics
+8. **Cross-Profile Discovery** - Internal directory/search to explore other creators
+9. **Mobile Optimization** - PWA features and responsive design
 
 ---
 
