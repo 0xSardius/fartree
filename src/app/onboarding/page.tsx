@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "~/components/ui/Button"
 import { WindowFrame } from "~/components/window-frame"
 import { CheckCircle, Loader2, LinkIcon, User, Sparkles, ArrowRight, ArrowLeft } from "lucide-react"
+import { ScanConfetti } from "~/components/animations/ScanConfetti"
 import { cn } from "~/lib/utils"
 import { useRouter } from "next/navigation"
 import { useAuth } from "~/contexts/AuthContext"
@@ -11,10 +12,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 
 type AuthUser = ReturnType<typeof useAuth>["user"]
 
+interface ScanStep {
+  id: string
+  message: string
+  status: "pending" | "active" | "complete" | "error"
+}
+
 export default function OnboardingFlow() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [profileData, setProfileData] = useState<AuthUser>(null)
+  const [scanSteps, setScanSteps] = useState<ScanStep[]>([])
+  const [scanComplete, setScanComplete] = useState(false)
   const router = useRouter()
   
   // Use centralized auth context
@@ -28,24 +37,90 @@ export default function OnboardingFlow() {
     }
   }, [isAuthenticated, user, step])
 
+  useEffect(() => {
+    if (step === 2) {
+      setScanSteps([
+        { id: "profile", message: "🔍 Scanning your Farcaster identity…", status: "active" },
+        { id: "tokens", message: "✅ Found your profile data", status: "pending" },
+        { id: "collabs", message: "✅ Detected collaborations & hypersubs", status: "pending" },
+        { id: "content", message: "✅ Surfaced your viral casts", status: "pending" },
+        { id: "apps", message: "✅ Mapped your mini-apps", status: "pending" },
+        { id: "celebrate", message: "🎉 Digital empire ready!", status: "pending" },
+      ])
+      setScanComplete(false)
+    }
+  }, [step])
+
   // Real auto-scanning function
   const handleAutoScan = async () => {
     setLoading(true)
     try {
+      setScanComplete(false)
       // Refetch to ensure we have the latest data
       await refetch()
       
-      // Simulate some scanning time for better UX
+      const stageRunners = [
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 450))
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 500))
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 500))
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 500))
+        },
+        async () => {
+          await new Promise((resolve) => setTimeout(resolve, 500))
+        },
+      ]
+
+      for (let i = 0; i < stageRunners.length; i++) {
+        setScanSteps((prev) =>
+          prev.map((scanStep, idx) =>
+            idx === i
+              ? { ...scanStep, status: "active" }
+              : idx < i
+              ? { ...scanStep, status: "complete" }
+              : scanStep,
+          ),
+        )
+        await stageRunners[i]()
+      }
+
+      setScanSteps((prev) =>
+        prev.map((scanStep, idx) =>
+          idx < prev.length - 1
+            ? { ...scanStep, status: "complete" }
+            : { ...scanStep, status: "active" },
+        ),
+      )
+
+      setProfileData((prev) => (user ?? prev))
+      setLoading(false)
+      setScanComplete(true)
+
       setTimeout(() => {
-        setProfileData((prev) => (user ?? prev))
-        setLoading(false)
-        setStep(3) // Move to review step
-      }, 2000)
+        setStep(3)
+      }, 900)
     } catch (error) {
       console.error('Auto-scan failed:', error)
       setLoading(false)
       // Still advance but show error state
-      setStep(3)
+      setScanSteps((prev) =>
+        prev.map((scanStep, idx) =>
+          idx === prev.findIndex((step) => step.status === "active")
+            ? {
+                ...scanStep,
+                status: "error",
+                message: "⚠️ Scan hit a snag—fallback data loaded",
+              }
+            : scanStep,
+        ),
+      )
+      setTimeout(() => setStep(3), 1000)
     }
   }
 
@@ -87,17 +162,35 @@ export default function OnboardingFlow() {
     {
       id: 2,
       title: "Auto-Scanning Your Profile",
-      icon: loading ? (
-        <Loader2 className="w-16 h-16 text-fartree-primary-purple animate-spin mb-6" />
-      ) : (
+      icon: scanComplete ? (
         <CheckCircle className="w-16 h-16 text-fartree-success-green mb-6" />
+      ) : (
+        <Loader2 className="w-16 h-16 text-fartree-primary-purple animate-spin mb-6" />
       ),
-      description: loading
-        ? "We're automatically detecting your Web3 activities and links from your FID. This might take a moment..."
-        : "Scan complete! Your profile has been auto-generated.",
-      buttonText: loading ? "Scanning..." : "Review My Profile",
+      description: (
+        <div className="flex flex-col items-center gap-2" aria-live="polite">
+          <ul className="text-left text-sm text-fartree-text-secondary w-full max-w-sm space-y-2">
+            {scanSteps.map((scanStep) => (
+              <li
+                key={scanStep.id}
+                className={cn(
+                  "transition-opacity",
+                  scanStep.status === "complete" && "text-fartree-text-primary",
+                  scanStep.status === "active" && "text-fartree-accent-purple",
+                  scanStep.status === "error" && "text-red-400",
+                  scanStep.status === "pending" && "opacity-60",
+                )}
+              >
+                {scanStep.message}
+              </li>
+            ))}
+          </ul>
+          {scanComplete && <p className="text-sm text-fartree-text-primary">Scan complete! Your empire awaits.</p>}
+        </div>
+      ),
+      buttonText: scanComplete ? "Review My Profile" : "Scanning...",
       action: handleNext,
-      disabled: loading,
+      disabled: !scanComplete,
     },
     {
       id: 3,
@@ -191,6 +284,7 @@ export default function OnboardingFlow() {
     <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
       <WindowFrame title="Fartree Onboarding" className="w-full max-w-xl h-[calc(100vh-4rem)] flex flex-col">
         <div className="flex-1 flex flex-col items-center justify-center text-center p-8 overflow-auto bg-fartree-window-background">
+          <ScanConfetti trigger={scanComplete && step === 2} />
           <div className="mb-8 flex gap-2">
             {steps.map((s) => (
               <div
