@@ -7,7 +7,7 @@ import Link from "next/link"
 
 import { LinkCard } from "~/components/link-card"
 
-interface ProfileLink {
+export interface ProfileLink {
   id: string
   title: string
   url: string

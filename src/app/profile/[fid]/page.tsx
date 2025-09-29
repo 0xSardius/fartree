@@ -2,7 +2,9 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Metadata } from "next"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
-import { ProfileLinkList } from "~/components/profile/ProfileLinkList"
+import { ProfileLinkList, type ProfileLink } from "~/components/profile/ProfileLinkList"
+import { ProfileHeroStats } from "~/components/profile/ProfileHeroStats"
+import { ProfileSection } from "~/components/profile/ProfileSection"
 import { WindowFrame } from "~/components/window-frame"
 import { Twitter, Github, Globe, Users, Figma, Wallet, Zap, Edit } from "lucide-react"
 import { Button } from "~/components/ui/Button"
@@ -15,19 +17,6 @@ const categoryIcons = {
   content: Globe,
   collabs: Users,
   default: Globe,
-}
-
-// Interface for our data structures
-interface ProfileLink {
-  id: string;
-  title: string;
-  url: string;
-  category?: string;
-  position?: number;
-  is_visible?: boolean;
-  click_count?: number;
-  auto_detected?: boolean;
-  created_at?: string;
 }
 
 interface ProfileData {
@@ -201,17 +190,37 @@ export default async function PublicProfileView({ params }: { params: { fid: str
     getProfileLinks(fid),
   ])
 
-  // Handle profile not found
   if (!profile) {
     notFound()
   }
 
-  // Filter to only show visible links, sorted by position
   const visibleLinks = links
-    .filter(link => link.is_visible !== false)
+    .filter((link) => link.is_visible !== false)
     .sort((a, b) => (a.position || 0) - (b.position || 0))
 
   const profileName = profile.display_name || profile.username || `User ${profile.fid}`
+
+  const totalClicks = visibleLinks.reduce((acc, link) => acc + (link.click_count || 0), 0)
+  const autoDetectedCount = visibleLinks.filter((link) => link.auto_detected).length
+
+  const empireLinks = visibleLinks.filter((link) => link.category?.toLowerCase() === "crypto")
+  const collabLinks = visibleLinks.filter((link) => link.category?.toLowerCase() === "collabs")
+  const socialLinks = visibleLinks.filter((link) => link.category?.toLowerCase() === "social")
+  const contentLinks = visibleLinks.filter((link) => link.category?.toLowerCase() === "content")
+  const signatureLinks = visibleLinks.filter(
+    (link) => !["crypto", "collabs", "social", "content"].includes(link.category?.toLowerCase() || ""),
+  )
+
+  const badgeLabels: string[] = []
+  if (empireLinks.length > 0) {
+    badgeLabels.push("Empire Builder")
+  }
+  if (collabLinks.length > 0) {
+    badgeLabels.push("Collaboration King")
+  }
+  if (totalClicks > 100) {
+    badgeLabels.push("Viral Spark")
+  }
 
   return (
     <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
@@ -241,7 +250,7 @@ export default async function PublicProfileView({ params }: { params: { fid: str
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col items-center p-6 overflow-auto bg-fartree-window-background">
+        <div className="flex-1 flex flex-col items-center p-6 overflow-auto bg-fartree-window-background space-y-6">
           {/* Profile Header */}
           <Avatar className="w-24 h-24 border-4 border-fartree-primary-purple mb-4 shadow-lg">
             <AvatarImage src={profile.avatar_url || "/placeholder.svg"} alt={profileName} />
@@ -263,25 +272,83 @@ export default async function PublicProfileView({ params }: { params: { fid: str
             <p className="text-fartree-text-secondary text-center max-w-xs mb-4">{profile.bio}</p>
           )}
 
-          {/* Stats */}
-          <div className="flex items-center gap-4 text-fartree-text-secondary text-sm mb-6">
-            <div className="flex items-center gap-1">
-              <Globe className="w-4 h-4" />
-              <span>{visibleLinks.length} Links</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Zap className="w-4 h-4" />
-              <span>{links.reduce((acc, link) => acc + (link.click_count || 0), 0)} Total Clicks</span>
-            </div>
-          </div>
-
-          {/* Links */}
-          <ProfileLinkList
-            initialLinks={visibleLinks}
-            profileFid={profile.fid}
-            getIconForCategory={getIconForCategory}
-            showSummary={false}
+          <ProfileHeroStats
+            totalClicks={totalClicks}
+            autoDetectedCount={autoDetectedCount}
+            badgeLabels={badgeLabels}
           />
+
+          <div className="space-y-4 w-full">
+            {empireLinks.length > 0 && (
+              <ProfileSection
+                title="Your Empire"
+                description="Flagship projects, tokens, and onchain creations."
+              >
+                <ProfileLinkList
+                  initialLinks={empireLinks}
+                  profileFid={profile.fid}
+                  getIconForCategory={getIconForCategory}
+                  showSummary={false}
+                />
+              </ProfileSection>
+            )}
+
+            {collabLinks.length > 0 && (
+              <ProfileSection
+                title="Collaboration King"
+                description="Builds and splits with fellow Farcaster creators."
+              >
+                <ProfileLinkList
+                  initialLinks={collabLinks}
+                  profileFid={profile.fid}
+                  getIconForCategory={getIconForCategory}
+                  showSummary={false}
+                />
+              </ProfileSection>
+            )}
+
+            {contentLinks.length > 0 && (
+              <ProfileSection
+                title="Content That Slaps"
+                description="Viral casts, frames, and content that grab attention."
+              >
+                <ProfileLinkList
+                  initialLinks={contentLinks}
+                  profileFid={profile.fid}
+                  getIconForCategory={getIconForCategory}
+                  showSummary={false}
+                />
+              </ProfileSection>
+            )}
+
+            {socialLinks.length > 0 && (
+              <ProfileSection
+                title="Signal Boost"
+                description="Where to connect and follow the journey."
+              >
+                <ProfileLinkList
+                  initialLinks={socialLinks}
+                  profileFid={profile.fid}
+                  getIconForCategory={getIconForCategory}
+                  showSummary={false}
+                />
+              </ProfileSection>
+            )}
+
+            {signatureLinks.length > 0 && (
+              <ProfileSection
+                title="Signature Moves"
+                description="Hand-picked links that define your vibe."
+              >
+                <ProfileLinkList
+                  initialLinks={signatureLinks}
+                  profileFid={profile.fid}
+                  getIconForCategory={getIconForCategory}
+                  showSummary={false}
+                />
+              </ProfileSection>
+            )}
+          </div>
         </div>
 
         {/* Footer */}
