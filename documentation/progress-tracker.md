@@ -44,9 +44,9 @@
 ## 🔄 In Progress / Next Priority
 
 ### Immediate (Next Session)
-1. **Progressive Auto-Scan** - Build staged scanning messages and celebration per onboarding plan
-2. **Profile Storytelling UI** - Group links into Empire/Collaborations/Viral sections with badges
-3. **Production Hardening** - Replace test FID with session auth, add JWT verification/logging/rate limits
+1. **Production Hardening** - Replace test FID with session auth, add JWT verification/logging/rate limits
+2. **Hero Metrics & Achievements** - Wire analytics (weekly trends, badges) into new profile layout
+3. **Cross-Profile Discovery** - Directory/search to explore other creators
 
 ### Short Term (1-2 Sessions)
 4. **Auto-Detection Engine** - Progressive scanning with celebration animations
