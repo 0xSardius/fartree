@@ -79,29 +79,47 @@ export default function ProfileEditorInterface() {
 
   // Load profile and links data
   const loadProfileData = useCallback(async () => {
-    if (!user?.fid) return
+    if (!user?.fid) {
+      console.log('⚠️ loadProfileData: No user FID available')
+      return
+    }
 
+    console.log('🔄 loadProfileData: Loading data for FID:', user.fid)
     setLoading(true)
     setError(null)
 
     try {
       // Load profile data
+      console.log('📡 Fetching profile from /api/profiles/${user.fid}')
       const profileResponse = await fetch(`/api/profiles/${user.fid}`)
+      console.log('📡 Profile response status:', profileResponse.status)
+      
       if (!profileResponse.ok) {
+        const errorText = await profileResponse.text()
+        console.error('❌ Profile fetch failed:', errorText)
         throw new Error('Failed to load profile')
       }
       const profileData = await profileResponse.json()
+      console.log('✅ Profile data received:', profileData)
 
       // Load links data
+      console.log('📡 Fetching links from /api/profiles/${user.fid}/links')
       const linksResponse = await fetch(`/api/profiles/${user.fid}/links?include_hidden=true`)
+      console.log('📡 Links response status:', linksResponse.status)
+      
       if (!linksResponse.ok) {
+        const errorText = await linksResponse.text()
+        console.error('❌ Links fetch failed:', errorText)
         throw new Error('Failed to load links')
       }
       const linksData = await linksResponse.json()
+      console.log('✅ Links data received:', linksData)
 
       setProfile(profileData.profile)
       setLinks(linksData.links || [])
+      console.log('✅ State updated - Profile:', !!profileData.profile, 'Links:', linksData.links?.length || 0)
     } catch (err) {
+      console.error('❌ Error in loadProfileData:', err)
       setError(err instanceof Error ? err.message : 'Failed to load data')
     } finally {
       setLoading(false)
