@@ -441,7 +441,7 @@ export default function ProfileEditorInterface() {
 
   return (
     <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-2 md:p-4 font-mono">
-      <WindowFrame title="Fartree Editor" className="w-full max-w-sm md:max-w-6xl h-[calc(100vh-2rem)] md:h-[calc(100vh-4rem)] flex flex-col">
+      <WindowFrame title="Fartree Editor" className="w-full max-w-md md:max-w-6xl h-[calc(100vh-2rem)] md:h-[calc(100vh-4rem)] flex flex-col">
         {/* Top Toolbar */}
         <div className="flex flex-col md:flex-row items-center justify-between p-3 border-b-2 border-fartree-border-dark bg-fartree-window-header gap-2">
           <div className="flex gap-2 w-full md:w-auto">

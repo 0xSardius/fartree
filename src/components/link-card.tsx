@@ -4,6 +4,32 @@ import { cn } from "~/lib/utils"
 import { Link, Eye, Pencil, GripVertical } from "lucide-react"
 import { Button } from "~/components/ui/Button"
 
+// Helper to shorten long URLs for display
+function shortenUrl(url: string, maxLength: number = 40): string {
+  if (url.length <= maxLength) return url
+  
+  try {
+    const urlObj = new URL(url)
+    const domain = urlObj.hostname.replace('www.', '')
+    const path = urlObj.pathname + urlObj.search
+    
+    if (domain.length + path.length <= maxLength) {
+      return domain + path
+    }
+    
+    // Truncate path if needed
+    const remainingLength = maxLength - domain.length - 3 // -3 for "..."
+    if (remainingLength > 10) {
+      return domain + path.substring(0, remainingLength) + '...'
+    }
+    
+    return domain
+  } catch {
+    // If URL parsing fails, just truncate
+    return url.substring(0, maxLength) + '...'
+  }
+}
+
 interface LinkCardProps extends React.HTMLAttributes<HTMLDivElement> {
   icon?: React.ElementType
   title: string
@@ -58,11 +84,14 @@ export function LinkCard({
           <div className="flex-shrink-0 mt-0.5">
             <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-fartree-primary-purple" />
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 max-w-full overflow-hidden">
             <h3 className="font-semibold text-base sm:text-lg truncate">{title}</h3>
             {description && (
-              <p className="text-xs sm:text-sm text-fartree-text-secondary truncate mt-1">
-                {description}
+              <p 
+                className="text-xs sm:text-sm text-fartree-text-secondary mt-1 truncate" 
+                title={description}
+              >
+                {shortenUrl(description, 35)}
               </p>
             )}
             <div className="flex items-center gap-2 text-xs text-fartree-text-secondary mt-2 flex-wrap">
