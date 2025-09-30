@@ -26,7 +26,8 @@
     "test:onboarding": "node scripts/test-onboarding-flow.js",
     "test:quick-auth": "node scripts/test-quick-auth-environments.js",
     "test:link-management": "node scripts/test-link-management.js",
-    "test:public-profiles": "node scripts/test-public-profiles.js"
+    "test:public-profiles": "node scripts/test-public-profiles.js",
+    "test:debug": "node scripts/test-debug.js"
   },
   "dependencies": {
     "@farcaster/auth-client": ">=0.3.0 <1.0.0",

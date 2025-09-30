@@ -90,7 +90,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT /api/profiles/[identifier] - Update profile
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { identifier } = params;
+    const { identifier } = await params;
     const body = await request.json();
     
     if (!identifier) {
@@ -177,7 +177,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/profiles/[identifier] - Delete profile
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const { identifier } = params;
+    const { identifier } = await params;
     
     if (!identifier) {
       return NextResponse.json(

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { Button } from "~/components/ui/Button"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
@@ -429,8 +429,8 @@ export default function ProfileEditorInterface() {
           <div className="flex gap-2 w-full md:w-auto">
             <Button 
               onClick={handleSaveProfile}
-              disabled={saving}
-              className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary flex-1 md:flex-none"
+              disabled={saving || !profile || !user?.fid}
+              className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary flex-1 md:flex-none disabled:opacity-50"
             >
               {saving ? (
                 <>
@@ -445,7 +445,8 @@ export default function ProfileEditorInterface() {
             <Button
               variant="outline"
               onClick={() => window.open(`/profile/${user?.fid}`, '_blank')}
-              className="border-fartree-border-dark text-fartree-text-primary hover:bg-fartree-window-background hover:text-fartree-accent-purple bg-transparent flex-1 md:flex-none"
+              disabled={!user?.fid}
+              className="border-fartree-border-dark text-fartree-text-primary hover:bg-fartree-window-background hover:text-fartree-accent-purple bg-transparent flex-1 md:flex-none disabled:opacity-50"
             >
               <Eye className="w-4 h-4 mr-2" /> Preview
             </Button>
