@@ -1,7 +1,7 @@
 import type React from "react"
 import { Card, CardContent } from "~/components/ui/card"
 import { cn } from "~/lib/utils"
-import { Link, Eye, Pencil, GripVertical } from "lucide-react"
+import { Link, Eye, Pencil, GripVertical, Trash2 } from "lucide-react"
 import { Button } from "~/components/ui/Button"
 
 // Helper to shorten long URLs for display
@@ -74,18 +74,18 @@ export function LinkCard({
   return (
     <Card
       className={cn(
-        "relative group border-2 border-fartree-border-dark bg-fartree-window-background text-fartree-text-primary rounded-lg overflow-hidden",
+        "relative group border-2 border-fartree-border-dark bg-fartree-window-background text-fartree-text-primary rounded-lg overflow-hidden w-full",
         "hover:border-fartree-accent-purple transition-colors duration-200",
         className,
       )}
       {...props}
     >
-      <CardContent className="p-2.5 sm:p-3">
+      <CardContent className="p-2.5 sm:p-3 w-full">
         {/* Mobile-first responsive layout */}
-        <div className="flex items-start gap-2.5">
+        <div className="flex items-start gap-2.5 w-full">
           {editable && (
-            <div className="flex-shrink-0 cursor-grab text-fartree-text-secondary opacity-0 group-hover:opacity-100 transition-opacity mt-1">
-              <GripVertical className="w-4 h-4" />
+            <div className="flex-shrink-0 cursor-grab text-fartree-text-secondary opacity-0 group-hover:opacity-100 transition-opacity">
+              <GripVertical className="w-3 h-3" />
             </div>
           )}
           <div className="flex-shrink-0">
@@ -124,43 +124,17 @@ export function LinkCard({
               )}
             </div>
           </div>
-          {editable && (
-            <div className="flex-shrink-0 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              {onEdit && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onEdit}
-                  className="w-7 h-7 sm:w-8 sm:h-8 text-fartree-text-secondary hover:text-fartree-accent-purple"
-                >
-                  <Pencil className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="sr-only">Edit</span>
-                </Button>
-              )}
-              {onToggleVisibility && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onToggleVisibility}
-                  className="w-7 h-7 sm:w-8 sm:h-8 text-fartree-text-secondary hover:text-fartree-accent-purple"
-                >
-                  <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
-                  <span className="sr-only">Toggle Visibility</span>
-                </Button>
-              )}
-              {onDelete && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onDelete}
-                  className="w-7 h-7 sm:w-8 sm:h-8 text-red-500 hover:text-red-700"
-                >
-                  <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                  <span className="sr-only">Delete</span>
-                </Button>
-              )}
+          {editable && onEdit && (
+            <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEdit}
+                className="w-7 h-7 p-0 text-fartree-text-secondary hover:text-fartree-accent-purple border-fartree-border-dark"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                <span className="sr-only">Edit</span>
+              </Button>
             </div>
           )}
         </div>

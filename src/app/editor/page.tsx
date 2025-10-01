@@ -22,6 +22,7 @@ import {
   LayoutGrid,
   Loader2,
   AlertCircle,
+  Trash2,
 } from "lucide-react"
 
   // Link category icons mapping
@@ -348,20 +349,35 @@ export default function ProfileEditorInterface() {
 
   // Delete link
   const handleDeleteLink = async (linkId: string) => {
-    if (!user?.fid) return
+    console.log('🗑️ Deleting link:', linkId)
+    if (!user?.fid) {
+      console.error('No user FID available for delete')
+      return
+    }
 
     try {
+      console.log('Making DELETE request to:', `/api/profiles/${user.fid}/links/${linkId}`)
       const response = await fetch(`/api/profiles/${user.fid}/links/${linkId}`, {
         method: 'DELETE',
       })
 
+      console.log('Delete response status:', response.status)
+      
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Delete failed:', errorText)
         throw new Error('Failed to delete link')
       }
 
-      // Remove from state
-      setLinks(links.filter(link => link.id !== linkId))
+      console.log('✅ Delete successful, updating state')
+      // Remove from state using functional update to avoid stale closure
+      setLinks((currentLinks) => {
+        const newLinks = currentLinks.filter(link => link.id !== linkId)
+        console.log('Updated links count:', newLinks.length)
+        return newLinks
+      })
     } catch (err) {
+      console.error('Error in handleDeleteLink:', err)
       setError(err instanceof Error ? err.message : 'Failed to delete link')
     }
   }
@@ -610,12 +626,6 @@ export default function ProfileEditorInterface() {
                         isAutoDetected={link.auto_detected}
                         editable
                         onEdit={() => handleEditLinkClick(link)}
-                        onToggleVisibility={() => handleToggleVisibility(link.id)}
-                        onDelete={() => {
-                          if (confirm(`Delete "${link.title}"?`)) {
-                            handleDeleteLink(link.id)
-                          }
-                        }}
                         className={!link.is_visible ? 'opacity-60' : ''}
                       />
                     </div>
@@ -744,8 +754,28 @@ export default function ProfileEditorInterface() {
       {/* Edit Link Modal */}
       {showEditLinkModal && editingLink && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-fartree-window-background border-2 border-fartree-border-dark rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold text-fartree-text-primary mb-4">Edit Link</h3>
+          <div className="bg-fartree-window-background border-2 border-fartree-border-dark rounded-lg p-6 w-full max-w-md relative">
+            <div className="flex items-center justify-between gap-4 mb-4">
+              <h3 className="text-lg font-semibold text-fartree-text-primary flex-1">Edit Link</h3>
+              <Button
+                onClick={() => {
+                  if (confirm(`Delete "${editingLink.title}"?`)) {
+                    handleDeleteLink(editingLink.id)
+                    setShowEditLinkModal(false)
+                    setEditLinkTitle('')
+                    setEditLinkUrl('')
+                    setEditingLink(null)
+                  }
+                }}
+                variant="outline"
+                size="sm"
+                className="w-8 h-8 min-w-[2rem] p-0 flex-shrink-0 text-red-500 hover:text-red-700 hover:bg-red-50 border-red-300 hover:border-red-500"
+                disabled={updatingLink}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span className="sr-only">Delete Link</span>
+              </Button>
+            </div>
             
             <div className="space-y-4">
               <div>

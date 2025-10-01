@@ -1,12 +1,12 @@
 # Fartree Development Progress Tracker
 
-*Last Updated: September 24, 2025*
+*Last Updated: October 1, 2025*
 
 ## 🎯 Project Status Overview
 
 **Current Phase**: Core Profile Builder (Phase 1) - ✅ **COMPLETE**  
 **Next Phase**: Public Profiles & Auto-Detection - 🔄 **IN PROGRESS**  
-**Overall Progress**: 15/23 tasks completed (65%)
+**Overall Progress**: 18/23 tasks completed (78%)
 
 ---
 
@@ -33,11 +33,20 @@
 - [x] **Profile Creation Flow** - Real auto-scanning with Farcaster data
 - [x] **Test Infrastructure** - Multiple test scripts for different components
 
-### Miniapp Integration (NEW)
+### Miniapp Integration
 - [x] **SDK Ready() Fix** - Fixed splash screen hiding across all entry points
 - [x] **Navigation Fix** - Corrected routing from /app to /editor
 - [x] **Neynar Provider Fix** - Resolved fetch errors and analytics issues
 - [x] **Share Flow** - Mini App composer button with native share/clipboard fallback
+
+### Editor UX & Layout (October 1, 2025)
+- [x] **Layout Fix** - Fixed flex layout structure in WindowFrame for proper scrolling
+- [x] **Compact Link Cards** - Linktree-style compact design with smaller padding and gaps
+- [x] **Scrolling Fix** - All links now visible with proper overflow-y-auto on columns
+- [x] **URL Display** - Smart URL truncation with hover tooltips for full URLs
+- [x] **Delete UX** - Moved delete button to edit modal with subtle icon in top-right
+- [x] **Link Management** - Full CRUD with edit/delete functionality in modal
+- [x] **TypeScript Fixes** - Added missing is_visible and position properties to ProfileLink interface
 
 ---
 
@@ -194,6 +203,10 @@ src/components/ui/tabs/HomeTab.tsx - Works but could be enhanced 📋
 3. **Path Aliases**: Consistent ~/ usage prevents import confusion
 4. **Auto-Population Works**: Successfully pulling real Farcaster data via Neynar
 5. **Database Design**: Simple but effective schema for MVP requirements
+6. **Flex Layout Issue**: WindowFrame content div needs explicit flex container styling for proper scrolling
+7. **Mobile Viewport**: Mini Apps on web should be 424x695px - layout must scroll within constraints
+8. **Compact Design**: Linktree-style requires tight spacing (gap-2, p-2.5) and smaller icons (w-4 h-4)
+9. **Delete UX**: Subtle icon in modal prevents accidental deletions on mobile vs prominent button
 
 ---
 
@@ -211,13 +224,15 @@ src/components/ui/tabs/HomeTab.tsx - Works but could be enhanced 📋
 1. We have a working Farcaster miniapp with Quick Auth
 2. Database is set up with real profile auto-population
 3. Core CRUD APIs are complete and tested
-4. Main issue was desktop UX - now fixed
-5. Ready for link management and editor integration
+4. Editor UI is fully functional with compact Linktree-style layout
+5. Link management (add/edit/delete/reorder) is complete and working
+6. All links display properly with scrolling in mobile-sized viewport
 
-**Current codebase health:** ✅ Excellent - no linting errors, all tests pass
+**Current codebase health:** ✅ Excellent - no linting errors, all functionality working
 **Authentication status:** ✅ Working across all platforms
-**Database status:** ✅ Connected and populated with test data
-**Next logical step:** Link management with drag-and-drop reordering
+**Database status:** ✅ Connected and populated with real data
+**Editor status:** ✅ Fully functional with compact design and proper scrolling
+**Next logical step:** Production hardening (replace test FID, add JWT verification)
 
 ---
 
