@@ -6,7 +6,7 @@
 
 **Current Phase**: Core Profile Builder (Phase 1) - ✅ **COMPLETE**  
 **Next Phase**: Public Profiles & Auto-Detection - 🔄 **IN PROGRESS**  
-**Overall Progress**: 18/23 tasks completed (78%)
+**Overall Progress**: 20/23 tasks completed (87%)
 
 ---
 
@@ -41,12 +41,15 @@
 
 ### Editor UX & Layout (October 1, 2025)
 - [x] **Layout Fix** - Fixed flex layout structure in WindowFrame for proper scrolling
-- [x] **Compact Link Cards** - Linktree-style compact design with smaller padding and gaps
+- [x] **Compact Link Cards** - Linktree-style compact design with smaller padding and gaps (gap-2, p-2.5)
 - [x] **Scrolling Fix** - All links now visible with proper overflow-y-auto on columns
 - [x] **URL Display** - Smart URL truncation with hover tooltips for full URLs
-- [x] **Delete UX** - Moved delete button to edit modal with subtle icon in top-right
-- [x] **Link Management** - Full CRUD with edit/delete functionality in modal
+- [x] **Delete UX** - Subtle trash icon in edit modal header, compact and contained
+- [x] **Custom Delete Confirmation** - Replaced native confirm() with styled confirmation modal
+- [x] **Link Management** - Full CRUD with edit/delete functionality, functional state updates
 - [x] **TypeScript Fixes** - Added missing is_visible and position properties to ProfileLink interface
+- [x] **Modal Event Handling** - Fixed backdrop clicks and event propagation for reliable interactions
+- [x] **State Management** - Fixed stale closure issue in delete handler with functional setState
 
 ---
 
@@ -207,6 +210,9 @@ src/components/ui/tabs/HomeTab.tsx - Works but could be enhanced 📋
 7. **Mobile Viewport**: Mini Apps on web should be 424x695px - layout must scroll within constraints
 8. **Compact Design**: Linktree-style requires tight spacing (gap-2, p-2.5) and smaller icons (w-4 h-4)
 9. **Delete UX**: Subtle icon in modal prevents accidental deletions on mobile vs prominent button
+10. **React State Closures**: Use functional setState `setLinks(current => ...)` to avoid stale closure bugs
+11. **Native Dialogs in Modals**: Browser confirm() can fail in complex modals - use custom confirmation UI
+12. **Modal Event Handling**: Stop propagation at modal content level, handle backdrop clicks separately
 
 ---
 

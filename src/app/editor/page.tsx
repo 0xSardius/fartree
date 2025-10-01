@@ -76,6 +76,7 @@ export default function ProfileEditorInterface() {
   const [editLinkTitle, setEditLinkTitle] = useState('')
   const [editLinkUrl, setEditLinkUrl] = useState('')
   const [updatingLink, setUpdatingLink] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [draggedItem, setDraggedItem] = useState<string | null>(null)
 
   // Load profile and links data
@@ -753,28 +754,35 @@ export default function ProfileEditorInterface() {
 
       {/* Edit Link Modal */}
       {showEditLinkModal && editingLink && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-fartree-window-background border-2 border-fartree-border-dark rounded-lg p-6 w-full max-w-md relative">
-            <div className="flex items-center justify-between gap-4 mb-4">
-              <h3 className="text-lg font-semibold text-fartree-text-primary flex-1">Edit Link</h3>
-              <Button
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          onClick={(e) => {
+            // Only close if clicking the backdrop, not the modal content
+            if (e.target === e.currentTarget) {
+              setShowEditLinkModal(false)
+              setEditLinkTitle('')
+              setEditLinkUrl('')
+              setEditingLink(null)
+            }
+          }}
+        >
+          <div 
+            className="bg-fartree-window-background border-2 border-fartree-border-dark rounded-lg p-6 w-full max-w-md relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3 mb-4">
+              <h3 className="text-lg font-semibold text-fartree-text-primary flex-1 min-w-0">Edit Link</h3>
+              <button
+                type="button"
                 onClick={() => {
-                  if (confirm(`Delete "${editingLink.title}"?`)) {
-                    handleDeleteLink(editingLink.id)
-                    setShowEditLinkModal(false)
-                    setEditLinkTitle('')
-                    setEditLinkUrl('')
-                    setEditingLink(null)
-                  }
+                  console.log('🗑️ Delete button clicked!')
+                  setShowDeleteConfirm(true)
                 }}
-                variant="outline"
-                size="sm"
-                className="w-8 h-8 min-w-[2rem] p-0 flex-shrink-0 text-red-500 hover:text-red-700 hover:bg-red-50 border-red-300 hover:border-red-500"
                 disabled={updatingLink}
+                className="relative z-10 flex items-center justify-center w-8 h-8 min-w-[32px] min-h-[32px] rounded border border-red-300 bg-white text-red-500 hover:text-red-700 hover:bg-red-50 hover:border-red-500 disabled:opacity-50 flex-shrink-0 cursor-pointer"
               >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span className="sr-only">Delete Link</span>
-              </Button>
+                <Trash2 className="w-4 h-4 pointer-events-none" />
+              </button>
             </div>
             
             <div className="space-y-4">
@@ -830,6 +838,45 @@ export default function ProfileEditorInterface() {
                 className="flex-1 bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary disabled:opacity-50"
               >
                 {updatingLink ? 'Updating...' : 'Update Link'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && editingLink && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
+          <div className="bg-fartree-window-background border-2 border-fartree-border-dark rounded-lg p-6 w-full max-w-sm">
+            <h3 className="text-lg font-semibold text-fartree-text-primary mb-2">Delete Link?</h3>
+            <p className="text-fartree-text-secondary mb-6">
+              Are you sure you want to delete "<span className="font-semibold">{editingLink.title}</span>"? This action cannot be undone.
+            </p>
+            
+            <div className="flex gap-3">
+              <Button
+                onClick={() => {
+                  console.log('❌ User cancelled deletion')
+                  setShowDeleteConfirm(false)
+                }}
+                variant="outline"
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  console.log('✅ User confirmed deletion')
+                  handleDeleteLink(editingLink.id)
+                  setShowDeleteConfirm(false)
+                  setShowEditLinkModal(false)
+                  setEditLinkTitle('')
+                  setEditLinkUrl('')
+                  setEditingLink(null)
+                }}
+                className="flex-1 bg-red-500 hover:bg-red-700 text-white"
+              >
+                Delete
               </Button>
             </div>
           </div>
