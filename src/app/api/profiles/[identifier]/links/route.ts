@@ -121,7 +121,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const { title, url, category, position, is_visible = true, auto_detected = false } = body;
+    let { title, url, category, position, is_visible = true, auto_detected = false } = body;
 
     // Validate required fields
     if (!title || !url) {
@@ -131,12 +131,17 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    // Auto-add https:// if protocol is missing
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+
     // Validate URL format
     try {
       new URL(url);
-    } catch {
+    } catch (err) {
       return NextResponse.json(
-        { success: false, error: 'Invalid URL format' },
+        { success: false, error: 'Invalid URL format. Please use a valid URL like: https://example.com' },
         { status: 400 }
       );
     }

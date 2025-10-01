@@ -118,6 +118,7 @@ export default function ProfileEditorInterface() {
       setProfile(profileData.profile)
       setLinks(linksData.links || [])
       console.log('✅ State updated - Profile:', !!profileData.profile, 'Links:', linksData.links?.length || 0)
+      console.log('📋 Link titles:', linksData.links?.map((l: ProfileLink) => l.title).join(', '))
     } catch (err) {
       console.error('❌ Error in loadProfileData:', err)
       setError(err instanceof Error ? err.message : 'Failed to load data')
@@ -208,22 +209,24 @@ export default function ProfileEditorInterface() {
   // Add new link
   const handleAddLinkSubmit = async () => {
     if (!newLinkTitle.trim() || !newLinkUrl.trim()) {
-      console.log('Title and URL are required')
+      console.log('⚠️ Title and URL are required')
       return
     }
 
     try {
       setAddingLink(true)
-      console.log('Adding link:', { title: newLinkTitle, url: newLinkUrl })
+      console.log('📝 Adding link:', { title: newLinkTitle, url: newLinkUrl })
       await handleAddLink({ title: newLinkTitle, url: newLinkUrl, category: 'content' })
       
-      // Reset form and close modal
+      console.log('✅ Link added and profile reloaded!')
+      
+      // Reset form and close modal AFTER successful add
       setNewLinkTitle('')
       setNewLinkUrl('')
       setShowAddLinkModal(false)
-      console.log('Link added successfully')
     } catch (error) {
-      console.error('Error adding link:', error)
+      console.error('❌ Error adding link:', error)
+      // Don't close modal on error so user can see what happened
     } finally {
       setAddingLink(false)
     }
@@ -330,13 +333,16 @@ export default function ProfileEditorInterface() {
       }
 
       const result = await response.json()
-      console.log('Link added successfully:', result)
+      console.log('✅ Link added successfully:', result)
       
       // Reload data to get the new link
+      console.log('🔄 Reloading profile data after adding link...')
       await loadProfileData()
+      console.log('✅ Profile data reloaded, new links count:', links.length)
     } catch (err) {
-      console.error('Error in handleAddLink:', err)
+      console.error('❌ Error in handleAddLink:', err)
       setError(err instanceof Error ? err.message : 'Failed to add link')
+      throw err // Re-throw so handleAddLinkSubmit knows it failed
     }
   }
 
@@ -483,9 +489,9 @@ export default function ProfileEditorInterface() {
           </Button>
         </div>
 
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-[280px_1fr_280px] overflow-hidden bg-fartree-window-background">
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-[280px_1fr_280px] bg-fartree-window-background">
           {/* Left Sidebar: Profile Preview */}
-          <div className="hidden md:flex flex-col p-4 border-r-2 border-fartree-border-dark bg-fartree-window-background overflow-auto">
+          <div className="hidden md:flex flex-col p-4 border-r-2 border-fartree-border-dark bg-fartree-window-background overflow-y-auto">
             <h2 className="text-lg font-semibold text-fartree-text-primary mb-4">Profile Preview</h2>
             <div className="flex flex-col items-center text-center mb-6">
               <Avatar className="w-20 h-20 border-2 border-fartree-primary-purple mb-3">
@@ -526,7 +532,7 @@ export default function ProfileEditorInterface() {
           </div>
 
           {/* Center Area: Link Management */}
-          <div className="flex flex-col p-4 bg-fartree-window-background overflow-auto">
+          <div className="flex flex-col p-4 bg-fartree-window-background overflow-y-auto">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
               <div>
                 <h2 className="text-lg font-semibold text-fartree-text-primary">Your Links ({links.length})</h2>
@@ -563,9 +569,14 @@ export default function ProfileEditorInterface() {
                 </div>
               </div>
             ) : (
-              <div className="grid gap-3 md:gap-4 flex-1">
-                {links.map((link) => {
-                  const IconComponent = getIconForCategory(link.category)
+              <div className="grid gap-3 md:gap-4 w-full border-2 border-red-500 p-2 min-h-[200px]" key={`links-container-${links.length}`}>
+                {(() => {
+                  console.log('🎨 Rendering links:', links.length, 'links in state')
+                  console.log('🔍 Link IDs:', links.map((l: ProfileLink) => l.id))
+                  console.log('🔍 Link titles:', links.map((l: ProfileLink) => l.title))
+                  return links.map((link, index) => {
+                    console.log(`  -> Rendering link ${index}:`, link.title, link.id)
+                    const IconComponent = getIconForCategory(link.category)
                   return (
                     <div
                       key={link.id}
@@ -605,13 +616,13 @@ export default function ProfileEditorInterface() {
                       />
                     </div>
                   )
-                })}
+                })})()}
               </div>
             )}
           </div>
 
           {/* Right Panel: Customization Options */}
-          <div className="hidden md:flex flex-col p-4 border-l-2 border-fartree-border-dark bg-fartree-window-background overflow-auto">
+          <div className="hidden md:flex flex-col p-4 border-l-2 border-fartree-border-dark bg-fartree-window-background overflow-y-auto">
             <h2 className="text-lg font-semibold text-fartree-text-primary mb-4">Customization</h2>
             <div className="grid gap-6">
               <div>
@@ -689,12 +700,15 @@ export default function ProfileEditorInterface() {
                 </Label>
                 <Input
                   id="link-url"
-                  type="url"
+                  type="text"
                   value={newLinkUrl}
                   onChange={(e) => setNewLinkUrl(e.target.value)}
-                  placeholder="https://..."
+                  placeholder="example.com or https://example.com"
                   className="mt-1"
                 />
+                <p className="text-xs text-fartree-text-secondary mt-1">
+                  Protocol (https://) will be added automatically if missing
+                </p>
               </div>
             </div>
             
@@ -750,12 +764,15 @@ export default function ProfileEditorInterface() {
                 </Label>
                 <Input
                   id="edit-link-url"
-                  type="url"
+                  type="text"
                   value={editLinkUrl}
                   onChange={(e) => setEditLinkUrl(e.target.value)}
-                  placeholder="https://..."
+                  placeholder="example.com or https://example.com"
                   className="mt-1"
                 />
+                <p className="text-xs text-fartree-text-secondary mt-1">
+                  Protocol (https://) will be added automatically if missing
+                </p>
               </div>
             </div>
             
