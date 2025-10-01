@@ -447,7 +447,11 @@ export default function ProfileEditorInterface() {
 
   return (
     <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-2 md:p-4 font-mono">
-      <WindowFrame title="Fartree Editor" className="w-full max-w-md md:max-w-6xl h-[calc(100vh-2rem)] md:h-[calc(100vh-4rem)] flex flex-col">
+      <WindowFrame 
+        title="Fartree Editor" 
+        className="w-full max-w-md md:max-w-6xl h-[calc(100vh-2rem)] md:h-[calc(100vh-4rem)]"
+        contentClassName="flex flex-col h-full p-0"
+      >
         {/* Top Toolbar */}
         <div className="flex flex-col md:flex-row items-center justify-between p-3 border-b-2 border-fartree-border-dark bg-fartree-window-header gap-2">
           <div className="flex gap-2 w-full md:w-auto">
@@ -489,9 +493,9 @@ export default function ProfileEditorInterface() {
           </Button>
         </div>
 
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-[280px_1fr_280px] bg-fartree-window-background overflow-hidden">
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-[280px_1fr_280px] bg-fartree-window-background overflow-hidden min-h-0">
           {/* Left Sidebar: Profile Preview */}
-          <div className="hidden md:flex flex-col p-4 border-r-2 border-fartree-border-dark bg-fartree-window-background overflow-y-auto min-h-0">
+          <div className="hidden md:flex flex-col p-4 border-r-2 border-fartree-border-dark bg-fartree-window-background overflow-y-auto">
             <h2 className="text-lg font-semibold text-fartree-text-primary mb-4">Profile Preview</h2>
             <div className="flex flex-col items-center text-center mb-6">
               <Avatar className="w-20 h-20 border-2 border-fartree-primary-purple mb-3">
@@ -507,7 +511,7 @@ export default function ProfileEditorInterface() {
               <p className="text-fartree-text-secondary text-sm">@{profile?.username || user?.username}</p>
               <p className="text-fartree-text-secondary text-xs mt-2">{profile?.bio || user?.bio}</p>
             </div>
-            <div className="flex-1 grid gap-3">
+            <div className="flex-1 grid gap-2">
               {links.slice(0, 3).map((link) => {
                 const IconComponent = getIconForCategory(link.category)
                 return (
@@ -532,7 +536,7 @@ export default function ProfileEditorInterface() {
           </div>
 
           {/* Center Area: Link Management */}
-          <div className="flex flex-col p-4 bg-fartree-window-background overflow-y-auto min-h-0">
+          <div className="flex flex-col p-4 bg-fartree-window-background overflow-y-auto">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
               <div>
                 <h2 className="text-lg font-semibold text-fartree-text-primary">Your Links ({links.length})</h2>
@@ -569,7 +573,7 @@ export default function ProfileEditorInterface() {
                 </div>
               </div>
             ) : (
-              <div className="grid gap-3 md:gap-4 w-full" key={`links-container-${links.length}`}>
+              <div className="grid gap-2 w-full" key={`links-container-${links.length}`}>
                 {(() => {
                   console.log('🎨 Rendering links:', links.length, 'links in state')
                   console.log('🔍 Link IDs:', links.map((l: ProfileLink) => l.id))
@@ -622,7 +626,7 @@ export default function ProfileEditorInterface() {
           </div>
 
           {/* Right Panel: Customization Options */}
-          <div className="hidden md:flex flex-col p-4 border-l-2 border-fartree-border-dark bg-fartree-window-background overflow-y-auto min-h-0">
+          <div className="hidden md:flex flex-col p-4 border-l-2 border-fartree-border-dark bg-fartree-window-background overflow-y-auto">
             <h2 className="text-lg font-semibold text-fartree-text-primary mb-4">Customization</h2>
             <div className="grid gap-6">
               <div>

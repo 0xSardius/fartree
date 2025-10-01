@@ -15,6 +15,8 @@ export interface ProfileLink {
   click_count?: number
   auto_detected?: boolean
   description?: string
+  is_visible?: boolean
+  position?: number
 }
 
 interface ProfileLinkListProps {

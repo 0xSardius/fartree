@@ -80,28 +80,28 @@ export function LinkCard({
       )}
       {...props}
     >
-      <CardContent className="p-3 sm:p-4">
+      <CardContent className="p-2.5 sm:p-3">
         {/* Mobile-first responsive layout */}
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-2.5">
           {editable && (
             <div className="flex-shrink-0 cursor-grab text-fartree-text-secondary opacity-0 group-hover:opacity-100 transition-opacity mt-1">
               <GripVertical className="w-4 h-4" />
             </div>
           )}
-          <div className="flex-shrink-0 mt-0.5">
-            <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-fartree-primary-purple" />
+          <div className="flex-shrink-0">
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-fartree-primary-purple" />
           </div>
-          <div className="flex-1 min-w-0 overflow-hidden pr-2">
-            <h3 className="font-semibold text-sm sm:text-base truncate" title={title}>{title}</h3>
+          <div className="flex-1 min-w-0 overflow-hidden pr-1.5">
+            <h3 className="font-semibold text-sm truncate leading-tight" title={title}>{title}</h3>
             {description && (
               <p 
-                className="text-xs text-fartree-text-secondary mt-0.5 truncate font-mono" 
+                className="text-xs text-fartree-text-secondary truncate font-mono leading-tight" 
                 title={description}
               >
                 {shortenUrl(description, 30)}
               </p>
             )}
-            <div className="flex items-center gap-2 text-xs text-fartree-text-secondary mt-2 flex-wrap">
+            <div className="flex items-center gap-2 text-xs text-fartree-text-secondary mt-1.5 flex-wrap">
               {clickCount !== undefined && (
                 <span className="flex items-center gap-1 flex-shrink-0">
                   <Eye className="w-3 h-3" /> {clickCount}
