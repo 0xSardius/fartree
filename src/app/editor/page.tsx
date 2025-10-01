@@ -489,9 +489,9 @@ export default function ProfileEditorInterface() {
           </Button>
         </div>
 
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-[280px_1fr_280px] bg-fartree-window-background">
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-[280px_1fr_280px] bg-fartree-window-background overflow-hidden">
           {/* Left Sidebar: Profile Preview */}
-          <div className="hidden md:flex flex-col p-4 border-r-2 border-fartree-border-dark bg-fartree-window-background overflow-y-auto">
+          <div className="hidden md:flex flex-col p-4 border-r-2 border-fartree-border-dark bg-fartree-window-background overflow-y-auto min-h-0">
             <h2 className="text-lg font-semibold text-fartree-text-primary mb-4">Profile Preview</h2>
             <div className="flex flex-col items-center text-center mb-6">
               <Avatar className="w-20 h-20 border-2 border-fartree-primary-purple mb-3">
@@ -532,7 +532,7 @@ export default function ProfileEditorInterface() {
           </div>
 
           {/* Center Area: Link Management */}
-          <div className="flex flex-col p-4 bg-fartree-window-background overflow-y-auto">
+          <div className="flex flex-col p-4 bg-fartree-window-background overflow-y-auto min-h-0">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
               <div>
                 <h2 className="text-lg font-semibold text-fartree-text-primary">Your Links ({links.length})</h2>
@@ -569,7 +569,7 @@ export default function ProfileEditorInterface() {
                 </div>
               </div>
             ) : (
-              <div className="grid gap-3 md:gap-4 w-full border-2 border-red-500 p-2 min-h-[200px]" key={`links-container-${links.length}`}>
+              <div className="grid gap-3 md:gap-4 w-full" key={`links-container-${links.length}`}>
                 {(() => {
                   console.log('🎨 Rendering links:', links.length, 'links in state')
                   console.log('🔍 Link IDs:', links.map((l: ProfileLink) => l.id))
@@ -622,7 +622,7 @@ export default function ProfileEditorInterface() {
           </div>
 
           {/* Right Panel: Customization Options */}
-          <div className="hidden md:flex flex-col p-4 border-l-2 border-fartree-border-dark bg-fartree-window-background overflow-y-auto">
+          <div className="hidden md:flex flex-col p-4 border-l-2 border-fartree-border-dark bg-fartree-window-background overflow-y-auto min-h-0">
             <h2 className="text-lg font-semibold text-fartree-text-primary mb-4">Customization</h2>
             <div className="grid gap-6">
               <div>
