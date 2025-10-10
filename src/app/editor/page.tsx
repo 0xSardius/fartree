@@ -495,6 +495,14 @@ export default function ProfileEditorInterface() {
             >
               <Eye className="w-4 h-4 mr-2" /> Preview
             </Button>
+            <Button
+              variant="outline"
+              onClick={() => window.location.href = '/discover'}
+              disabled={!user?.fid}
+              className="border-fartree-border-dark text-fartree-text-primary hover:bg-fartree-window-background hover:text-fartree-accent-purple bg-transparent flex-1 md:flex-none disabled:opacity-50"
+            >
+              <Users className="w-4 h-4 mr-2" /> Discover
+            </Button>
           </div>
           <Button
             variant="outline"

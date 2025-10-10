@@ -1,12 +1,12 @@
 # Fartree Development Progress Tracker
 
-*Last Updated: October 1, 2025*
+*Last Updated: October 10, 2025*
 
 ## 🎯 Project Status Overview
 
 **Current Phase**: Core Profile Builder (Phase 1) - ✅ **COMPLETE**  
-**Next Phase**: Public Profiles & Auto-Detection - 🔄 **IN PROGRESS**  
-**Overall Progress**: 20/23 tasks completed (87%)
+**Next Phase**: Social Discovery & Analytics - 🔄 **IN PROGRESS**  
+**Overall Progress**: 20/24 tasks completed (83%)
 
 ---
 
@@ -55,20 +55,22 @@
 
 ## 🔄 In Progress / Next Priority
 
-### Immediate (Next Session)
-1. **Production Hardening** - Replace test FID with session auth, add JWT verification/logging/rate limits
-2. **Hero Metrics & Achievements** - Wire analytics (weekly trends, badges) into new profile layout
-3. **Cross-Profile Discovery** - Directory/search to explore other creators
+### Immediate (Current Session - October 10, 2025)
+1. **🎯 Friends Discovery (IN PROGRESS)** - Show friends who have Fartrees using Neynar Best Friends API
+   - Create `/api/discover/friends` endpoint
+   - Build `/discover` page with friend cards grid
+   - Filter friends by who has created Fartree profiles
+   - Add navigation links to header
+
+### Next Priority
+2. **Production Hardening** - Replace test FID with session auth, add JWT verification/logging/rate limits
+3. **Analytics Dashboard** - Display click counts in editor and public profiles
+4. **Hero Metrics & Achievements** - Wire analytics (weekly trends, badges) into profile layout
 
 ### Short Term (1-2 Sessions)
-4. **Auto-Detection Engine** - Progressive scanning with celebration animations
-5. **Analytics Tracking** - Click tracking for profile links
+5. **Auto-Detection Engine** - Progressive scanning with celebration animations
 6. **Theme Customization** - Dark theme with purple accents
-
-### Medium Term (3-5 Sessions)
-7. **Hero Metrics & Achievements** - Surface builder badges, “Most clicked this week”, rich analytics
-8. **Cross-Profile Discovery** - Internal directory/search to explore other creators
-9. **Mobile Optimization** - PWA features and responsive design
+7. **Mobile Optimization** - PWA features and responsive design
 
 ---
 
@@ -218,8 +220,8 @@ src/components/ui/tabs/HomeTab.tsx - Works but could be enhanced 📋
 
 ## 🚀 Next Session Priorities
 
-1. **Ship Link Analytics UX** - Debounce tracking + display totals in editor/public
-2. **Build Progressive Auto-Scan** - Step-by-step statuses with celebration animation
+1. **Complete Friends Discovery** - Finish /discover page and test end-to-end
+2. **Ship Link Analytics UX** - Debounce tracking + display totals in editor/public
 3. **Swap Test FID for Real Auth** - Wire JWT verification + logging/rate limiting
 
 ---
@@ -241,7 +243,8 @@ src/components/ui/tabs/HomeTab.tsx - Works but could be enhanced 📋
 **Database status:** ✅ Connected and populated with real data
 **Editor status:** ✅ Production-ready with polished UX and reliable CRUD operations
 **Delete feature:** ✅ Custom modal with proper event handling and state management
-**Next logical step:** Production hardening (replace test FID, JWT verification) OR public profile features
+**Social Discovery:** 🔄 Building Friends Discovery using Neynar Best Friends API
+**Next logical step:** Complete Friends Discovery, then Analytics Dashboard or Production Auth
 
 ---
 

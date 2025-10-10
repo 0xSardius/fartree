@@ -81,11 +81,20 @@ export default function LandingPage() {
               </div>
             ) : null}
             
-            <nav>
+            <nav className="flex gap-2">
+              {isAuthenticated && user && (
+                <Button 
+                  variant="outline" 
+                  className="text-fartree-text-primary hover:text-fartree-accent-purple"
+                  onClick={() => router.push('/discover')}
+                >
+                  Discover
+                </Button>
+              )}
               <Button 
                 variant="outline" 
                 className="text-fartree-text-primary hover:text-fartree-accent-purple"
-                onClick={() => router.push('/onboarding')}
+                onClick={() => router.push(isAuthenticated ? '/editor' : '/onboarding')}
                 disabled={authLoading}
               >
                 {authLoading ? "Connecting..." : isAuthenticated ? "Go to App" : "Sign In"}
