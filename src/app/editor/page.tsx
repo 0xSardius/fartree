@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "~/components/ui/Button"
 import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
@@ -61,6 +62,7 @@ interface ProfileData {
 export default function ProfileEditorInterface() {
   // Authentication and state management
   const { user, loading: authLoading, isAuthenticated } = useAuth()
+  const router = useRouter()
   const [profile, setProfile] = useState<ProfileData | null>(null)
   const [links, setLinks] = useState<ProfileLink[]>([])
   const totalClicks = useMemo(() => links.reduce((acc, link) => acc + (link.click_count || 0), 0), [links])
@@ -138,7 +140,7 @@ export default function ProfileEditorInterface() {
 
   // Save profile changes
   const handleSaveProfile = async () => {
-    if (!profile || !user?.fid) return
+    if (!profile || !user?.fid) return false
 
     setSaving(true)
     try {
@@ -148,22 +150,46 @@ export default function ProfileEditorInterface() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          username: profile.username,
           display_name: profile.display_name,
           bio: profile.bio,
+          avatar_url: profile.avatar_url,
           theme: profile.theme,
         }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save profile')
+        const errorData = await response.json()
+        console.error('❌ Save failed:', errorData)
+        throw new Error(errorData.error || 'Failed to save profile')
       }
 
-      // Show success message (you could add a toast here)
-      console.log('Profile saved successfully')
+      const data = await response.json()
+      console.log('✅ Profile saved successfully:', data)
+      return true
     } catch (err) {
+      console.error('❌ Error saving profile:', err)
       setError(err instanceof Error ? err.message : 'Failed to save profile')
+      return false
     } finally {
       setSaving(false)
+    }
+  }
+
+  // Handle preview - save first, then navigate
+  const handlePreview = async () => {
+    if (!user?.fid || !profile) return
+    
+    // Save profile first to ensure it exists in database
+    console.log('💾 Saving profile before preview...')
+    const saved = await handleSaveProfile()
+    
+    if (saved) {
+      console.log('✅ Profile saved, navigating to preview...')
+      router.push(`/profile/${user.fid}`)
+    } else {
+      console.error('❌ Failed to save profile, cannot preview')
+      setError('Please fix errors and try saving again before previewing')
     }
   }
 
@@ -489,11 +515,11 @@ export default function ProfileEditorInterface() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => window.open(`/profile/${user?.fid}`, '_blank')}
-              disabled={!user?.fid}
+              onClick={handlePreview}
+              disabled={!user?.fid || !profile || saving}
               className="border-fartree-border-dark text-fartree-text-primary hover:bg-fartree-window-background hover:text-fartree-accent-purple bg-transparent flex-1 md:flex-none disabled:opacity-50"
             >
-              <Eye className="w-4 h-4 mr-2" /> Preview
+              <Eye className="w-4 h-4 mr-2" /> {saving ? 'Saving...' : 'Preview'}
             </Button>
             <Button
               variant="outline"

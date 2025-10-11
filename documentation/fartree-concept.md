@@ -30,7 +30,8 @@
 ### MVP User Journey
 ```
 1. "Sign in with Farcaster" → 2. Profile auto-generates → 
-3. Customize/organize → 4. Share everywhere → 5. Track engagement
+3. Customize/organize → 4. Share everywhere → 5. Track engagement →
+6. Discover friends' Fartrees
 ```
 
 ### What Gets Auto-Detected
@@ -43,11 +44,18 @@
 - **Social proof**: Follower count, engagement metrics
 
 ### Customization Options
-- **Drag & drop** link reordering
+- **Drag & drop** link reordering ✅ *Implemented*
 - **Categories**: Social, Crypto, Content, Collabs
-- **Themes**: Nouns-inspired minimal (black/white to start)
+- **Themes**: Nouns-inspired minimal (dark theme with purple accents) ✅ *Implemented*
 - **Visibility controls**: Hide/show specific links
-- **Custom sections**: Add manual links for anything we missed
+- **Custom sections**: Add manual links for anything we missed ✅ *Implemented*
+- **Edit/Delete**: Polished modal UI with custom confirmation ✅ *Implemented*
+
+### Social Discovery Features ✨ *NEW*
+- **Friends Discovery**: Browse best friends who have Fartrees (ranked by mutual affinity)
+- **Profile Cards**: See friend avatars, link counts, and power badges
+- **Invite Flow**: Encourage friends to create their Fartrees
+- **In-App Navigation**: Seamless browsing within miniapp with back button support
 
 ---
 

@@ -2,10 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { ElementType } from "react"
-import { Globe, Zap } from "lucide-react"
+import { Globe, Zap, Twitter, Wallet, Users } from "lucide-react"
 import Link from "next/link"
 
 import { LinkCard } from "~/components/link-card"
+
+// Icon mapping for categories
+const categoryIcons = {
+  social: Twitter,
+  crypto: Wallet,
+  content: Globe,
+  collabs: Users,
+  default: Globe,
+}
 
 export interface ProfileLink {
   id: string
@@ -22,13 +31,19 @@ export interface ProfileLink {
 interface ProfileLinkListProps {
   initialLinks: ProfileLink[]
   profileFid: number
-  getIconForCategory?: (category?: string) => ElementType
   showSummary?: boolean
 }
 
 const CLICK_DEBOUNCE_MS = 500
 
-export function ProfileLinkList({ initialLinks, profileFid, getIconForCategory, showSummary = true }: ProfileLinkListProps) {
+// Helper to get icon for category
+function getIconForCategory(category?: string): ElementType {
+  if (!category) return categoryIcons.default
+  const lowerCategory = category.toLowerCase()
+  return categoryIcons[lowerCategory as keyof typeof categoryIcons] || categoryIcons.default
+}
+
+export function ProfileLinkList({ initialLinks, profileFid, showSummary = true }: ProfileLinkListProps) {
   const sanitizedLinks = useMemo(
     () =>
       initialLinks.map((link) => ({

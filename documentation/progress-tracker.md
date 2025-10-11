@@ -1,12 +1,12 @@
 # Fartree Development Progress Tracker
 
-*Last Updated: October 10, 2025*
+*Last Updated: October 11, 2025*
 
 ## 🎯 Project Status Overview
 
 **Current Phase**: Core Profile Builder (Phase 1) - ✅ **COMPLETE**  
-**Next Phase**: Social Discovery & Analytics - 🔄 **IN PROGRESS**  
-**Overall Progress**: 20/24 tasks completed (83%)
+**Next Phase**: Social Discovery & Analytics - ✅ **Discovery COMPLETE** | 📊 **Analytics IN PROGRESS**  
+**Overall Progress**: 22/24 tasks completed (92%)
 
 ---
 
@@ -51,26 +51,40 @@
 - [x] **Modal Event Handling** - Fixed backdrop clicks and event propagation for reliable interactions
 - [x] **State Management** - Fixed stale closure issue in delete handler with functional setState
 
+### Friends Discovery & Navigation (October 11, 2025)
+- [x] **Friends Discovery API** - `/api/discover/friends` endpoint using Neynar Best Friends API
+- [x] **Discover Page** - Beautiful friend cards grid showing who has Fartree profiles
+- [x] **Social Filtering** - Separates friends with/without Fartrees, shows link counts and badges
+- [x] **Navigation Integration** - Added Discover button to landing page for authenticated users
+- [x] **Back Button** - Implemented Farcaster SDK back navigation with enableWebNavigation()
+- [x] **Preview Enhancement** - Preview now navigates within miniapp instead of opening new tab
+- [x] **Profile API UPSERT** - PUT endpoint now creates profile if it doesn't exist (auto-save on preview)
+- [x] **Loading States** - Proper guards for undefined user state during authentication
+
 ---
 
 ## 🔄 In Progress / Next Priority
 
-### Immediate (Current Session - October 10, 2025)
-1. **🎯 Friends Discovery (IN PROGRESS)** - Show friends who have Fartrees using Neynar Best Friends API
-   - Create `/api/discover/friends` endpoint
-   - Build `/discover` page with friend cards grid
-   - Filter friends by who has created Fartree profiles
-   - Add navigation links to header
-
-### Next Priority
-2. **Production Hardening** - Replace test FID with session auth, add JWT verification/logging/rate limits
-3. **Analytics Dashboard** - Display click counts in editor and public profiles
-4. **Hero Metrics & Achievements** - Wire analytics (weekly trends, badges) into profile layout
+### Immediate (Next Session Priorities)
+1. **📊 Analytics Dashboard** - Display click counts in editor and public profiles
+   - Add click tracking middleware to `/api/profiles/[identifier]/links/[linkId]` redirect
+   - Display click counts in editor link cards
+   - Show top-performing links in profile stats
+   
+2. **🔒 Production Hardening** - Replace test FID with real session auth
+   - Remove hardcoded test FID (6841) from all components
+   - Add JWT verification with process.env.JWT_SECRET
+   - Implement logging and rate limits on API endpoints
+   
+3. **🎨 Enhanced Auto-Detection** - Progressive scanning with celebration animations
+   - Detect more platforms (Hypersub, Paragraph, Token launches)
+   - Add celebration animations when new links are found
+   - Show auto-detection progress in onboarding
 
 ### Short Term (1-2 Sessions)
-5. **Auto-Detection Engine** - Progressive scanning with celebration animations
-6. **Theme Customization** - Dark theme with purple accents
-7. **Mobile Optimization** - PWA features and responsive design
+4. **Theme Customization** - Light/dark mode toggle with theme persistence
+5. **Mobile PWA** - Install prompts, offline support, app icons
+6. **Share Frames** - Farcaster Frame for easy profile sharing
 
 ---
 
@@ -215,14 +229,18 @@ src/components/ui/tabs/HomeTab.tsx - Works but could be enhanced 📋
 10. **React State Closures**: Use functional setState `setLinks(current => ...)` to avoid stale closure bugs
 11. **Native Dialogs in Modals**: Browser confirm() can fail in complex modals - use custom confirmation UI
 12. **Modal Event Handling**: Stop propagation at modal content level, handle backdrop clicks separately
+13. **Neynar Best Friends API**: Returns friends ranked by mutual affinity - perfect for social discovery
+14. **Back Button Integration**: `sdk.back.enableWebNavigation()` enables native back controls in Farcaster clients
+15. **UPSERT Pattern**: Profile API should create on first save, not require separate creation step
+16. **In-App Navigation**: Miniapps should use `router.push()` not `window.open()` for seamless UX
 
 ---
 
 ## 🚀 Next Session Priorities
 
-1. **Complete Friends Discovery** - Finish /discover page and test end-to-end
-2. **Ship Link Analytics UX** - Debounce tracking + display totals in editor/public
-3. **Swap Test FID for Real Auth** - Wire JWT verification + logging/rate limiting
+1. **Ship Link Analytics UX** - Track clicks + display totals in editor/public profiles
+2. **Swap Test FID for Real Auth** - Wire JWT verification + logging/rate limiting  
+3. **Enhanced Auto-Detection** - Scan for Hypersub, Paragraph, token launches with celebration animations
 
 ---
 
@@ -237,14 +255,17 @@ src/components/ui/tabs/HomeTab.tsx - Works but could be enhanced 📋
 6. All links display properly with scrolling in mobile-sized viewport (424px wide)
 7. Delete functionality works with custom confirmation modal
 8. All state management uses functional updates to avoid closure bugs
+9. **Friends Discovery is live** - `/discover` page shows best friends who have Fartrees
+10. Navigation follows Farcaster best practices (back button, in-app routing)
 
 **Current codebase health:** ✅ Excellent - no linting errors, all core features working
 **Authentication status:** ✅ Working across all platforms (Quick Auth + test FID fallback)
 **Database status:** ✅ Connected and populated with real data
 **Editor status:** ✅ Production-ready with polished UX and reliable CRUD operations
 **Delete feature:** ✅ Custom modal with proper event handling and state management
-**Social Discovery:** 🔄 Building Friends Discovery using Neynar Best Friends API
-**Next logical step:** Complete Friends Discovery, then Analytics Dashboard or Production Auth
+**Social Discovery:** ✅ **COMPLETE** - Friends Discovery using Neynar Best Friends API is live
+**Preview Flow:** ✅ Auto-saves and navigates within miniapp (not new tab)
+**Next logical step:** Analytics Dashboard (click tracking) OR Production Auth (remove test FID)
 
 ---
 

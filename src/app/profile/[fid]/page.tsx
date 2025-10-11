@@ -1,4 +1,3 @@
-import Link from "next/link"
 import { notFound } from "next/navigation"
 import { Metadata } from "next"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
@@ -6,18 +5,10 @@ import { ProfileLinkList, type ProfileLink } from "~/components/profile/ProfileL
 import { ProfileHeroStats } from "~/components/profile/ProfileHeroStats"
 import { ProfileSection } from "~/components/profile/ProfileSection"
 import { WindowFrame } from "~/components/window-frame"
-import { Twitter, Github, Globe, Users, Figma, Wallet, Zap, Edit } from "lucide-react"
-import { Button } from "~/components/ui/Button"
 import { ShareProfileButton } from "~/components/profile/ShareProfileButton"
+import { EditButton } from "~/components/profile/EditButton"
+import { Zap } from "lucide-react"
 
-// Link category icons mapping (same as editor)
-const categoryIcons = {
-  social: Twitter,
-  crypto: Wallet,
-  content: Globe,
-  collabs: Users,
-  default: Globe,
-}
 
 interface ProfileData {
   id: string;
@@ -95,16 +86,9 @@ async function getProfileLinks(identifier: string): Promise<ProfileLink[]> {
   }
 }
 
-// Get icon for category
-function getIconForCategory(category?: string) {
-  if (!category) return categoryIcons.default
-  const lowerCategory = category.toLowerCase()
-  return categoryIcons[lowerCategory as keyof typeof categoryIcons] || categoryIcons.default
-}
-
 // Generate metadata for SEO and social sharing
-export async function generateMetadata({ params }: { params: { fid: string } }): Promise<Metadata> {
-  const { fid } = params
+export async function generateMetadata({ params }: { params: Promise<{ fid: string }> }): Promise<Metadata> {
+  const { fid } = await params
   
   try {
     const profile = await getProfile(fid)
@@ -143,46 +127,10 @@ export async function generateMetadata({ params }: { params: { fid: string } }):
   }
 }
 
-// Component for handling link clicks with analytics
-function TrackableLink({ link, profileFid, children }: { link: ProfileLink; profileFid: number; children: React.ReactNode }) {
-  const handleClick = async () => {
-    try {
-      // Track the click - use the correct API endpoint
-      // Use a timeout to prevent blocking the navigation
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 1000)
-      
-      await fetch(`/api/profiles/${profileFid}/links/${link.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        signal: controller.signal,
-      })
-      
-      clearTimeout(timeoutId)
-    } catch (error) {
-      // Fail silently for analytics - don't block user navigation
-      console.error('Failed to track click:', error)
-    }
-  }
-
-  return (
-    <Link 
-      href={link.url} 
-      target="_blank" 
-      rel="noopener noreferrer" 
-      className="block transition-transform hover:scale-[1.02]"
-      onClick={handleClick}
-    >
-      {children}
-    </Link>
-  )
-}
 
 // Main component - now using server-side rendering
-export default async function PublicProfileView({ params }: { params: { fid: string } }) {
-  const { fid } = params
+export default async function PublicProfileView({ params }: { params: Promise<{ fid: string }> }) {
+  const { fid } = await params
 
   // Fetch profile and links data server-side
   const [profile, links] = await Promise.all([
@@ -235,18 +183,7 @@ export default async function PublicProfileView({ params }: { params: { fid: str
           </div>
           <div className="flex gap-2">
             <ShareProfileButton fid={profile.fid} profileName={profileName} />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                if (typeof window !== 'undefined') {
-                  window.location.href = '/editor'
-                }
-              }}
-              className="text-xs"
-            >
-              <Edit className="w-3 h-3 mr-1" /> Edit
-            </Button>
+            <EditButton />
           </div>
         </div>
 
@@ -287,7 +224,6 @@ export default async function PublicProfileView({ params }: { params: { fid: str
                 <ProfileLinkList
                   initialLinks={empireLinks}
                   profileFid={profile.fid}
-                  getIconForCategory={getIconForCategory}
                   showSummary={false}
                 />
               </ProfileSection>
@@ -301,7 +237,6 @@ export default async function PublicProfileView({ params }: { params: { fid: str
                 <ProfileLinkList
                   initialLinks={collabLinks}
                   profileFid={profile.fid}
-                  getIconForCategory={getIconForCategory}
                   showSummary={false}
                 />
               </ProfileSection>
@@ -315,7 +250,6 @@ export default async function PublicProfileView({ params }: { params: { fid: str
                 <ProfileLinkList
                   initialLinks={contentLinks}
                   profileFid={profile.fid}
-                  getIconForCategory={getIconForCategory}
                   showSummary={false}
                 />
               </ProfileSection>
@@ -329,7 +263,6 @@ export default async function PublicProfileView({ params }: { params: { fid: str
                 <ProfileLinkList
                   initialLinks={socialLinks}
                   profileFid={profile.fid}
-                  getIconForCategory={getIconForCategory}
                   showSummary={false}
                 />
               </ProfileSection>
@@ -343,7 +276,6 @@ export default async function PublicProfileView({ params }: { params: { fid: str
                 <ProfileLinkList
                   initialLinks={signatureLinks}
                   profileFid={profile.fid}
-                  getIconForCategory={getIconForCategory}
                   showSummary={false}
                 />
               </ProfileSection>

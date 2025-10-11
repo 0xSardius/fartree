@@ -100,65 +100,69 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // First, find the profile
-    let existingProfile;
-    
+    // Use UPSERT to create or update profile
+    // For FID-based updates, we need the FID
+    let fid: number | null = null;
+
     if (isNumeric(identifier)) {
-      const result = await query('SELECT id FROM profiles WHERE fid = $1', [parseInt(identifier)]);
-      existingProfile = result.rows[0];
+      fid = parseInt(identifier);
     } else {
-      const result = await query('SELECT id FROM profiles WHERE username = $1', [identifier]);
-      existingProfile = result.rows[0];
-    }
-
-    if (!existingProfile) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: `Profile not found with ${isNumeric(identifier) ? 'FID' : 'username'}: ${identifier}` 
-        },
-        { status: 404 }
-      );
-    }
-
-    // Build update query dynamically based on provided fields
-    const allowedFields = ['display_name', 'bio', 'avatar_url', 'theme', 'custom_domain'];
-    const updateFields = [];
-    const updateValues = [];
-    let paramCount = 1;
-
-    for (const field of allowedFields) {
-      if (body[field] !== undefined) {
-        updateFields.push(`${field} = $${paramCount}`);
-        updateValues.push(body[field]);
-        paramCount++;
+      // If updating by username, we need to look up the FID first
+      const result = await query('SELECT fid FROM profiles WHERE username = $1', [identifier]);
+      if (result.rows.length > 0) {
+        fid = result.rows[0].fid;
+      } else {
+        return NextResponse.json(
+          { success: false, error: `Profile not found with username: ${identifier}` },
+          { status: 404 }
+        );
       }
     }
 
-    if (updateFields.length === 0) {
+    if (!fid) {
       return NextResponse.json(
-        { success: false, error: 'No valid fields provided for update' },
+        { success: false, error: 'FID is required for profile update' },
         { status: 400 }
       );
     }
 
-    // Add updated_at
-    updateFields.push(`updated_at = NOW()`);
-
-    // Update the profile
-    updateValues.push(existingProfile.id);
-    const updateResult = await query(`
-      UPDATE profiles 
-      SET ${updateFields.join(', ')}
-      WHERE id = $${paramCount}
+    // UPSERT query - insert if not exists, update if exists
+    const upsertResult = await query(`
+      INSERT INTO profiles (
+        fid, 
+        username,
+        display_name, 
+        bio, 
+        avatar_url, 
+        theme, 
+        custom_domain,
+        created_at,
+        updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+      ON CONFLICT (fid) 
+      DO UPDATE SET
+        display_name = COALESCE(EXCLUDED.display_name, profiles.display_name),
+        bio = COALESCE(EXCLUDED.bio, profiles.bio),
+        avatar_url = COALESCE(EXCLUDED.avatar_url, profiles.avatar_url),
+        theme = COALESCE(EXCLUDED.theme, profiles.theme),
+        custom_domain = COALESCE(EXCLUDED.custom_domain, profiles.custom_domain),
+        updated_at = NOW()
       RETURNING id, fid, username, display_name, bio, avatar_url, theme, 
                 custom_domain, is_verified, created_at, updated_at
-    `, updateValues);
+    `, [
+      fid,
+      body.username || null,
+      body.display_name || null,
+      body.bio || null,
+      body.avatar_url || null,
+      body.theme || 'default',
+      body.custom_domain || null
+    ]);
 
     return NextResponse.json({
       success: true,
-      profile: updateResult.rows[0],
-      message: 'Profile updated successfully'
+      profile: upsertResult.rows[0],
+      message: 'Profile saved successfully'
     });
 
   } catch (error) {
