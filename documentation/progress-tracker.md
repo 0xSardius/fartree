@@ -80,6 +80,12 @@
 - [x] **Prominent Analytics** - Click counts highlighted in purple for top performer
 - [x] **ProfileHeroStats** - Already displays total clicks prominently (verified working)
 
+### Production Fixes (October 11, 2025 - Session 4)
+- [x] **Neynar API Response Fix** - Fixed best friends API response parsing (users array structure)
+- [x] **JWT Development Mode** - Cleaner fallback handling, less noisy error logs
+- [x] **API Error Logging** - Added debug logging for Neynar response structure
+- [x] **Friends Discovery Fix** - Corrected user object access pattern (no nested .user property)
+
 ---
 
 ## 🔄 In Progress / Next Priority

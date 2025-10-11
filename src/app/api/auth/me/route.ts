@@ -84,15 +84,16 @@ async function extractFidFromJWT(authHeader: string): Promise<number | null> {
       console.log('✅ JWT verified successfully, FID:', payload.sub);
       return payload.sub; // The FID is in the 'sub' field
       
-    } catch (jwtError) {
-      console.error('❌ JWT verification failed:', jwtError);
-      
-      // In development, fall back to test FID if JWT verification fails
+    } catch (jwtError: any) {
+      // In development, JWT verification often fails due to domain mismatch
+      // This is expected and we fall back to test FID
       if (process.env.NODE_ENV === 'development') {
-        console.log('🔧 Development mode: using test FID');
+        console.log('🔧 Development mode: JWT verification skipped (domain mismatch expected), using test FID 6841');
         return 6841;
       }
       
+      // In production, log the actual error
+      console.error('❌ JWT verification failed:', jwtError?.shortMessage || jwtError?.message || jwtError);
       return null;
     }
     

@@ -37,7 +37,9 @@ export async function GET(request: Request) {
       throw new Error(`Neynar API error: ${neynarResponse.statusText}`);
     }
 
-    const bestFriendsResponse = await neynarResponse.json() as { users: { user: any }[] };
+    const bestFriendsResponse = await neynarResponse.json() as { users: any[] };
+
+    console.log('📊 Neynar response structure:', JSON.stringify(bestFriendsResponse, null, 2).substring(0, 500));
 
     if (!bestFriendsResponse?.users || bestFriendsResponse.users.length === 0) {
       return NextResponse.json({
@@ -49,8 +51,8 @@ export async function GET(request: Request) {
       });
     }
 
-    // Extract FIDs from best friends
-    const friendFids = bestFriendsResponse.users.map((u: any) => u.user.fid);
+    // Extract FIDs from best friends - Neynar returns users directly, not nested
+    const friendFids = bestFriendsResponse.users.map((user: any) => user.fid);
 
     // Query our database to see which friends have Fartree profiles
     const profilesResult = await query(
@@ -73,8 +75,7 @@ export async function GET(request: Request) {
     );
 
     // Enrich friend data with Fartree profile info
-    const enrichedFriends = bestFriendsResponse.users.map((friendData: any) => {
-      const friend = friendData.user;
+    const enrichedFriends = bestFriendsResponse.users.map((friend: any) => {
       const fartreeProfile = profilesResult.rows.find((p: any) => p.fid === friend.fid);
 
       return {
