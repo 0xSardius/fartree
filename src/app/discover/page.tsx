@@ -7,7 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { Button } from "~/components/ui/Button"
 import { Card, CardContent } from "~/components/ui/card"
 import { useAuth } from "~/contexts/AuthContext"
-import { Users, LinkIcon, Sparkles, Loader2, Share2, ArrowRight } from "lucide-react"
+import { Users, LinkIcon, Sparkles, Loader2, Share2, ArrowRight, ArrowLeft } from "lucide-react"
+import { sdk } from "@farcaster/miniapp-sdk"
 
 interface FriendData {
   fid: number
@@ -40,6 +41,24 @@ export default function DiscoverPage() {
   const [discoverData, setDiscoverData] = useState<DiscoverData | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  // Enable web navigation for back button
+  useEffect(() => {
+    const enableBack = async () => {
+      try {
+        await sdk.back.enableWebNavigation()
+      } catch (error) {
+        console.log('Back navigation not supported:', error)
+      }
+    }
+    
+    enableBack()
+    
+    return () => {
+      // Cleanup: disable back navigation when leaving this page
+      sdk.back.disableWebNavigation().catch(() => {})
+    }
+  }, [])
+
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push('/')
@@ -48,9 +67,14 @@ export default function DiscoverPage() {
 
   useEffect(() => {
     async function fetchFriends() {
-      if (!user?.fid) return
+      if (!user?.fid) {
+        console.log('No user FID available yet')
+        setLoading(false)
+        return
+      }
 
       try {
+        console.log('Fetching friends for FID:', user.fid)
         setLoading(true)
         const response = await fetch(`/api/discover/friends?fid=${user.fid}&limit=20`)
         const data = await response.json()
@@ -70,10 +94,39 @@ export default function DiscoverPage() {
 
     if (user?.fid) {
       fetchFriends()
+    } else if (!authLoading) {
+      // Auth is done loading but no user - set loading to false
+      setLoading(false)
     }
-  }, [user?.fid])
+  }, [user?.fid, authLoading])
 
-  if (authLoading || loading) {
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-8 w-8 mx-auto mb-4 text-fartree-primary-purple" />
+          <p className="text-fartree-text-primary">Authenticating...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
+        <WindowFrame title="Discover Friends" className="w-full max-w-2xl">
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
+            <div className="text-red-500 text-4xl mb-4">⚠️</div>
+            <h1 className="text-2xl font-bold text-fartree-text-primary mb-2">Authentication Required</h1>
+            <p className="text-fartree-text-secondary mb-6">Please sign in to discover your friends.</p>
+            <Button onClick={() => router.push('/')}>Go to Home</Button>
+          </div>
+        </WindowFrame>
+      </div>
+    )
+  }
+
+  if (loading) {
     return (
       <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
         <div className="text-center">
@@ -112,6 +165,15 @@ export default function DiscoverPage() {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b-2 border-fartree-border-dark bg-fartree-window-header">
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.back()}
+              className="flex items-center gap-1"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span className="hidden sm:inline">Back</span>
+            </Button>
             <Users className="w-6 h-6 text-fartree-primary-purple" />
             <div>
               <h1 className="text-lg font-bold text-fartree-text-primary">Your Friends on Fartree</h1>
