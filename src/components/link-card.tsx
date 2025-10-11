@@ -44,6 +44,7 @@ interface LinkCardProps extends React.HTMLAttributes<HTMLDivElement> {
   clickCount?: number
   category?: "Social" | "Crypto" | "Content" | "Collabs" | string
   isAutoDetected?: boolean
+  isMostClicked?: boolean
   editable?: boolean
   onEdit?: () => void
   onToggleVisibility?: () => void
@@ -57,6 +58,7 @@ export function LinkCard({
   clickCount,
   category,
   isAutoDetected = false,
+  isMostClicked = false,
   editable = false,
   onEdit,
   onToggleVisibility,
@@ -103,8 +105,16 @@ export function LinkCard({
             )}
             <div className="flex items-center gap-2 text-xs text-fartree-text-secondary mt-1.5 flex-wrap">
               {clickCount !== undefined && (
-                <span className="flex items-center gap-1 flex-shrink-0">
+                <span className={cn(
+                  "flex items-center gap-1 flex-shrink-0",
+                  isMostClicked && "text-fartree-accent-purple font-semibold"
+                )}>
                   <Eye className="w-3 h-3" /> {clickCount}
+                </span>
+              )}
+              {isMostClicked && (
+                <span className="px-1.5 py-0.5 rounded-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs flex-shrink-0 font-semibold">
+                  🔥 Top
                 </span>
               )}
               {category && (

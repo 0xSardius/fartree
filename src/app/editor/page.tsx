@@ -542,6 +542,16 @@ export default function ProfileEditorInterface() {
           >
             <Share2 className="w-4 h-4 mr-2" /> Share
           </Button>
+          {/* Analytics Badge */}
+          {totalClicks > 0 && (
+            <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg border-2 border-fartree-border-dark bg-fartree-window-background">
+              <Eye className="w-4 h-4 text-fartree-accent-purple" />
+              <div className="text-xs">
+                <span className="text-fartree-text-secondary">Total Views:</span>{' '}
+                <span className="font-semibold text-fartree-text-primary">{totalClicks}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex-1 grid grid-cols-1 md:grid-cols-[280px_1fr_280px] bg-fartree-window-background overflow-hidden min-h-0">
@@ -629,9 +639,16 @@ export default function ProfileEditorInterface() {
                   console.log('🎨 Rendering links:', links.length, 'links in state')
                   console.log('🔍 Link IDs:', links.map((l: ProfileLink) => l.id))
                   console.log('🔍 Link titles:', links.map((l: ProfileLink) => l.title))
+                  
+                  // Find the link with the most clicks (minimum 1 click to qualify)
+                  const maxClicks = Math.max(...links.map((l: ProfileLink) => l.click_count || 0))
+                  const mostClickedId = maxClicks > 0 ? links.find((l: ProfileLink) => (l.click_count || 0) === maxClicks)?.id : null
+                  
                   return links.map((link, index) => {
                     console.log(`  -> Rendering link ${index}:`, link.title, link.id)
                     const IconComponent = getIconForCategory(link.category)
+                    const isMostClicked = mostClickedId === link.id
+                    
                   return (
                     <div
                       key={link.id}
@@ -659,6 +676,7 @@ export default function ProfileEditorInterface() {
                         clickCount={link.click_count}
                         category={link.category}
                         isAutoDetected={link.auto_detected}
+                        isMostClicked={isMostClicked}
                         editable
                         onEdit={() => handleEditLinkClick(link)}
                         className={!link.is_visible ? 'opacity-60' : ''}
