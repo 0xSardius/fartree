@@ -5,8 +5,8 @@
 ## 🎯 Project Status Overview
 
 **Current Phase**: Core Profile Builder (Phase 1) - ✅ **COMPLETE**  
-**Next Phase**: Social Discovery & Analytics - ✅ **Discovery COMPLETE** | 📊 **Analytics IN PROGRESS**  
-**Overall Progress**: 22/24 tasks completed (92%)
+**Next Phase**: Social Discovery & Analytics - ✅ **Discovery COMPLETE** | ✅ **Preview COMPLETE** | 📊 **Analytics NEXT**  
+**Overall Progress**: 23/24 tasks completed (96%)
 
 ---
 
@@ -60,6 +60,16 @@
 - [x] **Preview Enhancement** - Preview now navigates within miniapp instead of opening new tab
 - [x] **Profile API UPSERT** - PUT endpoint now creates profile if it doesn't exist (auto-save on preview)
 - [x] **Loading States** - Proper guards for undefined user state during authentication
+
+### Preview & Profile Page Fixes (October 11, 2025 - Session 2)
+- [x] **Server Component Architecture** - Properly separated Server/Client boundaries in profile page
+- [x] **Edit Button Component** - Created Client Component for interactive edit button
+- [x] **Icon Logic Simplification** - Moved category icon mapping into ProfileLinkList (no function passing)
+- [x] **Next.js 15 Params** - Fixed async params handling in profile page (await params)
+- [x] **Profile Scrolling** - Fixed overflow layout with proper flex structure and min-h-0
+- [x] **Save Profile Fix** - Editor now sends username and avatar_url when saving
+- [x] **UPSERT Username** - API now includes username field in profile creation
+- [x] **Missing Imports** - Added missing Zap icon import
 
 ---
 
@@ -233,6 +243,10 @@ src/components/ui/tabs/HomeTab.tsx - Works but could be enhanced 📋
 14. **Back Button Integration**: `sdk.back.enableWebNavigation()` enables native back controls in Farcaster clients
 15. **UPSERT Pattern**: Profile API should create on first save, not require separate creation step
 16. **In-App Navigation**: Miniapps should use `router.push()` not `window.open()` for seamless UX
+17. **Server/Client Boundaries**: Cannot pass functions across boundaries - move logic into Client Components
+18. **Next.js 15 Params**: Route params are now Promises and must be awaited (`await params`)
+19. **Simplicity > Complexity**: Like Linktree - keep editor and viewer architecturally similar
+20. **Scrolling in Profiles**: Use `min-h-0` + nested div structure (outer: overflow-y-auto, inner: content wrapper)
 
 ---
 
@@ -257,6 +271,7 @@ src/components/ui/tabs/HomeTab.tsx - Works but could be enhanced 📋
 8. All state management uses functional updates to avoid closure bugs
 9. **Friends Discovery is live** - `/discover` page shows best friends who have Fartrees
 10. Navigation follows Farcaster best practices (back button, in-app routing)
+11. **Preview works perfectly** - Save → Navigate to `/profile/[fid]` with proper scrolling
 
 **Current codebase health:** ✅ Excellent - no linting errors, all core features working
 **Authentication status:** ✅ Working across all platforms (Quick Auth + test FID fallback)
@@ -264,8 +279,9 @@ src/components/ui/tabs/HomeTab.tsx - Works but could be enhanced 📋
 **Editor status:** ✅ Production-ready with polished UX and reliable CRUD operations
 **Delete feature:** ✅ Custom modal with proper event handling and state management
 **Social Discovery:** ✅ **COMPLETE** - Friends Discovery using Neynar Best Friends API is live
-**Preview Flow:** ✅ Auto-saves and navigates within miniapp (not new tab)
-**Next logical step:** Analytics Dashboard (click tracking) OR Production Auth (remove test FID)
+**Preview Flow:** ✅ **COMPLETE** - Auto-saves, navigates within miniapp, scrolls properly
+**Profile Page:** ✅ **COMPLETE** - Server Component with proper Client Component boundaries
+**Next logical step:** Analytics Dashboard (display click counts) - easiest win since tracking already exists!
 
 ---
 

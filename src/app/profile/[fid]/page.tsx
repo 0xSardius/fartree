@@ -174,7 +174,8 @@ export default async function PublicProfileView({ params }: { params: Promise<{ 
     <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
       <WindowFrame
         title={`${profileName}'s Fartree`}
-        className="w-full max-w-md mx-auto h-[calc(100vh-4rem)] flex flex-col"
+        className="w-full max-w-md mx-auto h-[calc(100vh-4rem)]"
+        contentClassName="flex flex-col h-full p-0"
       >
         {/* Header with share button */}
         <div className="flex items-center justify-between p-3 border-b-2 border-fartree-border-dark bg-fartree-window-header">
@@ -187,7 +188,8 @@ export default async function PublicProfileView({ params }: { params: Promise<{ 
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col items-center p-6 overflow-auto bg-fartree-window-background space-y-6">
+        <div className="flex-1 overflow-y-auto bg-fartree-window-background min-h-0">
+          <div className="flex flex-col items-center p-6 space-y-6">
           {/* Profile Header */}
           <Avatar className="w-24 h-24 border-4 border-fartree-primary-purple mb-4 shadow-lg">
             <AvatarImage src={profile.avatar_url || "/placeholder.svg"} alt={profileName} />
@@ -280,6 +282,7 @@ export default async function PublicProfileView({ params }: { params: Promise<{ 
                 />
               </ProfileSection>
             )}
+          </div>
           </div>
         </div>
 
