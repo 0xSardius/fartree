@@ -7,8 +7,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { Button } from "~/components/ui/Button"
 import { Card, CardContent } from "~/components/ui/card"
 import { useAuth } from "~/contexts/AuthContext"
-import { Users, LinkIcon, Sparkles, Loader2, Share2, ArrowRight, ArrowLeft } from "lucide-react"
+import { Users, LinkIcon, Sparkles, Loader2, Share2, ArrowRight, ArrowLeft, Search } from "lucide-react"
 import { sdk } from "@farcaster/miniapp-sdk"
+import { Input } from "~/components/ui/input"
 
 interface FriendData {
   fid: number
@@ -40,6 +41,7 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(true)
   const [discoverData, setDiscoverData] = useState<DiscoverData | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
 
   // Enable web navigation for back button
   useEffect(() => {
@@ -155,6 +157,21 @@ export default function DiscoverPage() {
   const friendsWithFartree = discoverData?.friends_with_fartree || []
   const friendsWithoutFartree = discoverData?.friends_without_fartree || []
 
+  // Filter friends based on search query
+  const filterFriends = (friends: FriendData[]) => {
+    if (!searchQuery.trim()) return friends
+    
+    const query = searchQuery.toLowerCase()
+    return friends.filter(friend => 
+      friend.username?.toLowerCase().includes(query) ||
+      friend.display_name?.toLowerCase().includes(query) ||
+      friend.fid.toString().includes(query)
+    )
+  }
+
+  const filteredFriendsWithFartree = filterFriends(friendsWithFartree)
+  const filteredFriendsWithoutFartree = filterFriends(friendsWithoutFartree)
+
   return (
     <div className="min-h-screen bg-fartree-background flex flex-col items-center p-4 font-mono">
       <WindowFrame
@@ -163,47 +180,61 @@ export default function DiscoverPage() {
         contentClassName="flex flex-col h-full p-0"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b-2 border-fartree-border-dark bg-fartree-window-header">
-          <div className="flex items-center gap-3">
+        <div className="p-4 border-b-2 border-fartree-border-dark bg-fartree-window-header space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.back()}
+                className="flex items-center gap-1"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="hidden sm:inline">Back</span>
+              </Button>
+              <Users className="w-6 h-6 text-fartree-primary-purple" />
+              <div>
+                <h1 className="text-lg font-bold text-fartree-text-primary">Your Friends on Fartree</h1>
+                <p className="text-xs text-fartree-text-secondary">
+                  {discoverData?.fartree_count || 0} of {discoverData?.total_friends || 0} friends have Fartrees
+                </p>
+              </div>
+            </div>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => router.back()}
-              className="flex items-center gap-1"
+              onClick={() => router.push('/editor')}
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">Back</span>
+              My Profile
             </Button>
-            <Users className="w-6 h-6 text-fartree-primary-purple" />
-            <div>
-              <h1 className="text-lg font-bold text-fartree-text-primary">Your Friends on Fartree</h1>
-              <p className="text-xs text-fartree-text-secondary">
-                {discoverData?.fartree_count || 0} of {discoverData?.total_friends || 0} friends have Fartrees
-              </p>
-            </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.push('/editor')}
-          >
-            My Profile
-          </Button>
+          
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-fartree-text-secondary" />
+            <Input
+              type="text"
+              placeholder="Search by username or FID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-fartree-window-background border-fartree-border-dark text-fartree-text-primary placeholder:text-fartree-text-secondary"
+            />
+          </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 bg-fartree-window-background space-y-8">
           {/* Friends with Fartree */}
-          {friendsWithFartree.length > 0 && (
+          {filteredFriendsWithFartree.length > 0 && (
             <section>
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-5 h-5 text-fartree-primary-purple" />
                 <h2 className="text-xl font-bold text-fartree-text-primary">
-                  Friends with Fartrees ({friendsWithFartree.length})
+                  Friends with Fartrees ({filteredFriendsWithFartree.length})
                 </h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {friendsWithFartree.map((friend) => (
+                {filteredFriendsWithFartree.map((friend) => (
                   <FriendCard
                     key={friend.fid}
                     friend={friend}
@@ -228,25 +259,38 @@ export default function DiscoverPage() {
           )}
 
           {/* Friends without Fartree */}
-          {friendsWithoutFartree.length > 0 && (
+          {filteredFriendsWithoutFartree.length > 0 && (
             <section>
               <div className="flex items-center gap-2 mb-4">
                 <Share2 className="w-5 h-5 text-fartree-text-secondary" />
                 <h2 className="text-lg font-semibold text-fartree-text-secondary">
-                  Invite Friends ({friendsWithoutFartree.length})
+                  Invite Friends ({filteredFriendsWithoutFartree.length})
                 </h2>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {friendsWithoutFartree.slice(0, 8).map((friend) => (
+                {filteredFriendsWithoutFartree.slice(0, 8).map((friend) => (
                   <InviteFriendCard key={friend.fid} friend={friend} />
                 ))}
               </div>
-              {friendsWithoutFartree.length > 8 && (
+              {filteredFriendsWithoutFartree.length > 8 && (
                 <p className="text-xs text-fartree-text-secondary mt-3 text-center">
-                  ...and {friendsWithoutFartree.length - 8} more friends to invite
+                  ...and {filteredFriendsWithoutFartree.length - 8} more friends to invite
                 </p>
               )}
             </section>
+          )}
+          
+          {/* No search results */}
+          {searchQuery && filteredFriendsWithFartree.length === 0 && filteredFriendsWithoutFartree.length === 0 && (
+            <div className="text-center py-12">
+              <Search className="w-16 h-16 text-fartree-text-secondary mx-auto mb-4 opacity-50" />
+              <h3 className="text-xl font-bold text-fartree-text-primary mb-2">
+                No friends found
+              </h3>
+              <p className="text-fartree-text-secondary">
+                Try searching by username or FID
+              </p>
+            </div>
           )}
         </div>
       </WindowFrame>

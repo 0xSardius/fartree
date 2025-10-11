@@ -86,6 +86,14 @@
 - [x] **API Error Logging** - Added debug logging for Neynar response structure
 - [x] **Friends Discovery Fix** - Corrected user object access pattern (no nested .user property)
 
+### Production Auth & Search (October 11, 2025 - Session 5)
+- [x] **Real FID Extraction** - Decode JWT payload in development to get actual user FID
+- [x] **Remove Test FID Fallback** - No more hardcoded test FID 6841, requires real auth
+- [x] **401 Unauthorized** - Proper error response when not authenticated
+- [x] **Search Feature** - Added search bar to discover page (by username/FID)
+- [x] **Client-Side Filtering** - Real-time search across friends lists
+- [x] **No Results State** - Empty state when search has no matches
+
 ---
 
 ## 🔄 In Progress / Next Priority

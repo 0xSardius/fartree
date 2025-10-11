@@ -86,10 +86,24 @@ async function extractFidFromJWT(authHeader: string): Promise<number | null> {
       
     } catch (jwtError: any) {
       // In development, JWT verification often fails due to domain mismatch
-      // This is expected and we fall back to test FID
+      // But we can still decode the token to get the FID (without verification)
       if (process.env.NODE_ENV === 'development') {
-        console.log('🔧 Development mode: JWT verification skipped (domain mismatch expected), using test FID 6841');
-        return 6841;
+        try {
+          // Decode JWT without verification to get the FID
+          const parts = token.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
+            if (payload.sub) {
+              console.log('🔧 Development mode: Using FID from unverified JWT:', payload.sub);
+              return parseInt(payload.sub);
+            }
+          }
+        } catch (decodeError) {
+          console.error('Failed to decode JWT in development:', decodeError);
+        }
+        // If decoding fails, return null instead of test FID
+        console.log('⚠️ Development mode: Could not extract FID from JWT');
+        return null;
       }
       
       // In production, log the actual error
@@ -115,12 +129,15 @@ export async function GET(request: NextRequest) {
       console.log('✅ Found FID from JWT:', fid);
     }
     
-    // If no JWT token (e.g., desktop web user), check for other auth methods
+    // If no JWT token, user is not authenticated
     if (!fid) {
-      // TODO: In production, implement proper session-based auth for non-miniapp users
-      // For now, use test FID for development
-      fid = 6841; // Test FID for development
-      console.log('⚠️ No JWT found - using test FID for development:', fid);
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Not authenticated - please sign in with Farcaster' 
+        },
+        { status: 401 }
+      );
     }
     
     // Check if user exists in our database
