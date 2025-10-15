@@ -339,8 +339,36 @@ function FriendCard({ friend, onClick }: { friend: FriendData; onClick: () => vo
 
 // Invite Friend Card Component (without Fartree)
 function InviteFriendCard({ friend }: { friend: FriendData }) {
+  const handleInvite = async () => {
+    try {
+      // Try to share via Farcaster Composer (Mini App SDK)
+      const shareText = `Hey @${friend.username}! 👋 Check out Fartree - it's like Linktree for Farcaster. Create your Web3 profile in seconds! 🌳✨`
+      const shareUrl = window.location.origin
+      
+      // Try to use Mini App composer
+      const isInMiniApp = await sdk.isInMiniApp()
+      if (isInMiniApp) {
+        await sdk.actions.openUrl(`https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}`)
+      } else {
+        // Fallback to copying invite link
+        const inviteMessage = `${shareText}\n\n${shareUrl}`
+        await navigator.clipboard.writeText(inviteMessage)
+        alert('Invite message copied to clipboard! Share it with your friend.')
+      }
+    } catch (error) {
+      console.error('Error inviting friend:', error)
+      // Last resort fallback
+      const inviteMessage = `Hey @${friend.username}! Check out Fartree: ${window.location.origin}`
+      await navigator.clipboard.writeText(inviteMessage)
+      alert('Invite link copied to clipboard!')
+    }
+  }
+
   return (
-    <Card className="opacity-60 hover:opacity-100 transition-opacity">
+    <Card 
+      className="opacity-60 hover:opacity-100 transition-opacity cursor-pointer hover:border-fartree-primary-purple"
+      onClick={handleInvite}
+    >
       <CardContent className="p-3">
         <div className="flex flex-col items-center text-center gap-2">
           <Avatar className="w-10 h-10 border border-fartree-border-dark">
@@ -355,6 +383,18 @@ function InviteFriendCard({ friend }: { friend: FriendData }) {
             </p>
             <p className="text-[10px] text-fartree-text-secondary truncate">@{friend.username}</p>
           </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full text-xs py-1 h-6"
+            onClick={(e) => {
+              e.stopPropagation()
+              handleInvite()
+            }}
+          >
+            <Share2 className="w-3 h-3 mr-1" />
+            Invite
+          </Button>
         </div>
       </CardContent>
     </Card>
