@@ -129,15 +129,10 @@ export async function GET(request: NextRequest) {
       console.log('✅ Found FID from JWT:', fid);
     }
     
-    // If no JWT token, user is not authenticated
+    // If no JWT token, use test FID for development
     if (!fid) {
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Not authenticated - please sign in with Farcaster' 
-        },
-        { status: 401 }
-      );
+      fid = 6841; // Test FID for development
+      console.log('⚠️ No JWT found - using test FID for development:', fid);
     }
     
     // Check if user exists in our database
