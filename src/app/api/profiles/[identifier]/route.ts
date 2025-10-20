@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '~/lib/db';
+import { getNeynarUser } from '~/lib/neynar';
 
 type RouteParams = {
   params: {
@@ -66,10 +67,30 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       ORDER BY position ASC, created_at ASC
     `, [profile.id]);
 
+    // Fetch fresh follower count from Neynar (for social proof)
+    let follower_count = 0;
+    let following_count = 0;
+    let power_badge = false;
+    
+    try {
+      const neynarUser = await getNeynarUser(profile.fid);
+      if (neynarUser) {
+        follower_count = neynarUser.follower_count || 0;
+        following_count = neynarUser.following_count || 0;
+        power_badge = neynarUser.power_badge || false;
+      }
+    } catch (error) {
+      console.error('Error fetching Neynar data for follower count:', error);
+      // Continue without follower count - not critical
+    }
+
     return NextResponse.json({
       success: true,
       profile: {
         ...profile,
+        follower_count,
+        following_count,
+        power_badge,
         links: linksResult.rows
       }
     });

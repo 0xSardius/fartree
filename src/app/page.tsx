@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Button } from "../components/ui/Button"
 import { WindowFrame } from "../components/window-frame"
-import { ArrowRight, Sparkles, LinkIcon, User, CheckCircle, AlertCircle } from "lucide-react"
+import { ArrowRight, Sparkles, LinkIcon, User, CheckCircle, AlertCircle, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "~/contexts/AuthContext"
 import { useEffect } from "react"
@@ -109,8 +109,8 @@ export default function LandingPage() {
               The <span className="text-fartree-primary-purple">Linktree</span> for Farcaster
             </h1>
             <p className="text-lg md:text-xl text-fartree-text-secondary mb-8 max-w-2xl">
-              Connect all your Web3 activities, mini-apps, tokens, and collaborations in one shareable link,
-              auto-generated from your FID.
+              One beautiful link for all your Farcaster activities. Kickstart your profile with Farcaster data, 
+              then customize with tokens, mini-apps, and collabs.
             </p>
             <Button
               onClick={() => {
@@ -148,21 +148,21 @@ export default function LandingPage() {
           <section className="feature-preview w-full max-w-3xl grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div className="bg-fartree-window-background p-6 rounded-lg border-2 border-fartree-border-dark shadow-md">
               <Sparkles className="w-8 h-8 text-fartree-primary-purple mb-3" />
-              <h3 className="font-semibold text-fartree-text-primary text-xl mb-2">Auto-Detection</h3>
+              <h3 className="font-semibold text-fartree-text-primary text-xl mb-2">Quick Setup</h3>
               <p className="text-fartree-text-secondary text-sm">
-                Automatically pulls your Web3 activities from your FID.
+                Profile auto-populated with your Farcaster data. Add links in seconds.
               </p>
             </div>
             <div className="bg-fartree-window-background p-6 rounded-lg border-2 border-fartree-border-dark shadow-md">
-              <LinkIcon className="w-8 h-8 text-fartree-primary-purple mb-3" />
-              <h3 className="font-semibold text-fartree-text-primary text-xl mb-2">Unified Links</h3>
-              <p className="text-fartree-text-secondary text-sm">One link to share all your digital presence.</p>
+              <Users className="w-8 h-8 text-fartree-primary-purple mb-3" />
+              <h3 className="font-semibold text-fartree-text-primary text-xl mb-2">Discover Friends</h3>
+              <p className="text-fartree-text-secondary text-sm">See which friends have Fartrees and invite others.</p>
             </div>
             <div className="bg-fartree-window-background p-6 rounded-lg border-2 border-fartree-border-dark shadow-md">
-              <User className="w-8 h-8 text-fartree-primary-purple mb-3" />
-              <h3 className="font-semibold text-fartree-text-primary text-xl mb-2">Custom Profiles</h3>
+              <LinkIcon className="w-8 h-8 text-fartree-primary-purple mb-3" />
+              <h3 className="font-semibold text-fartree-text-primary text-xl mb-2">Built-in Analytics</h3>
               <p className="text-fartree-text-secondary text-sm">
-                Personalize your Fartree profile to match your brand.
+                Track link performance with click counts and insights.
               </p>
             </div>
           </section>

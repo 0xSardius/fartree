@@ -1,14 +1,15 @@
 "use client"
 
-import { Trophy, Zap } from "lucide-react"
+import { Trophy, Zap, Users } from "lucide-react"
 
 interface ProfileHeroStatsProps {
   totalClicks: number
   autoDetectedCount: number
   badgeLabels: string[]
+  followerCount?: number
 }
 
-export function ProfileHeroStats({ totalClicks, autoDetectedCount, badgeLabels }: ProfileHeroStatsProps) {
+export function ProfileHeroStats({ totalClicks, autoDetectedCount, badgeLabels, followerCount }: ProfileHeroStatsProps) {
   return (
     <div className="w-full rounded-xl border border-fartree-border-dark bg-fartree-window-background p-4 shadow-lg">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -19,6 +20,15 @@ export function ProfileHeroStats({ totalClicks, autoDetectedCount, badgeLabels }
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-4">
+          {followerCount !== undefined && followerCount > 0 && (
+            <div className="flex items-center gap-2 rounded-lg border border-fartree-border-dark px-3 py-2">
+              <Users className="h-4 w-4 text-fartree-primary-purple" />
+              <div>
+                <p className="text-xs text-fartree-text-secondary">Followers</p>
+                <p className="text-sm font-semibold text-fartree-text-primary">{followerCount.toLocaleString()}</p>
+              </div>
+            </div>
+          )}
           <div className="flex items-center gap-2 rounded-lg border border-fartree-border-dark px-3 py-2">
             <Zap className="h-4 w-4 text-fartree-primary-purple" />
             <div>
@@ -29,7 +39,7 @@ export function ProfileHeroStats({ totalClicks, autoDetectedCount, badgeLabels }
           <div className="flex items-center gap-2 rounded-lg border border-fartree-border-dark px-3 py-2">
             <Trophy className="h-4 w-4 text-fartree-primary-purple" />
             <div>
-              <p className="text-xs text-fartree-text-secondary">Auto-Detected Wins</p>
+              <p className="text-xs text-fartree-text-secondary">Auto-Detected</p>
               <p className="text-sm font-semibold text-fartree-text-primary">{autoDetectedCount}</p>
             </div>
           </div>

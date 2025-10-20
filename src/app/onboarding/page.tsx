@@ -40,12 +40,12 @@ export default function OnboardingFlow() {
   useEffect(() => {
     if (step === 2) {
       setScanSteps([
-        { id: "profile", message: "🔍 Scanning your Farcaster identity…", status: "active" },
-        { id: "tokens", message: "✅ Found your profile data", status: "pending" },
-        { id: "collabs", message: "✅ Detected collaborations & hypersubs", status: "pending" },
-        { id: "content", message: "✅ Surfaced your viral casts", status: "pending" },
-        { id: "apps", message: "✅ Mapped your mini-apps", status: "pending" },
-        { id: "celebrate", message: "🎉 Digital empire ready!", status: "pending" },
+        { id: "profile", message: "🔍 Scanning your Farcaster profile…", status: "active" },
+        { id: "basics", message: "✅ Imported profile basics (avatar, bio, username)", status: "pending" },
+        { id: "social", message: "✅ Found verified social accounts", status: "pending" },
+        { id: "crypto", message: "✅ Detected crypto addresses (ETH/SOL)", status: "pending" },
+        { id: "ready", message: "✅ Profile ready for customization!", status: "pending" },
+        { id: "celebrate", message: "🎉 Let's add your links!", status: "pending" },
       ])
       setScanComplete(false)
     }
@@ -142,8 +142,8 @@ export default function OnboardingFlow() {
       title: "Welcome to Fartree!",
       icon: <Sparkles className="w-16 h-16 text-fartree-primary-purple mb-6" />,
       description: isAuthenticated 
-        ? `Welcome back, ${user?.display_name || user?.username}! Let's set up your Fartree profile.`
-        : "The Linktree for Farcaster. Connect all your Web3 activities in one shareable profile.",
+        ? `Welcome back, ${user?.display_name || user?.username}! Let's kickstart your profile with your Farcaster data.`
+        : "The Linktree for Farcaster. Beautiful link-in-bio profiles for creators.",
       buttonText: authLoading 
         ? "Connecting..." 
         : isAuthenticated 
@@ -239,7 +239,7 @@ export default function OnboardingFlow() {
       id: 4,
       title: "Customize & Organize",
       icon: <LinkIcon className="w-16 h-16 text-fartree-primary-purple mb-6" />,
-      description: "Drag-and-drop to reorder, add new links, and personalize your Fartree to perfection!",
+      description: "Add your tokens, mini-apps, and custom links. Drag-and-drop to reorder. Make it yours!",
       buttonText: "Go to Editor",
       action: () => router.push('/editor'),
     },
