@@ -30,7 +30,6 @@ async function getProfile(identifier: string): Promise<ProfileData | null> {
   try {
     // Use direct database query instead of internal API call
     const { query } = await import('~/lib/db')
-    const { getNeynarUser } = await import('~/lib/neynar')
     
     // Helper function to determine if identifier is FID (numeric) or username
     const isNumeric = (str: string): boolean => {
@@ -44,33 +43,7 @@ async function getProfile(identifier: string): Promise<ProfileData | null> {
       result = await query('SELECT * FROM profiles WHERE username = $1', [identifier])
     }
     
-    if (result.rows.length === 0) return null
-
-    const profile = result.rows[0]
-
-    // Fetch fresh follower count from Neynar (for social proof)
-    let follower_count = 0;
-    let following_count = 0;
-    let power_badge = false;
-    
-    try {
-      const neynarUser = await getNeynarUser(profile.fid);
-      if (neynarUser) {
-        follower_count = neynarUser.follower_count || 0;
-        following_count = neynarUser.following_count || 0;
-        power_badge = neynarUser.power_badge || false;
-      }
-    } catch (error) {
-      console.error('Error fetching Neynar data for follower count:', error);
-      // Continue without follower count - not critical
-    }
-
-    return {
-      ...profile,
-      follower_count,
-      following_count,
-      power_badge
-    }
+    return result.rows.length > 0 ? result.rows[0] : null
   } catch (error) {
     console.error('Error fetching profile:', error)
     return null
