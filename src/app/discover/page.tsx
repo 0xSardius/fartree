@@ -192,11 +192,10 @@ export default function DiscoverPage() {
                 <ArrowLeft className="w-4 h-4" />
                 <span className="hidden sm:inline">Back</span>
               </Button>
-              <Users className="w-6 h-6 text-fartree-primary-purple" />
               <div>
-                <h1 className="text-lg font-bold text-fartree-text-primary">Your Friends on Fartree</h1>
+                <h1 className="text-lg font-bold text-fartree-text-primary">Discover Friends</h1>
                 <p className="text-xs text-fartree-text-secondary">
-                  {discoverData?.fartree_count || 0} of {discoverData?.total_friends || 0} friends have Fartrees
+                  {discoverData?.fartree_count || 0} friends with Fartrees • Showing {discoverData?.total_friends || 0} best friends
                 </p>
               </div>
             </div>
@@ -214,11 +213,14 @@ export default function DiscoverPage() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-fartree-text-secondary" />
             <Input
               type="text"
-              placeholder="Search by username or FID..."
+              placeholder="Search your loaded friends..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-fartree-window-background border-fartree-border-dark text-fartree-text-primary placeholder:text-fartree-text-secondary"
             />
+            <p className="text-xs text-fartree-text-secondary mt-1 ml-1">
+              Filters friends shown above (search all of Farcaster coming in v2.0)
+            </p>
           </div>
         </div>
 

@@ -2,12 +2,9 @@ import { notFound } from "next/navigation"
 import { Metadata } from "next"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
 import { ProfileLinkList, type ProfileLink } from "~/components/profile/ProfileLinkList"
-import { ProfileHeroStats } from "~/components/profile/ProfileHeroStats"
-import { ProfileSection } from "~/components/profile/ProfileSection"
 import { WindowFrame } from "~/components/window-frame"
 import { ShareProfileButton } from "~/components/profile/ShareProfileButton"
 import { EditButton } from "~/components/profile/EditButton"
-import { Zap } from "lucide-react"
 
 
 interface ProfileData {
@@ -151,21 +148,6 @@ export default async function PublicProfileView({ params }: { params: Promise<{ 
 
   const profileName = profile.display_name || profile.username || `User ${profile.fid}`
 
-  const totalClicks = visibleLinks.reduce((acc, link) => acc + (link.click_count || 0), 0)
-  const autoDetectedCount = visibleLinks.filter((link) => link.auto_detected).length
-
-  // Simple badges based on activity
-  const badgeLabels: string[] = []
-  if (visibleLinks.length >= 5) {
-    badgeLabels.push("Link Master")
-  }
-  if (autoDetectedCount >= 3) {
-    badgeLabels.push("Auto-Populated")
-  }
-  if (totalClicks > 100) {
-    badgeLabels.push("Viral")
-  }
-
   return (
     <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
       <WindowFrame
@@ -207,13 +189,6 @@ export default async function PublicProfileView({ params }: { params: Promise<{ 
             <p className="text-fartree-text-secondary text-center max-w-xs mb-4">{profile.bio}</p>
           )}
 
-          <ProfileHeroStats
-            totalClicks={totalClicks}
-            autoDetectedCount={autoDetectedCount}
-            badgeLabels={badgeLabels}
-            followerCount={profile.follower_count}
-          />
-
           <div className="space-y-4 w-full">
             {/* Simple Linktree-style single list */}
             {links.length > 0 ? (
@@ -234,8 +209,8 @@ export default async function PublicProfileView({ params }: { params: Promise<{ 
         {/* Footer */}
         <footer className="p-4 border-t-2 border-fartree-border-dark text-fartree-text-secondary text-xs text-center bg-fartree-window-header">
           <div className="flex items-center justify-between">
-            <p className="flex items-center gap-1">
-              Powered by <Zap className="w-3 h-3 text-fartree-primary-purple" /> Fartree
+            <p className="text-fartree-text-secondary">
+              Powered by Fartree ✨
             </p>
             {profile.updated_at && (
               <p className="text-[10px]">
