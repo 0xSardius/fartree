@@ -19,7 +19,6 @@ export default function LandingPage() {
       try {
         const isInMiniApp = await sdk.isInMiniApp()
         if (isInMiniApp) {
-          console.log('📱 Main app entry - calling sdk.actions.ready() to hide splash screen')
           await sdk.actions.ready()
         }
       } catch (error) {

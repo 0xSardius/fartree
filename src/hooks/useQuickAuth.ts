@@ -44,8 +44,6 @@ export function useQuickAuth() {
         const isInMiniApp = await sdk.isInMiniApp(500); // Increased timeout for desktop iframe
         
         if (isInMiniApp) {
-          console.log('✅ Detected Mini App environment - using Quick Auth');
-          
           // Use Quick Auth to get authenticated token and make request
           const response = await sdk.quickAuth.fetch('/api/auth/me');
           
@@ -67,8 +65,6 @@ export function useQuickAuth() {
             throw new Error(data.error || 'Authentication failed');
           }
         } else {
-          console.log('⚠️ Not in Mini App environment - graceful fallback');
-          
           // Graceful fallback: Try to make a regular authenticated request
           // This handles cases where user is on desktop web or other environments
           try {

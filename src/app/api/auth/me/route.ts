@@ -59,8 +59,6 @@ async function autoDetectSocialLinks(profileId: string, neynarUser: any) {
       `, [profileId, link.title, link.url, link.category, i, link.auto_detected]);
     }
   }
-  
-  console.log(`Auto-detected ${linksToCreate.length} social links for profile ${profileId}`);
 }
 
 // Helper function to extract FID from Quick Auth JWT
@@ -81,7 +79,6 @@ async function extractFidFromJWT(authHeader: string): Promise<number | null> {
         domain: process.env.NEXT_PUBLIC_URL ? new URL(process.env.NEXT_PUBLIC_URL).hostname : 'localhost:3000',
       });
       
-      console.log('✅ JWT verified successfully, FID:', payload.sub);
       return payload.sub; // The FID is in the 'sub' field
       
     } catch (jwtError: any) {
@@ -94,7 +91,6 @@ async function extractFidFromJWT(authHeader: string): Promise<number | null> {
           if (parts.length === 3) {
             const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
             if (payload.sub) {
-              console.log('🔧 Development mode: Using FID from unverified JWT:', payload.sub);
               return parseInt(payload.sub);
             }
           }
@@ -102,7 +98,6 @@ async function extractFidFromJWT(authHeader: string): Promise<number | null> {
           console.error('Failed to decode JWT in development:', decodeError);
         }
         // If decoding fails, return null instead of test FID
-        console.log('⚠️ Development mode: Could not extract FID from JWT');
         return null;
       }
       
@@ -126,13 +121,11 @@ export async function GET(request: NextRequest) {
     
     if (authorization) {
       fid = await extractFidFromJWT(authorization);
-      console.log('✅ Found FID from JWT:', fid);
     }
     
     // If no JWT token, use test FID for development
     if (!fid) {
       fid = 6841; // Test FID for development
-      console.log('⚠️ No JWT found - using test FID for development:', fid);
     }
     
     // Check if user exists in our database
@@ -143,16 +136,9 @@ export async function GET(request: NextRequest) {
 
     if (profile.rows.length === 0) {
       // User doesn't exist in our DB, let's fetch from Neynar and create profile
-      console.log('Creating new profile for FID:', fid);
       const neynarUser = await getNeynarUser(fid);
       
       if (neynarUser) {
-        console.log('Got Neynar user data:', { 
-          username: neynarUser.username, 
-          displayName: neynarUser.display_name,
-          bio: neynarUser.profile?.bio?.text?.substring(0, 50) + '...'
-        });
-        
         const createResult = await query(`
           INSERT INTO profiles (fid, username, display_name, bio, avatar_url, theme)
           VALUES ($1, $2, $3, $4, $5, $6)
@@ -171,7 +157,6 @@ export async function GET(request: NextRequest) {
         // Auto-detect and create social links from Neynar data
         await autoDetectSocialLinks(profile.rows[0].id, neynarUser);
       } else {
-        console.log('Neynar user fetch failed, creating basic profile for FID:', fid);
         // Fallback if Neynar API fails
         const createResult = await query(`
           INSERT INTO profiles (fid, username, display_name, theme)
@@ -182,8 +167,6 @@ export async function GET(request: NextRequest) {
         profile = createResult;
       }
     } else {
-      console.log('Found existing profile for FID:', fid);
-      
       // Optionally refresh profile data from Neynar (e.g., every 24 hours)
       const existingUser = profile.rows[0];
       const lastUpdated = new Date(existingUser.updated_at);
@@ -191,7 +174,6 @@ export async function GET(request: NextRequest) {
       const hoursSinceUpdate = (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60);
       
       if (hoursSinceUpdate > 24) {
-        console.log('Profile is stale, refreshing from Neynar...');
         const neynarUser = await getNeynarUser(fid);
         
         if (neynarUser) {
@@ -209,7 +191,6 @@ export async function GET(request: NextRequest) {
           ]);
           
           profile = updateResult;
-          console.log('Profile refreshed from Neynar');
           
           // Also refresh auto-detected links
           await autoDetectSocialLinks(existingUser.id, neynarUser);

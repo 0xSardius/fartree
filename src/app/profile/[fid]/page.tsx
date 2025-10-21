@@ -154,23 +154,16 @@ export default async function PublicProfileView({ params }: { params: Promise<{ 
   const totalClicks = visibleLinks.reduce((acc, link) => acc + (link.click_count || 0), 0)
   const autoDetectedCount = visibleLinks.filter((link) => link.auto_detected).length
 
-  const empireLinks = visibleLinks.filter((link) => link.category?.toLowerCase() === "crypto")
-  const collabLinks = visibleLinks.filter((link) => link.category?.toLowerCase() === "collabs")
-  const socialLinks = visibleLinks.filter((link) => link.category?.toLowerCase() === "social")
-  const contentLinks = visibleLinks.filter((link) => link.category?.toLowerCase() === "content")
-  const signatureLinks = visibleLinks.filter(
-    (link) => !["crypto", "collabs", "social", "content"].includes(link.category?.toLowerCase() || ""),
-  )
-
+  // Simple badges based on activity
   const badgeLabels: string[] = []
-  if (empireLinks.length > 0) {
-    badgeLabels.push("Empire Builder")
+  if (visibleLinks.length >= 5) {
+    badgeLabels.push("Link Master")
   }
-  if (collabLinks.length > 0) {
-    badgeLabels.push("Collaboration King")
+  if (autoDetectedCount >= 3) {
+    badgeLabels.push("Auto-Populated")
   }
   if (totalClicks > 100) {
-    badgeLabels.push("Viral Spark")
+    badgeLabels.push("Viral")
   }
 
   return (
@@ -222,69 +215,17 @@ export default async function PublicProfileView({ params }: { params: Promise<{ 
           />
 
           <div className="space-y-4 w-full">
-            {empireLinks.length > 0 && (
-              <ProfileSection
-                title="Your Empire"
-                description="Flagship projects, tokens, and onchain creations."
-              >
-                <ProfileLinkList
-                  initialLinks={empireLinks}
-                  profileFid={profile.fid}
-                  showSummary={false}
-                />
-              </ProfileSection>
-            )}
-
-            {collabLinks.length > 0 && (
-              <ProfileSection
-                title="Collaboration King"
-                description="Builds and splits with fellow Farcaster creators."
-              >
-                <ProfileLinkList
-                  initialLinks={collabLinks}
-                  profileFid={profile.fid}
-                  showSummary={false}
-                />
-              </ProfileSection>
-            )}
-
-            {contentLinks.length > 0 && (
-              <ProfileSection
-                title="Content That Slaps"
-                description="Viral casts, frames, and content that grab attention."
-              >
-                <ProfileLinkList
-                  initialLinks={contentLinks}
-                  profileFid={profile.fid}
-                  showSummary={false}
-                />
-              </ProfileSection>
-            )}
-
-            {socialLinks.length > 0 && (
-              <ProfileSection
-                title="Signal Boost"
-                description="Where to connect and follow the journey."
-              >
-                <ProfileLinkList
-                  initialLinks={socialLinks}
-                  profileFid={profile.fid}
-                  showSummary={false}
-                />
-              </ProfileSection>
-            )}
-
-            {signatureLinks.length > 0 && (
-              <ProfileSection
-                title="Signature Moves"
-                description="Hand-picked links that define your vibe."
-              >
-                <ProfileLinkList
-                  initialLinks={signatureLinks}
-                  profileFid={profile.fid}
-                  showSummary={false}
-                />
-              </ProfileSection>
+            {/* Simple Linktree-style single list */}
+            {links.length > 0 ? (
+              <ProfileLinkList
+                initialLinks={links}
+                profileFid={profile.fid}
+                showSummary={false}
+              />
+            ) : (
+              <div className="text-center py-8 text-fartree-text-secondary">
+                <p>No links yet. Check back soon!</p>
+              </div>
             )}
           </div>
           </div>

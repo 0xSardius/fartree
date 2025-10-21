@@ -88,13 +88,21 @@
 
 ### Production Auth & Search (October 11, 2025 - Session 5)
 - [x] **Real FID Extraction** - Decode JWT payload in development to get actual user FID
-- [x] **Remove Test FID Fallback** - No more hardcoded test FID 6841, requires real auth
-- [x] **401 Unauthorized** - Proper error response when not authenticated
+- [x] **Remove Test FID Fallback** - Reverted: Kept test FID (6841) for development stability
+- [x] **401 Unauthorized** - Proper error response when not authenticated (production only)
 - [x] **Search Feature** - Added search bar to discover page (by username/FID)
 - [x] **Client-Side Filtering** - Real-time search across friends lists
 - [x] **No Results State** - Empty state when search has no matches
 - [x] **Invite Functionality** - Added working invite button with Farcaster composer integration
 - [x] **Invite UX** - Button opens composer or copies invite message to clipboard
+
+### MVP Simplification (October 11, 2025 - Session 5 cont'd)
+- [x] **Landing Page Messaging** - Updated to "kickstart your profile" (honest, not overselling)
+- [x] **Onboarding Animation** - Shows only actual auto-detection (profile, social, crypto addresses)
+- [x] **Simplified Profile Layout** - Removed categorized sections, now single Linktree-style list
+- [x] **Profile Sections Removed** - "Your Empire", "Collaboration King", "Content That Slaps", "Signal Boost", "Signature Moves" (saved for v2.0)
+- [x] **Simplified Badges** - "Link Master" (5+ links), "Auto-Populated" (3+ auto-detected), "Viral" (100+ clicks)
+- [x] **Follower Count Removed** - Caused blocking issues, can add client-side later
 
 ---
 
@@ -209,6 +217,10 @@
    - Add celebration animations when new links are found
 5. **Theme Customization** - Light/dark mode toggle
 6. **Share Frames** - Farcaster Frame for profile sharing
+7. **Profile Sections v2.0** - Bring back categorized sections as optional feature
+   - "Your Empire" (crypto/tokens), "Collabs", "Content", "Social", "Signature Moves"
+   - User toggle: Simple list vs. Organized sections
+8. **Follower Count Display** - Add as client-side feature (non-blocking)
 
 ---
 
