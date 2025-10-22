@@ -46,8 +46,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const isInMiniApp = await sdk.isInMiniApp()
       
       if (isInMiniApp) {
-        console.log('✅ Mini App detected - using Quick Auth')
-        
         // Use Quick Auth to fetch user data
         const response = await sdk.quickAuth.fetch('/api/auth/me')
         
@@ -59,13 +57,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (data.success && data.user) {
           setUser(data.user)
-          console.log('✅ User authenticated:', data.user.username)
         } else {
           throw new Error(data.error || 'Authentication failed')
         }
       } else {
-        console.log('⚠️ Not in Mini App - trying fallback auth')
-        
         // Fallback for non-miniapp environments (web)
         const response = await fetch('/api/auth/me', {
           method: 'GET',
@@ -76,7 +71,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const data = await response.json()
           if (data.success && data.user) {
             setUser(data.user)
-            console.log('✅ Fallback auth successful:', data.user.username)
           } else {
             // Not authenticated, but not an error - user needs to sign in
             setUser(null)

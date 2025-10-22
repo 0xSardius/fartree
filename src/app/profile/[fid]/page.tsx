@@ -5,6 +5,7 @@ import { ProfileLinkList, type ProfileLink } from "~/components/profile/ProfileL
 import { WindowFrame } from "~/components/window-frame"
 import { ShareProfileButton } from "~/components/profile/ShareProfileButton"
 import { EditButton } from "~/components/profile/EditButton"
+import { CreateFartreeCTA } from "~/components/profile/CreateFartreeCTA"
 
 
 interface ProfileData {
@@ -162,7 +163,7 @@ export default async function PublicProfileView({ params }: { params: Promise<{ 
           </div>
           <div className="flex gap-2">
             <ShareProfileButton fid={profile.fid} profileName={profileName} />
-            <EditButton />
+            <EditButton profileFid={profile.fid} />
           </div>
         </div>
 
@@ -205,6 +206,9 @@ export default async function PublicProfileView({ params }: { params: Promise<{ 
           </div>
           </div>
         </div>
+
+        {/* Visitor CTA - Shows only for non-owners */}
+        <CreateFartreeCTA profileFid={profile.fid} />
 
         {/* Footer */}
         <footer className="p-4 border-t-2 border-fartree-border-dark text-fartree-text-secondary text-xs text-center bg-fartree-window-header">

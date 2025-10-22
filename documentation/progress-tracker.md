@@ -104,6 +104,15 @@
 - [x] **Simplified Badges** - "Link Master" (5+ links), "Auto-Populated" (3+ auto-detected), "Viral" (100+ clicks)
 - [x] **Follower Count Removed** - Caused blocking issues, can add client-side later
 
+### Production Hardening (October 21, 2025 - Session 6)
+- [x] **Category Infrastructure** - Category field exists in DB/API but unused in UI (dormant for v2.0)
+- [x] **Debug Log Cleanup** - Removing console.log statements from production code
+- [x] **Visitor UX Gap Fixed** - "Create your own Fartree" CTA for non-owners viewing shared profiles
+  - ✅ Edit button now owner-only (checks FID match)
+  - ✅ Created `CreateFartreeCTA` component for visitor conversion
+  - ✅ Clear call-to-action above footer for non-authenticated visitors
+- [ ] **Complete Debug Removal** - Remove remaining console.log statements from all routes
+
 ---
 
 ## 📊 Reality Check: Vision vs. Implementation
@@ -196,15 +205,17 @@
    - ✅ JWT decoding for development mode
    - ⚠️ Still needs: Rate limiting on API endpoints
    
-2. **📝 Update Messaging** - Align copy with actual features
-   - Update landing page: "auto-generates" → "kickstarts your profile"
-   - Onboarding animation: only show what we actually detect
-   - Be honest about manual addition for tokens/hypersubs
+2. **✅ Update Messaging** - ~~Align copy with actual features~~ **COMPLETE**
+   - ✅ Updated landing page: "auto-generates" → "kickstarts your profile"
+   - ✅ Onboarding animation: only shows what we actually detect
+   - ✅ Honest messaging about manual addition for tokens/hypersubs
    
-3. **🧹 Polish & UX** - Final touches before launch
-   - Remove debug console.logs from production code
-   - Test all flows end-to-end in real Farcaster client
-   - Verify invite functionality works in production
+3. **🚧 Polish & UX** - Final touches before launch **IN PROGRESS**
+   - 🚧 Remove debug console.logs from production code
+   - ✅ Fixed visitor UX gap: Added "Create your own Fartree" CTA for non-owners
+   - ✅ Made Edit button owner-only (checks FID match)
+   - 📋 Test all flows end-to-end in real Farcaster client
+   - 📋 Verify invite functionality works in production
    
 4. **🚀 Deploy to Production** - Launch on Vercel
    - Set up production environment variables

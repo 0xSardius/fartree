@@ -39,8 +39,6 @@ export async function GET(request: Request) {
 
     const bestFriendsResponse = await neynarResponse.json() as { users: any[] };
 
-    console.log('📊 Neynar response structure:', JSON.stringify(bestFriendsResponse, null, 2).substring(0, 500));
-
     if (!bestFriendsResponse?.users || bestFriendsResponse.users.length === 0) {
       return NextResponse.json({
         success: true,

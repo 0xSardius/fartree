@@ -49,7 +49,7 @@ export default function DiscoverPage() {
       try {
         await sdk.back.enableWebNavigation()
       } catch (error) {
-        console.log('Back navigation not supported:', error)
+        // Back navigation not supported in this context
       }
     }
     
@@ -70,13 +70,11 @@ export default function DiscoverPage() {
   useEffect(() => {
     async function fetchFriends() {
       if (!user?.fid) {
-        console.log('No user FID available yet')
         setLoading(false)
         return
       }
 
       try {
-        console.log('Fetching friends for FID:', user.fid)
         setLoading(true)
         const response = await fetch(`/api/discover/friends?fid=${user.fid}&limit=20`)
         const data = await response.json()
