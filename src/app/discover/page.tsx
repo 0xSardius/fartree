@@ -207,15 +207,17 @@ export default function DiscoverPage() {
           </div>
           
           {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-fartree-text-secondary" />
-            <Input
-              type="text"
-              placeholder="Search your loaded friends..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-fartree-window-background border-fartree-border-dark text-fartree-text-primary placeholder:text-fartree-text-secondary"
-            />
+          <div>
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-fartree-text-secondary pointer-events-none z-10" />
+              <Input
+                type="text"
+                placeholder="Search your loaded friends..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-fartree-window-background border-fartree-border-dark text-fartree-text-primary placeholder:text-fartree-text-secondary"
+              />
+            </div>
             <p className="text-xs text-fartree-text-secondary mt-1 ml-1">
               Filters friends shown above (search all of Farcaster coming in v2.0)
             </p>
@@ -340,27 +342,24 @@ function FriendCard({ friend, onClick }: { friend: FriendData; onClick: () => vo
 // Invite Friend Card Component (without Fartree)
 function InviteFriendCard({ friend }: { friend: FriendData }) {
   const handleInvite = async () => {
+    const shareText = `Hey @${friend.username}! 👋 Check out Fartree - it's like Linktree for Farcaster. Create your Web3 profile in seconds! 🌳✨`
+    const shareUrl = window.location.origin
+    
     try {
-      // Try to share via Farcaster Composer (Mini App SDK)
-      const shareText = `Hey @${friend.username}! 👋 Check out Fartree - it's like Linktree for Farcaster. Create your Web3 profile in seconds! 🌳✨`
-      const shareUrl = window.location.origin
-      
-      // Try to use Mini App composer
-      const isInMiniApp = await sdk.isInMiniApp()
-      if (isInMiniApp) {
-        await sdk.actions.openUrl(`https://warpcast.com/~/compose?text=${encodeURIComponent(shareText)}&embeds[]=${encodeURIComponent(shareUrl)}`)
-      } else {
-        // Fallback to copying invite link
+      // Use composeCast to stay within Farcaster (doesn't open new tab)
+      await sdk.actions.composeCast({
+        text: shareText,
+        embeds: [shareUrl],
+      })
+    } catch (error) {
+      // Fallback: copy to clipboard
+      try {
         const inviteMessage = `${shareText}\n\n${shareUrl}`
         await navigator.clipboard.writeText(inviteMessage)
         alert('Invite message copied to clipboard! Share it with your friend.')
+      } catch (clipboardError) {
+        console.error('Error inviting friend:', error)
       }
-    } catch (error) {
-      console.error('Error inviting friend:', error)
-      // Last resort fallback
-      const inviteMessage = `Hey @${friend.username}! Check out Fartree: ${window.location.origin}`
-      await navigator.clipboard.writeText(inviteMessage)
-      alert('Invite link copied to clipboard!')
     }
   }
 
@@ -386,14 +385,14 @@ function InviteFriendCard({ friend }: { friend: FriendData }) {
           <Button
             size="sm"
             variant="outline"
-            className="w-full text-xs py-1 h-6"
+            className="w-full text-xs py-1 h-7 flex items-center justify-center gap-1"
             onClick={(e) => {
               e.stopPropagation()
               handleInvite()
             }}
           >
-            <Share2 className="w-3 h-3 mr-1" />
-            Invite
+            <Share2 className="w-3 h-3" />
+            <span>Invite</span>
           </Button>
         </div>
       </CardContent>

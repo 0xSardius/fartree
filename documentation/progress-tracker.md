@@ -106,12 +106,17 @@
 
 ### Production Hardening (October 21, 2025 - Session 6)
 - [x] **Category Infrastructure** - Category field exists in DB/API but unused in UI (dormant for v2.0)
-- [x] **Debug Log Cleanup** - Removing console.log statements from production code
+- [x] **Debug Log Cleanup** - Removed console.log from key user-facing components
+  - ✅ Cleaned: AuthContext, discover page, API routes
+  - ⚠️ Still present in: editor (47 logs for debugging), onboarding, test pages
 - [x] **Visitor UX Gap Fixed** - "Create your own Fartree" CTA for non-owners viewing shared profiles
   - ✅ Edit button now owner-only (checks FID match)
   - ✅ Created `CreateFartreeCTA` component for visitor conversion
   - ✅ Clear call-to-action above footer for non-authenticated visitors
-- [ ] **Complete Debug Removal** - Remove remaining console.log statements from all routes
+- [x] **Discover Page UX Polish** - Fixed visual and interaction issues
+  - ✅ Search icon now properly positioned within search bar with pointer-events-none
+  - ✅ Invite button icon and text properly aligned with flex layout
+  - ✅ Invite now uses `composeCast()` instead of `openUrl()` - stays in Farcaster, no new tab
 
 ---
 
