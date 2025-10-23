@@ -42,6 +42,9 @@ export default function DiscoverPage() {
   const [discoverData, setDiscoverData] = useState<DiscoverData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
+  const [searchResults, setSearchResults] = useState<FriendData[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchMode, setSearchMode] = useState(false)
 
   // Enable web navigation for back button
   useEffect(() => {
@@ -99,6 +102,40 @@ export default function DiscoverPage() {
       setLoading(false)
     }
   }, [user?.fid, authLoading])
+
+  // Handle global Farcaster user search with debouncing
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchMode(false)
+      setSearchResults([])
+      return
+    }
+
+    // Debounce search
+    const timer = setTimeout(async () => {
+      setSearchMode(true)
+      setIsSearching(true)
+      
+      try {
+        const response = await fetch(`/api/search/users?q=${encodeURIComponent(searchQuery)}&limit=20`)
+        const data = await response.json()
+        
+        if (data.success) {
+          setSearchResults(data.users || [])
+        } else {
+          console.error('Search error:', data.error)
+          setSearchResults([])
+        }
+      } catch (error) {
+        console.error('Search failed:', error)
+        setSearchResults([])
+      } finally {
+        setIsSearching(false)
+      }
+    }, 500) // 500ms debounce
+
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
   if (authLoading) {
     return (
@@ -193,7 +230,10 @@ export default function DiscoverPage() {
               <div>
                 <h1 className="text-lg font-bold text-fartree-text-primary">Discover Friends</h1>
                 <p className="text-xs text-fartree-text-secondary">
-                  {discoverData?.fartree_count || 0} friends with Fartrees • Showing {discoverData?.total_friends || 0} best friends
+                  {searchMode 
+                    ? `Searching Farcaster...` 
+                    : `${discoverData?.fartree_count || 0} friends with Fartrees • ${discoverData?.total_friends || 0} closest connections`
+                  }
                 </p>
               </div>
             </div>
@@ -212,22 +252,62 @@ export default function DiscoverPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-fartree-text-secondary pointer-events-none z-10" />
               <Input
                 type="text"
-                placeholder="Search your loaded friends..."
+                placeholder="Search by username or FID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-fartree-window-background border-fartree-border-dark text-fartree-text-primary placeholder:text-fartree-text-secondary"
               />
             </div>
             <p className="text-xs text-fartree-text-secondary mt-1 ml-1">
-              Filters friends shown above (search all of Farcaster coming in v2.0)
+              {searchMode 
+                ? `Showing search results from all of Farcaster` 
+                : `Showing your 20 closest connections • Search to find anyone on Farcaster`
+              }
             </p>
           </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 bg-fartree-window-background space-y-8">
-          {/* Friends with Fartree */}
-          {filteredFriendsWithFartree.length > 0 && (
+          {/* Search Mode: Show global search results */}
+          {searchMode ? (
+            <>
+              {isSearching ? (
+                <div className="text-center py-12">
+                  <Loader2 className="animate-spin w-8 h-8 text-fartree-primary-purple mx-auto mb-4" />
+                  <p className="text-fartree-text-secondary">Searching Farcaster...</p>
+                </div>
+              ) : searchResults.length > 0 ? (
+                <section>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Search className="w-5 h-5 text-fartree-primary-purple" />
+                    <h2 className="text-xl font-bold text-fartree-text-primary">
+                      Search Results ({searchResults.length})
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {searchResults.map((user) => (
+                      <InviteFriendCard key={user.fid} friend={user} />
+                    ))}
+                  </div>
+                </section>
+              ) : (
+                <div className="text-center py-12">
+                  <Search className="w-16 h-16 text-fartree-text-secondary mx-auto mb-4 opacity-50" />
+                  <h3 className="text-xl font-bold text-fartree-text-primary mb-2">
+                    No results found
+                  </h3>
+                  <p className="text-fartree-text-secondary">
+                    Try searching by username or FID
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            /* Default Mode: Show best friends lists */
+            <>
+              {/* Friends with Fartree */}
+              {filteredFriendsWithFartree.length > 0 && (
             <section>
               <div className="flex items-center gap-2 mb-4">
                 <Sparkles className="w-5 h-5 text-fartree-primary-purple" />
@@ -281,18 +361,7 @@ export default function DiscoverPage() {
               )}
             </section>
           )}
-          
-          {/* No search results */}
-          {searchQuery && filteredFriendsWithFartree.length === 0 && filteredFriendsWithoutFartree.length === 0 && (
-            <div className="text-center py-12">
-              <Search className="w-16 h-16 text-fartree-text-secondary mx-auto mb-4 opacity-50" />
-              <h3 className="text-xl font-bold text-fartree-text-primary mb-2">
-                No friends found
-              </h3>
-              <p className="text-fartree-text-secondary">
-                Try searching by username or FID
-              </p>
-            </div>
+            </>
           )}
         </div>
       </WindowFrame>

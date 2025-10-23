@@ -117,6 +117,12 @@
   - ✅ Search icon now properly positioned within search bar with pointer-events-none
   - ✅ Invite button icon and text properly aligned with flex layout
   - ✅ Invite now uses `composeCast()` instead of `openUrl()` - stays in Farcaster, no new tab
+- [x] **Global Farcaster User Search** - Added ability to search all of Farcaster, not just loaded friends
+  - ✅ Created `/api/search/users` endpoint using Neynar's user search API
+  - ✅ Implemented debounced search (500ms) for smooth UX
+  - ✅ Two modes: Default shows 20 best friends, Search shows global results
+  - ✅ Updated messaging: "20 closest connections" → "Search to find anyone on Farcaster"
+  - ✅ Invite functionality works for both friends and search results
 
 ---
 
