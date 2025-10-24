@@ -117,13 +117,16 @@ export default function DiscoverPage() {
       setIsSearching(true)
       
       try {
-        const response = await fetch(`/api/search/users?q=${encodeURIComponent(searchQuery)}&limit=20`)
+        const viewerFidParam = user?.fid ? `&viewer_fid=${user.fid}` : '';
+        const searchUrl = `/api/search/users?q=${encodeURIComponent(searchQuery)}&limit=10${viewerFidParam}`;
+        
+        const response = await fetch(searchUrl)
         const data = await response.json()
         
         if (data.success) {
           setSearchResults(data.users || [])
         } else {
-          console.error('Search error:', data.error)
+          console.error('Search error:', data.error, data.details)
           setSearchResults([])
         }
       } catch (error) {
@@ -135,7 +138,7 @@ export default function DiscoverPage() {
     }, 500) // 500ms debounce
 
     return () => clearTimeout(timer)
-  }, [searchQuery])
+  }, [searchQuery, user?.fid])
 
   if (authLoading) {
     return (
