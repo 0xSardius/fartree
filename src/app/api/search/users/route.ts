@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
       fid: user.fid,
       username: user.username,
       display_name: user.display_name,
-      pfp_url: user.pfp_url,
+      pfp_url: user.pfp?.url || user.pfp_url, // Neynar returns pfp.url
       power_badge: user.power_badge || false,
       // Search results won't have fartree_data initially
       fartree_data: null,

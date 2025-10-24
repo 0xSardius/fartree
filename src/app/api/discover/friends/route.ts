@@ -80,7 +80,7 @@ export async function GET(request: Request) {
         fid: friend.fid,
         username: friend.username,
         display_name: friend.display_name,
-        pfp_url: friend.pfp_url,
+        pfp_url: friend.pfp?.url || friend.pfp_url, // Neynar returns pfp.url
         follower_count: friend.follower_count,
         following_count: friend.following_count,
         power_badge: friend.power_badge,

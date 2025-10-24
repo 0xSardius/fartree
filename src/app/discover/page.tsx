@@ -79,7 +79,9 @@ export default function DiscoverPage() {
 
       try {
         setLoading(true)
-        const response = await fetch(`/api/discover/friends?fid=${user.fid}&limit=20`)
+        const response = await fetch(`/api/discover/friends?fid=${user.fid}&limit=20`, {
+          cache: 'no-store'
+        })
         const data = await response.json()
 
         if (data.success) {
@@ -352,16 +354,11 @@ export default function DiscoverPage() {
                   Invite Friends ({filteredFriendsWithoutFartree.length})
                 </h2>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {filteredFriendsWithoutFartree.slice(0, 8).map((friend) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredFriendsWithoutFartree.map((friend) => (
                   <InviteFriendCard key={friend.fid} friend={friend} />
                 ))}
               </div>
-              {filteredFriendsWithoutFartree.length > 8 && (
-                <p className="text-xs text-fartree-text-secondary mt-3 text-center">
-                  ...and {filteredFriendsWithoutFartree.length - 8} more friends to invite
-                </p>
-              )}
             </section>
           )}
             </>

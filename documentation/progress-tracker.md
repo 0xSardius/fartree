@@ -124,6 +124,8 @@
   - ✅ Updated messaging: "20 closest connections" → "Search to find anyone on Farcaster"
   - ✅ Invite functionality works for both friends and search results
   - ✅ Fixed: Neynar API has max limit of 10 for search (not 20)
+  - ✅ Mobile-friendly layout: Single column on mobile, larger avatars (12x12), horizontal card layout
+  - ✅ Removed 8-friend limit - now shows all friends with proper scrolling
 
 ---
 
