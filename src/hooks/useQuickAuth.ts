@@ -40,8 +40,8 @@ export function useQuickAuth() {
       try {
         setAuthState(prev => ({ ...prev, loading: true, error: null }));
 
-        // Check if we're in a Mini App environment with longer timeout for desktop
-        const isInMiniApp = await sdk.isInMiniApp(500); // Increased timeout for desktop iframe
+        // Check if we're in a Mini App environment
+        const isInMiniApp = await sdk.isInMiniApp();
         
         if (isInMiniApp) {
           // Use Quick Auth to get authenticated token and make request
@@ -87,7 +87,7 @@ export function useQuickAuth() {
               }
             }
           } catch (fallbackError) {
-            console.log('Fallback auth also failed:', fallbackError);
+            // Fallback auth also failed
           }
           
           // If we reach here, user needs to authenticate
