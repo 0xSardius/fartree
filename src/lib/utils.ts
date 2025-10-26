@@ -97,7 +97,7 @@ export async function getFarcasterMetadata(): Promise<MiniAppManifest> {
       iconUrl: APP_ICON_URL,
       homeUrl: APP_URL,
       imageUrl: APP_OG_IMAGE_URL,
-      buttonTitle: APP_BUTTON_TEXT ?? "🌳 Build Your Tree",
+      buttonTitle: APP_BUTTON_TEXT ?? "🌳 Build Your Fartree",
       splashImageUrl: APP_SPLASH_URL,
       splashBackgroundColor: APP_SPLASH_BACKGROUND_COLOR,
       webhookUrl: APP_WEBHOOK_URL,

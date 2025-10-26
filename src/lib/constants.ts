@@ -63,14 +63,30 @@ export const APP_SPLASH_URL = `${APP_URL}/splash.png`;
  * Background color for the splash screen.
  * Used as fallback when splash image is loading.
  */
-export const APP_SPLASH_BACKGROUND_COLOR = '#1a1a1a';
+export const APP_SPLASH_BACKGROUND_COLOR = '#8465CB'; // Fartree purple
 
 // --- UI Configuration ---
 /**
  * Text displayed on the main action button.
  * Used for the primary call-to-action in the mini app.
  */
-export const APP_BUTTON_TEXT = '🌳 Build Your Tree';
+export const APP_BUTTON_TEXT = '🌳 Build Your Fartree';
+
+// --- Brand Colors ---
+/**
+ * Brand color palette for Fartree
+ * Used in manifest and theming
+ */
+export const BRAND_COLORS = {
+  PRIMARY_PURPLE: '#8465CB',
+  ACCENT_PURPLE: '#a478e8',
+  BACKGROUND_PINK: '#FADDE6',
+  WINDOW_BACKGROUND: '#FFFBF0',
+  WINDOW_HEADER: '#E0E0E0',
+  BORDER_DARK: '#333333',
+  TEXT_PRIMARY: '#333333',
+  TEXT_SECONDARY: '#666666',
+};
 
 // --- Integration Configuration ---
 /**
