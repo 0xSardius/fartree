@@ -16,7 +16,7 @@ export default function ProfileNotFound() {
           <h1 className="text-2xl font-bold text-fartree-text-primary mb-2">Profile Not Found</h1>
           
           <p className="text-fartree-text-secondary mb-6 max-w-xs">
-            This Fartree profile doesn't exist or hasn't been created yet.
+            This Fartree profile doesn&apos;t exist or hasn&apos;t been created yet.
           </p>
           
           <div className="space-y-3 w-full max-w-xs">

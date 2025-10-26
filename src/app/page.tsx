@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Button } from "../components/ui/Button"
 import { WindowFrame } from "../components/window-frame"
-import { ArrowRight, Sparkles, LinkIcon, User, CheckCircle, AlertCircle, Users } from "lucide-react"
+import { ArrowRight, Sparkles, LinkIcon, CheckCircle, AlertCircle, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "~/contexts/AuthContext"
 import { useEffect } from "react"

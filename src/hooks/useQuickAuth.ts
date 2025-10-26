@@ -86,7 +86,7 @@ export function useQuickAuth() {
                 return;
               }
             }
-          } catch (fallbackError) {
+          } catch {
             // Fallback auth also failed
           }
           

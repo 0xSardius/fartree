@@ -1,7 +1,7 @@
 import type React from "react"
 import { Card, CardContent } from "~/components/ui/card"
 import { cn } from "~/lib/utils"
-import { Link, Eye, Pencil, GripVertical, Trash2 } from "lucide-react"
+import { Link, Eye, Pencil, GripVertical } from "lucide-react"
 import { Button } from "~/components/ui/Button"
 
 // Helper to shorten long URLs for display
@@ -61,11 +61,11 @@ export function LinkCard({
   isMostClicked = false,
   editable = false,
   onEdit,
-  onToggleVisibility,
-  onDelete,
   className,
   ...props
 }: LinkCardProps) {
+  // Note: onToggleVisibility and onDelete are currently unused
+  // They're kept in the interface for future functionality
   const categoryColors = {
     Social: "bg-blue-500",
     Crypto: "bg-yellow-500",

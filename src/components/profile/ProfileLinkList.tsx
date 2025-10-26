@@ -159,7 +159,7 @@ export function ProfileLinkList({ initialLinks, profileFid, showSummary = true }
           <div>
             <Globe className="w-12 h-12 mx-auto mb-4 text-fartree-text-secondary" />
             <h3 className="text-lg font-medium text-fartree-text-primary mb-2">No links yet</h3>
-            <p className="text-fartree-text-secondary mb-4">This profile hasn't added any links yet.</p>
+            <p className="text-fartree-text-secondary mb-4">This profile hasn&apos;t added any links yet.</p>
           </div>
         </div>
       ) : (

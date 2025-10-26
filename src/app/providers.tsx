@@ -5,7 +5,6 @@ import type { Session } from 'next-auth';
 import { SessionProvider } from 'next-auth/react';
 import { MiniAppProvider } from '@neynar/react';
 import { SafeFarcasterSolanaProvider } from '~/components/providers/SafeFarcasterSolanaProvider';
-import { ANALYTICS_ENABLED } from '~/lib/constants';
 import { AuthKitProvider } from '@farcaster/auth-kit';
 import { AuthProvider } from '~/contexts/AuthContext';
 

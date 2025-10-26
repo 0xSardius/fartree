@@ -42,8 +42,7 @@ async function getProfile(identifier: string): Promise<ProfileData | null> {
     }
     
     return result.rows.length > 0 ? result.rows[0] : null
-  } catch (error) {
-    console.error('Error fetching profile:', error)
+  } catch {
     return null
   }
 }
@@ -81,8 +80,7 @@ async function getProfileLinks(identifier: string): Promise<ProfileLink[]> {
     `, [profileId])
     
     return linksResult.rows
-  } catch (error) {
-    console.error('Error fetching links:', error)
+  } catch {
     return []
   }
 }
@@ -142,10 +140,6 @@ export default async function PublicProfileView({ params }: { params: Promise<{ 
   if (!profile) {
     notFound()
   }
-
-  const visibleLinks = links
-    .filter((link) => link.is_visible !== false)
-    .sort((a, b) => (a.position || 0) - (b.position || 0))
 
   const profileName = profile.display_name || profile.username || `User ${profile.fid}`
 

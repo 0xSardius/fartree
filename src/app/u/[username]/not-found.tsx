@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "~/components/ui/Button"
 import { WindowFrame } from "~/components/window-frame"
-import { AlertCircle, Home, Search, User } from "lucide-react"
+import { Home, Search, User } from "lucide-react"
 
 export default function UsernameNotFound() {
   return (

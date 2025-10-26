@@ -426,7 +426,7 @@ function InviteFriendCard({ friend }: { friend: FriendData }) {
         const inviteMessage = `${shareText}\n\n${shareUrl}`
         await navigator.clipboard.writeText(inviteMessage)
         alert('Invite message copied to clipboard! Share it with your friend.')
-      } catch (clipboardError) {
+      } catch {
         console.error('Error inviting friend:', error)
       }
     }

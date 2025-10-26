@@ -121,7 +121,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    let { title, url, category, position, is_visible = true, auto_detected = false } = body;
+    const { title, category, position, is_visible = true, auto_detected = false } = body;
+    let { url } = body;
 
     // Validate required fields
     if (!title || !url) {
@@ -139,7 +140,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Validate URL format
     try {
       new URL(url);
-    } catch (err) {
+    } catch {
       return NextResponse.json(
         { success: false, error: 'Invalid URL format. Please use a valid URL like: https://example.com' },
         { status: 400 }

@@ -409,7 +409,9 @@ export default function ProfileEditorInterface() {
     }
   }
 
-  // Toggle link visibility
+  // Toggle link visibility (currently unused but kept for future feature)
+  // Commenting out to avoid unused variable warning
+  /*
   const handleToggleVisibility = async (linkId: string) => {
     const link = links.find(l => l.id === linkId)
     if (!link || !user?.fid) return
@@ -439,6 +441,7 @@ export default function ProfileEditorInterface() {
       setError(err instanceof Error ? err.message : 'Failed to update link visibility')
     }
   }
+  */
 
   // Get icon for category
   const getIconForCategory = (category?: string) => {
@@ -902,7 +905,7 @@ export default function ProfileEditorInterface() {
           <div className="bg-fartree-window-background border-2 border-fartree-border-dark rounded-lg p-6 w-full max-w-sm">
             <h3 className="text-lg font-semibold text-fartree-text-primary mb-2">Delete Link?</h3>
             <p className="text-fartree-text-secondary mb-6">
-              Are you sure you want to delete "<span className="font-semibold">{editingLink.title}</span>"? This action cannot be undone.
+              Are you sure you want to delete &quot;<span className="font-semibold">{editingLink.title}</span>&quot;? This action cannot be undone.
             </p>
             
             <div className="flex gap-3">
