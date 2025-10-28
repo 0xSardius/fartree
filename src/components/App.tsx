@@ -56,10 +56,10 @@ export default function App(
   // --- State ---
   const [currentTab, setCurrentTab] = useState<Tab>(Tab.Home);
   const [isSDKLoaded, setIsSDKLoaded] = useState(false);
-  const [context, setContext] = useState<any>(null);
+  const [context, setContext] = useState<Record<string, unknown> | null>(null);
 
   // --- Quick Auth ---
-  const { user, loading: authLoading, error: authError, isAuthenticated } = useQuickAuth();
+  const { loading: authLoading, error: authError } = useQuickAuth();
 
   // --- Effects ---
   /**

@@ -8,7 +8,7 @@ const pool = new Pool({
 export { pool };
 
 // Helper function to execute queries with error handling
-export async function query(text: string, params?: any[]) {
+export async function query(text: string, params?: unknown[]) {
   const client = await pool.connect();
   try {
     const result = await client.query(text, params);
@@ -23,7 +23,7 @@ export async function query(text: string, params?: any[]) {
 
 // Helper function for transactions
 export async function withTransaction<T>(
-  callback: (client: any) => Promise<T>
+  callback: (client: unknown) => Promise<T>
 ): Promise<T> {
   const client = await pool.connect();
   try {

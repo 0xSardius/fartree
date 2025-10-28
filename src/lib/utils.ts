@@ -81,9 +81,6 @@ export async function getFarcasterMetadata(): Promise<MiniAppManifest> {
     throw new Error("NEXT_PUBLIC_URL not configured");
   }
 
-  // Get the domain from the URL (without https:// prefix)
-  const domain = new URL(APP_URL).hostname;
-
   return {
     accountAssociation: {
       header: "",

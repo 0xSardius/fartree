@@ -4,12 +4,12 @@ import { getNeynarUser } from '~/lib/neynar';
 import { createClient } from '@farcaster/quick-auth';
 
 // Helper function to auto-detect and create social links from Neynar data
-async function autoDetectSocialLinks(profileId: string, neynarUser: any) {
+async function autoDetectSocialLinks(profileId: string, neynarUser: Record<string, unknown>) {
   const linksToCreate = [];
   
   // Add X (Twitter) if verified
   if (neynarUser.verified_accounts) {
-    const xAccount = neynarUser.verified_accounts.find((acc: any) => acc.platform === 'x');
+    const xAccount = (neynarUser.verified_accounts as Array<{ platform: string; username: string }>).find((acc) => acc.platform === 'x');
     if (xAccount) {
       linksToCreate.push({
         title: 'X (Twitter)',
@@ -21,8 +21,9 @@ async function autoDetectSocialLinks(profileId: string, neynarUser: any) {
   }
   
   // Add primary ETH address if available
-  if (neynarUser.verified_addresses?.primary?.eth_address) {
-    const ethAddress = neynarUser.verified_addresses.primary.eth_address;
+  const verifiedAddresses = neynarUser.verified_addresses as { primary?: { eth_address?: string; sol_address?: string } } | undefined;
+  if (verifiedAddresses?.primary?.eth_address) {
+    const ethAddress = verifiedAddresses.primary.eth_address;
     linksToCreate.push({
       title: 'ETH Address',
       url: `https://etherscan.io/address/${ethAddress}`,
@@ -32,8 +33,8 @@ async function autoDetectSocialLinks(profileId: string, neynarUser: any) {
   }
   
   // Add primary SOL address if available
-  if (neynarUser.verified_addresses?.primary?.sol_address) {
-    const solAddress = neynarUser.verified_addresses.primary.sol_address;
+  if (verifiedAddresses?.primary?.sol_address) {
+    const solAddress = verifiedAddresses.primary.sol_address;
     linksToCreate.push({
       title: 'SOL Address',
       url: `https://solscan.io/account/${solAddress}`,
@@ -81,7 +82,7 @@ async function extractFidFromJWT(authHeader: string): Promise<number | null> {
       
       return payload.sub; // The FID is in the 'sub' field
       
-    } catch (jwtError: any) {
+    } catch (jwtError: unknown) {
       // In development, JWT verification often fails due to domain mismatch
       // But we can still decode the token to get the FID (without verification)
       if (process.env.NODE_ENV === 'development') {
@@ -102,7 +103,8 @@ async function extractFidFromJWT(authHeader: string): Promise<number | null> {
       }
       
       // In production, log the actual error
-      console.error('❌ JWT verification failed:', jwtError?.shortMessage || jwtError?.message || jwtError);
+      const errorMessage = jwtError instanceof Error ? jwtError.message : String(jwtError);
+      console.error('❌ JWT verification failed:', errorMessage);
       return null;
     }
     
@@ -155,7 +157,7 @@ export async function GET(request: NextRequest) {
         profile = createResult;
         
         // Auto-detect and create social links from Neynar data
-        await autoDetectSocialLinks(profile.rows[0].id, neynarUser);
+        await autoDetectSocialLinks(profile.rows[0].id, neynarUser as unknown as Record<string, unknown>);
       } else {
         // Fallback if Neynar API fails
         const createResult = await query(`
@@ -193,7 +195,7 @@ export async function GET(request: NextRequest) {
           profile = updateResult;
           
           // Also refresh auto-detected links
-          await autoDetectSocialLinks(existingUser.id, neynarUser);
+          await autoDetectSocialLinks(existingUser.id, neynarUser as unknown as Record<string, unknown>);
         }
       }
     }

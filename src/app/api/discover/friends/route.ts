@@ -37,7 +37,18 @@ export async function GET(request: Request) {
       throw new Error(`Neynar API error: ${neynarResponse.statusText}`);
     }
 
-    const bestFriendsResponse = await neynarResponse.json() as { users: any[] };
+    interface NeynarUser {
+      fid: number;
+      username: string;
+      display_name: string;
+      pfp?: { url?: string };
+      pfp_url?: string;
+      follower_count?: number;
+      following_count?: number;
+      power_badge?: boolean;
+    }
+
+    const bestFriendsResponse = await neynarResponse.json() as { users: NeynarUser[] };
 
     if (!bestFriendsResponse?.users || bestFriendsResponse.users.length === 0) {
       return NextResponse.json({
@@ -50,7 +61,7 @@ export async function GET(request: Request) {
     }
 
     // Extract FIDs from best friends - Neynar returns users directly, not nested
-    const friendFids = bestFriendsResponse.users.map((user: any) => user.fid);
+    const friendFids = bestFriendsResponse.users.map((user) => user.fid);
 
     // Query our database to see which friends have Fartree profiles
     const profilesResult = await query(
@@ -72,9 +83,16 @@ export async function GET(request: Request) {
       [friendFids]
     );
 
+    interface FartreeProfile {
+      fid: number;
+      link_count: string;
+      bio?: string;
+      updated_at: string;
+    }
+
     // Enrich friend data with Fartree profile info
-    const enrichedFriends = bestFriendsResponse.users.map((friend: any) => {
-      const fartreeProfile = profilesResult.rows.find((p: any) => p.fid === friend.fid);
+    const enrichedFriends = bestFriendsResponse.users.map((friend) => {
+      const fartreeProfile = profilesResult.rows.find((p: FartreeProfile) => p.fid === friend.fid);
 
       return {
         fid: friend.fid,
@@ -95,8 +113,8 @@ export async function GET(request: Request) {
     });
 
     // Separate friends with and without Fartrees
-    const friendsWithFartree = enrichedFriends.filter((f: any) => f.has_fartree);
-    const friendsWithoutFartree = enrichedFriends.filter((f: any) => !f.has_fartree);
+    const friendsWithFartree = enrichedFriends.filter((f) => f.has_fartree);
+    const friendsWithoutFartree = enrichedFriends.filter((f) => !f.has_fartree);
 
     return NextResponse.json({
       success: true,

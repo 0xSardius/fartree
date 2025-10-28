@@ -40,7 +40,7 @@ export default function DiscoverPage() {
   const { user, loading: authLoading, isAuthenticated } = useAuth()
   const [loading, setLoading] = useState(true)
   const [discoverData, setDiscoverData] = useState<DiscoverData | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [discoverError, setDiscoverError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<FriendData[]>([])
   const [isSearching, setIsSearching] = useState(false)
@@ -87,11 +87,11 @@ export default function DiscoverPage() {
         if (data.success) {
           setDiscoverData(data)
         } else {
-          setError(data.error || 'Failed to load friends')
+          setDiscoverError(data.error || 'Failed to load friends')
         }
       } catch (err) {
         console.error('Error fetching friends:', err)
-        setError('Failed to load friends')
+        setDiscoverError('Failed to load friends')
       } finally {
         setLoading(false)
       }
@@ -179,14 +179,14 @@ export default function DiscoverPage() {
     )
   }
 
-  if (error) {
+  if (discoverError) {
     return (
       <div className="min-h-screen bg-fartree-background flex flex-col items-center justify-center p-4 font-mono">
         <WindowFrame title="Discover Friends" className="w-full max-w-2xl">
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
             <div className="text-red-500 text-4xl mb-4">⚠️</div>
             <h1 className="text-2xl font-bold text-fartree-text-primary mb-2">Oops!</h1>
-            <p className="text-fartree-text-secondary mb-6">{error}</p>
+            <p className="text-fartree-text-secondary mb-6">{discoverError}</p>
             <Button onClick={() => window.location.reload()}>Try Again</Button>
           </div>
         </WindowFrame>

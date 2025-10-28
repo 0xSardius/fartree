@@ -118,7 +118,7 @@ export async function generateMetadata({ params }: { params: Promise<{ fid: stri
         images: profile.avatar_url ? [profile.avatar_url] : undefined,
       },
     }
-  } catch (error) {
+  } catch {
     return {
       title: 'Fartree Profile',
       description: 'Web3 profile and links',

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "~/components/ui/Button"
 import { WindowFrame } from "~/components/window-frame"
 import { CheckCircle, Loader2, LinkIcon, User, Sparkles, ArrowRight, ArrowLeft } from "lucide-react"
@@ -35,7 +35,7 @@ export default function OnboardingFlow() {
       setStep(2)
       handleAutoScan()
     }
-  }, [isAuthenticated, user, step])
+  }, [isAuthenticated, user, step, handleAutoScan])
 
   useEffect(() => {
     if (step === 2) {
@@ -52,7 +52,7 @@ export default function OnboardingFlow() {
   }, [step])
 
   // Real auto-scanning function
-  const handleAutoScan = async () => {
+  const handleAutoScan = useCallback(async () => {
     setLoading(true)
     try {
       setScanComplete(false)
@@ -122,7 +122,7 @@ export default function OnboardingFlow() {
       )
       setTimeout(() => setStep(3), 1000)
     }
-  }
+  }, [user, refetch])
 
   const handleNext = () => {
     if (step === 2) {
@@ -217,7 +217,7 @@ export default function OnboardingFlow() {
           )}
           <div className="text-sm text-fartree-text-secondary">
             <strong>Auto-detected {profileData.links?.length || 0} links:</strong>
-            {profileData.links?.slice(0, 3).map((link: any, index: number) => (
+            {profileData.links?.slice(0, 3).map((link: { title: string; auto_detected?: boolean }, index: number) => (
               <div key={index} className="flex items-center mt-1">
                 <span className="text-xs">🔗</span>
                 <span className="ml-2 truncate">{link.title}</span>

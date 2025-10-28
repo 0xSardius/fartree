@@ -42,10 +42,19 @@ export async function GET(request: NextRequest) {
 
     const searchResults = await neynarResponse.json();
 
+    interface NeynarSearchUser {
+      fid: number;
+      username: string;
+      display_name: string;
+      pfp?: { url?: string };
+      pfp_url?: string;
+      power_badge?: boolean;
+    }
+
     // Transform the results to match our FriendData interface
     // Neynar returns users directly in the result object
-    const users = searchResults.result?.users || searchResults.users || [];
-    const transformedUsers = users.map((user: any) => ({
+    const users = (searchResults.result?.users || searchResults.users || []) as NeynarSearchUser[];
+    const transformedUsers = users.map((user) => ({
       fid: user.fid,
       username: user.username,
       display_name: user.display_name,

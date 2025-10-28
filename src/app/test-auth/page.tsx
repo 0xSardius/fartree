@@ -3,10 +3,36 @@
 import { useEffect, useState } from "react"
 import { useAuth } from "~/contexts/AuthContext"
 
+interface ProfileResponse {
+  success: boolean;
+  profile?: {
+    id: string;
+    fid: number;
+    username: string;
+    display_name: string;
+    links?: unknown[];
+  };
+  error?: string;
+}
+
+interface LinksResponse {
+  success: boolean;
+  count?: number;
+  links?: Array<{
+    id: string;
+    title: string;
+    url: string;
+    category?: string;
+    click_count: number;
+    auto_detected: boolean;
+    is_visible: boolean;
+  }>;
+}
+
 export default function TestAuthPage() {
   const { user, loading, error, isAuthenticated } = useAuth()
-  const [profileData, setProfileData] = useState<any>(null)
-  const [linksData, setLinksData] = useState<any>(null)
+  const [profileData, setProfileData] = useState<ProfileResponse | null>(null)
+  const [linksData, setLinksData] = useState<LinksResponse | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -137,7 +163,7 @@ export default function TestAuthPage() {
               
               {linksData.success && linksData.links && (
                 <div className="space-y-3 mt-4">
-                  {linksData.links.map((link: any, idx: number) => (
+                  {linksData.links.map((link, idx: number) => (
                     <div key={link.id} className="bg-gray-700 p-3 rounded">
                       <div><strong>Link {idx + 1}:</strong> {link.title}</div>
                       <div className="text-sm text-gray-300 mt-1">

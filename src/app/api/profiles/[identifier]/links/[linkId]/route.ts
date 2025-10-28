@@ -245,7 +245,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     try {
       body = await request.json();
-    } catch (error) {
+    } catch {
       // Gracefully handle empty bodies for legacy clients
       body = {};
     }
