@@ -29,29 +29,7 @@ export default function OnboardingFlow() {
   // Use centralized auth context
   const { user, loading: authLoading, error: authError, isAuthenticated, refetch } = useAuth()
   
-  // Auto-advance to step 2 when user is authenticated
-  useEffect(() => {
-    if (isAuthenticated && user && step === 1) {
-      setStep(2)
-      handleAutoScan()
-    }
-  }, [isAuthenticated, user, step, handleAutoScan])
-
-  useEffect(() => {
-    if (step === 2) {
-      setScanSteps([
-        { id: "profile", message: "🔍 Scanning your Farcaster profile…", status: "active" },
-        { id: "basics", message: "✅ Imported profile basics (avatar, bio, username)", status: "pending" },
-        { id: "social", message: "✅ Found verified social accounts", status: "pending" },
-        { id: "crypto", message: "✅ Detected crypto addresses (ETH/SOL)", status: "pending" },
-        { id: "ready", message: "✅ Profile ready for customization!", status: "pending" },
-        { id: "celebrate", message: "🎉 Let's add your links!", status: "pending" },
-      ])
-      setScanComplete(false)
-    }
-  }, [step])
-
-  // Real auto-scanning function
+  // Real auto-scanning function - defined before useEffect that uses it
   const handleAutoScan = useCallback(async () => {
     setLoading(true)
     try {
@@ -123,6 +101,28 @@ export default function OnboardingFlow() {
       setTimeout(() => setStep(3), 1000)
     }
   }, [user, refetch])
+
+  // Auto-advance to step 2 when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && user && step === 1) {
+      setStep(2)
+      handleAutoScan()
+    }
+  }, [isAuthenticated, user, step, handleAutoScan])
+
+  useEffect(() => {
+    if (step === 2) {
+      setScanSteps([
+        { id: "profile", message: "🔍 Scanning your Farcaster profile…", status: "active" },
+        { id: "basics", message: "✅ Imported profile basics (avatar, bio, username)", status: "pending" },
+        { id: "social", message: "✅ Found verified social accounts", status: "pending" },
+        { id: "crypto", message: "✅ Detected crypto addresses (ETH/SOL)", status: "pending" },
+        { id: "ready", message: "✅ Profile ready for customization!", status: "pending" },
+        { id: "celebrate", message: "🎉 Let's add your links!", status: "pending" },
+      ])
+      setScanComplete(false)
+    }
+  }, [step])
 
   const handleNext = () => {
     if (step === 2) {
