@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { query } from '~/lib/db';
+import { NextRequest, NextResponse } from "next/server";
+import { query } from "~/lib/db";
 
 type RouteParams = {
-  params: {
+  params: Promise<{
     identifier: string;
-  };
+  }>;
 };
 
 // Helper function to determine if identifier is FID (numeric) or username
@@ -16,41 +16,49 @@ function isNumeric(str: string): boolean {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { identifier } = await params;
-    
+
     if (!identifier) {
       return NextResponse.json(
-        { success: false, error: 'Profile identifier is required' },
+        { success: false, error: "Profile identifier is required" },
         { status: 400 }
       );
     }
 
     let result;
-    
+
     if (isNumeric(identifier)) {
       // Search by FID
-      result = await query(`
+      result = await query(
+        `
         SELECT 
           id, fid, username, display_name, bio, avatar_url, 
           theme, custom_domain, is_verified, created_at, updated_at
         FROM profiles 
         WHERE fid = $1
-      `, [parseInt(identifier)]);
+      `,
+        [parseInt(identifier)]
+      );
     } else {
       // Search by username
-      result = await query(`
+      result = await query(
+        `
         SELECT 
           id, fid, username, display_name, bio, avatar_url, 
           theme, custom_domain, is_verified, created_at, updated_at
         FROM profiles 
         WHERE username = $1
-      `, [identifier]);
+      `,
+        [identifier]
+      );
     }
 
     if (result.rows.length === 0) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: `Profile not found with ${isNumeric(identifier) ? 'FID' : 'username'}: ${identifier}` 
+        {
+          success: false,
+          error: `Profile not found with ${
+            isNumeric(identifier) ? "FID" : "username"
+          }: ${identifier}`,
         },
         { status: 404 }
       );
@@ -59,28 +67,30 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const profile = result.rows[0];
 
     // Also fetch profile links
-    const linksResult = await query(`
+    const linksResult = await query(
+      `
       SELECT id, title, url, category, position, is_visible, click_count, auto_detected, created_at
       FROM profile_links 
       WHERE profile_id = $1 AND is_visible = true
       ORDER BY position ASC, created_at ASC
-    `, [profile.id]);
+    `,
+      [profile.id]
+    );
 
     return NextResponse.json({
       success: true,
       profile: {
         ...profile,
-        links: linksResult.rows
-      }
+        links: linksResult.rows,
+      },
     });
-
   } catch (error) {
-    console.error('Error fetching profile:', error);
+    console.error("Error fetching profile:", error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to fetch profile',
-        details: error instanceof Error ? error.message : 'Unknown error'
+      {
+        success: false,
+        error: "Failed to fetch profile",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
@@ -92,10 +102,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { identifier } = await params;
     const body = await request.json();
-    
+
     if (!identifier) {
       return NextResponse.json(
-        { success: false, error: 'Profile identifier is required' },
+        { success: false, error: "Profile identifier is required" },
         { status: 400 }
       );
     }
@@ -108,12 +118,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       fid = parseInt(identifier);
     } else {
       // If updating by username, we need to look up the FID first
-      const result = await query('SELECT fid FROM profiles WHERE username = $1', [identifier]);
+      const result = await query(
+        "SELECT fid FROM profiles WHERE username = $1",
+        [identifier]
+      );
       if (result.rows.length > 0) {
         fid = result.rows[0].fid;
       } else {
         return NextResponse.json(
-          { success: false, error: `Profile not found with username: ${identifier}` },
+          {
+            success: false,
+            error: `Profile not found with username: ${identifier}`,
+          },
           { status: 404 }
         );
       }
@@ -121,13 +137,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (!fid) {
       return NextResponse.json(
-        { success: false, error: 'FID is required for profile update' },
+        { success: false, error: "FID is required for profile update" },
         { status: 400 }
       );
     }
 
     // UPSERT query - insert if not exists, update if exists
-    const upsertResult = await query(`
+    const upsertResult = await query(
+      `
       INSERT INTO profiles (
         fid, 
         username,
@@ -149,29 +166,30 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         updated_at = NOW()
       RETURNING id, fid, username, display_name, bio, avatar_url, theme, 
                 custom_domain, is_verified, created_at, updated_at
-    `, [
-      fid,
-      body.username || null,
-      body.display_name || null,
-      body.bio || null,
-      body.avatar_url || null,
-      body.theme || 'default',
-      body.custom_domain || null
-    ]);
+    `,
+      [
+        fid,
+        body.username || null,
+        body.display_name || null,
+        body.bio || null,
+        body.avatar_url || null,
+        body.theme || "default",
+        body.custom_domain || null,
+      ]
+    );
 
     return NextResponse.json({
       success: true,
       profile: upsertResult.rows[0],
-      message: 'Profile saved successfully'
+      message: "Profile saved successfully",
     });
-
   } catch (error) {
-    console.error('Error updating profile:', error);
+    console.error("Error updating profile:", error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to update profile',
-        details: error instanceof Error ? error.message : 'Unknown error'
+      {
+        success: false,
+        error: "Failed to update profile",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
@@ -182,27 +200,35 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { identifier } = await params;
-    
+
     if (!identifier) {
       return NextResponse.json(
-        { success: false, error: 'Profile identifier is required' },
+        { success: false, error: "Profile identifier is required" },
         { status: 400 }
       );
     }
 
     let result;
-    
+
     if (isNumeric(identifier)) {
-      result = await query('DELETE FROM profiles WHERE fid = $1 RETURNING id, username', [parseInt(identifier)]);
+      result = await query(
+        "DELETE FROM profiles WHERE fid = $1 RETURNING id, username",
+        [parseInt(identifier)]
+      );
     } else {
-      result = await query('DELETE FROM profiles WHERE username = $1 RETURNING id, username', [identifier]);
+      result = await query(
+        "DELETE FROM profiles WHERE username = $1 RETURNING id, username",
+        [identifier]
+      );
     }
 
     if (result.rows.length === 0) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: `Profile not found with ${isNumeric(identifier) ? 'FID' : 'username'}: ${identifier}` 
+        {
+          success: false,
+          error: `Profile not found with ${
+            isNumeric(identifier) ? "FID" : "username"
+          }: ${identifier}`,
         },
         { status: 404 }
       );
@@ -213,16 +239,15 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({
       success: true,
       message: `Profile '${deletedProfile.username}' deleted successfully`,
-      deleted_profile: deletedProfile
+      deleted_profile: deletedProfile,
     });
-
   } catch (error) {
-    console.error('Error deleting profile:', error);
+    console.error("Error deleting profile:", error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to delete profile',
-        details: error instanceof Error ? error.message : 'Unknown error'
+      {
+        success: false,
+        error: "Failed to delete profile",
+        details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
