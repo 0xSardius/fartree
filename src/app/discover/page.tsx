@@ -51,7 +51,7 @@ export default function DiscoverPage() {
     const enableBack = async () => {
       try {
         await sdk.back.enableWebNavigation()
-      } catch (error) {
+      } catch {
         // Back navigation not supported in this context
       }
     }

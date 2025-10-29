@@ -132,7 +132,9 @@ export function ProfileLinkList({ initialLinks, profileFid, showSummary = true }
 
   useEffect(() => {
     return () => {
-      debounceTimersRef.current.forEach((timer, linkId) => {
+      // Copy ref to local variable for cleanup
+      const timers = debounceTimersRef.current
+      timers.forEach((timer, linkId) => {
         clearTimeout(timer)
         flushClicks(linkId)
       })

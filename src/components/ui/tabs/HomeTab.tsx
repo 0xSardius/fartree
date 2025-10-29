@@ -46,6 +46,7 @@ export function HomeTab() {
       <div className="text-center">
         <div className="relative inline-block mb-4">
           {user.avatar_url ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img 
               src={user.avatar_url} 
               alt={user.display_name}
