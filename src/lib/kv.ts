@@ -1,6 +1,11 @@
-import { FrameNotificationDetails } from "@farcaster/miniapp-sdk";
 import { Redis } from "@upstash/redis";
 import { APP_NAME } from "./constants";
+
+// Define notification details type (for future notification functionality)
+export interface FrameNotificationDetails {
+  url: string;
+  token: string;
+}
 
 // In-memory fallback storage
 const localStore = new Map<string, FrameNotificationDetails>();
