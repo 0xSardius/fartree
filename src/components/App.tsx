@@ -127,13 +127,16 @@ export default function App(
   }
 
   // --- Render ---
+  // Safe area insets for native mobile app environment
+  const safeAreaInsets = context ? (context as { client?: { safeAreaInsets?: { top?: number; bottom?: number; left?: number; right?: number } } }).client?.safeAreaInsets : undefined;
+  
   return (
     <div
       style={{
-        paddingTop: context?.client.safeAreaInsets?.top ?? 0,
-        paddingBottom: context?.client.safeAreaInsets?.bottom ?? 0,
-        paddingLeft: context?.client.safeAreaInsets?.left ?? 0,
-        paddingRight: context?.client.safeAreaInsets?.right ?? 0,
+        paddingTop: safeAreaInsets?.top ?? 0,
+        paddingBottom: safeAreaInsets?.bottom ?? 0,
+        paddingLeft: safeAreaInsets?.left ?? 0,
+        paddingRight: safeAreaInsets?.right ?? 0,
       }}
     >
       {/* Header should be full width */}
