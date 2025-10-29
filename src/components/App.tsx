@@ -73,9 +73,9 @@ export default function App(
         
         if (isInMiniApp) {
           console.log('✅ Mini App environment detected');
-          // Get Mini App context
-          const miniAppContext = sdk.context;
-          setContext(miniAppContext);
+          // Get Mini App context (await because sdk.context is a Promise)
+          const miniAppContext = await sdk.context;
+          setContext(miniAppContext as unknown as Record<string, unknown>);
           
           // Note: sdk.actions.ready() is called once on the main app page entry point
           // This component just gets the context for display purposes
