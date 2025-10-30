@@ -111,8 +111,9 @@ export async function getFarcasterMetadata(): Promise<MiniAppManifest> {
       tags: APP_TAGS,
       heroImageUrl: APP_SPLASH_URL,
       tagline: "The Linktree for Farcaster",
-      ogTitle: `${APP_NAME} - The Linktree for Farcaster`,
-      ogDescription: APP_DESCRIPTION,
+      ogTitle: "Fartree - Onchain Profile Hub",
+      ogDescription:
+        "One link for all your Farcaster activities. Showcase mini-apps, tokens, and onchain collabs.",
       ogImageUrl: APP_OG_IMAGE_URL,
       castShareUrl: APP_URL,
       screenshotUrl: APP_SPLASH_URL,
