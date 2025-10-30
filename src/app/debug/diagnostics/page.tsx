@@ -254,7 +254,7 @@ export default function DiagnosticsPage() {
                           Show details
                         </summary>
                         <pre className="mt-2 p-2 bg-black/20 rounded overflow-x-auto">
-                          {JSON.stringify(result.details, null, 2)}
+                          {JSON.stringify(result.details as Record<string, unknown>, null, 2)}
                         </pre>
                       </details>
                     )}
