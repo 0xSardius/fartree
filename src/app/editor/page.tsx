@@ -537,7 +537,7 @@ export default function ProfileEditorInterface() {
             Please sign in to edit your profile
           </p>
           <Button
-            onClick={() => (window.location.href = "/")}
+            onClick={() => router.push("/")}
             className="bg-fartree-primary-purple hover:bg-fartree-accent-purple"
           >
             Go to Sign In
@@ -583,7 +583,7 @@ export default function ProfileEditorInterface() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => (window.location.href = "/discover")}
+              onClick={() => router.push("/discover")}
               disabled={!user?.fid}
               className="border-fartree-border-dark text-fartree-text-primary hover:bg-fartree-window-background hover:text-fartree-accent-purple bg-transparent flex-1 md:flex-none disabled:opacity-50"
             >
@@ -600,7 +600,7 @@ export default function ProfileEditorInterface() {
             }}
             className="border-fartree-border-dark text-fartree-text-primary hover:bg-fartree-window-background hover:text-fartree-accent-purple bg-transparent w-full md:w-auto"
           >
-            <Share2 className="w-4 h-4 mr-2" /> Share
+            <Share2 className="w-4 h-4 mr-2" /> Copy Fartree Link
           </Button>
           {/* Analytics Badge */}
           {totalClicks > 0 && (
