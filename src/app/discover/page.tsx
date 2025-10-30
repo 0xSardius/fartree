@@ -121,7 +121,7 @@ export default function DiscoverPage() {
       // Auth is done loading but no user - set loading to false
       setLoading(false);
     }
-  }, [user?.fid, authLoading]);
+  }, [user?.fid, authLoading, fetchFriends]);
 
   // Handle global Farcaster user search with debouncing
   useEffect(() => {
