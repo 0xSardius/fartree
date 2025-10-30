@@ -69,8 +69,12 @@ export async function GET(request: Request) {
     const allProfilesCheck = await query('SELECT fid, username FROM profiles LIMIT 10');
     console.log(`[Discover] Sample profiles in DB:`, allProfilesCheck.rows.map(p => ({ fid: p.fid, type: typeof p.fid, username: p.username })));
 
+    // CRITICAL FIX: Convert FIDs to strings to match database storage format
+    // Database stores FIDs as TEXT/VARCHAR, not bigint
+    const friendFidStrings = friendFids.map(fid => String(fid));
+    console.log(`[Discover] Converted FIDs to strings:`, friendFidStrings.slice(0, 3));
+
     // Query our database to see which friends have Fartree profiles
-    // Cast FIDs to BIGINT explicitly to match database schema
     const profilesResult = await query(
       `
       SELECT 
@@ -83,11 +87,11 @@ export async function GET(request: Request) {
         COUNT(pl.id) as link_count
       FROM profiles p
       LEFT JOIN profile_links pl ON p.id = pl.profile_id AND pl.is_visible = true
-      WHERE p.fid = ANY($1::bigint[])
+      WHERE p.fid = ANY($1)
       GROUP BY p.id, p.fid, p.username, p.display_name, p.bio, p.avatar_url, p.updated_at
       ORDER BY p.updated_at DESC
       `,
-      [friendFids]
+      [friendFidStrings]
     );
 
     console.log(`[Discover] Found ${profilesResult.rows.length} Fartree profiles:`, 

@@ -208,44 +208,179 @@
 
 ---
 
+## 💬 Power User Feedback (October 30, 2025)
+
+### Strategic Direction from Early Adopter
+**Context:** Feedback after testing discovery features and profile navigation
+
+**Key Insights:**
+1. **Discovery needs polish** - Navigation working but UX could be smoother
+2. **Scrolling/sharing experience** - Links display needs refinement for mobile
+3. **Missing: Educational home page** - Users need guidance on how to use Fartree effectively
+4. **Content gap** - No way to showcase Fartree updates or community highlights
+
+**Monetization Strategy Identified:**
+- Go miniapp-by-miniapp for deep integrations
+- Priority targets: Clanker (tokens), Vibe Market, Cura
+- B2B model: Other miniapps pay for Fartree integration
+- Payment structure: wETH → $FARTR token presale
+- Timeline: Fund for weeks/months post-MVP
+
+---
+
 ## 🔄 In Progress / Next Priority
 
-### 🎉 **MVP COMPLETE! Ready for Production**
+### 🚧 **PRE-MVP POLISH** (Current Sprint)
 
-### Immediate (Production Launch Priorities)
-1. **✅ Production Auth** - ~~Replace test FID with real session auth~~ **COMPLETE**
-   - ✅ Removed hardcoded test FID (6841)
-   - ✅ Using real Quick Auth user data
-   - ✅ JWT decoding for development mode
-   - ⚠️ Still needs: Rate limiting on API endpoints
+#### 1. **🔥 CRITICAL: Discovery Bug Fix** - **IN PROGRESS**
+   - 🚧 Fixed FID type mismatch (bigint[] cast for PostgreSQL)
+   - 🚧 Added comprehensive logging for debugging
+   - 📋 Deploy and verify 44 profiles now appear in discovery
+   - 📋 Test profile navigation end-to-end
    
-2. **✅ Update Messaging** - ~~Align copy with actual features~~ **COMPLETE**
-   - ✅ Updated landing page: "auto-generates" → "kickstarts your profile"
-   - ✅ Onboarding animation: only shows what we actually detect
-   - ✅ Honest messaging about manual addition for tokens/hypersubs
+#### 2. **🎯 Discovery UX Polish** - **NEXT UP**
+   - 📋 Smooth scrolling on friend cards grid
+   - 📋 Loading states during navigation
+   - 📋 Better empty states when no friends found
+   - 📋 Share link flow optimization (copy, composer, etc.)
    
-3. **🚧 Polish & UX** - Final touches before launch **IN PROGRESS**
-   - 🚧 Remove debug console.logs from production code
-   - ✅ Fixed visitor UX gap: Added "Create your own Fartree" CTA for non-owners
-   - ✅ Made Edit button owner-only (checks FID match)
-   - 📋 Test all flows end-to-end in real Farcaster client
-   - 📋 Verify invite functionality works in production
-   
-4. **🚀 Deploy to Production** - Launch on Vercel
-   - Set up production environment variables
-   - Configure domain and SSL
-   - Test in real Warpcast/Farcaster apps
+#### 3. **📱 Links Display Refinement** - **NEXT UP**
+   - 📋 Perfect mobile scrolling behavior
+   - 📋 Share button UX improvements
+   - 📋 Link preview on hover (desktop)
+   - 📋 Smoother animations
 
-### Short Term (Post-Launch)
-4. **🎨 Enhanced Auto-Detection** - Scan for more Web3 activity
-   - Detect Hypersub, Paragraph, Token launches
-   - Add celebration animations when new links are found
-5. **Theme Customization** - Light/dark mode toggle
-6. **Share Frames** - Farcaster Frame for profile sharing
-7. **Profile Sections v2.0** - Bring back categorized sections as optional feature
-   - "Your Empire" (crypto/tokens), "Collabs", "Content", "Social", "Signature Moves"
-   - User toggle: Simple list vs. Organized sections
-8. **Follower Count Display** - Add as client-side feature (non-blocking)
+---
+
+### 🎉 **MVP COMPLETION** (Next 2-3 Sessions)
+
+#### 4. **🏠 Fartree Home Page** - **NEW PRIORITY**
+   **Purpose:** Education, community, updates
+   
+   **Content Sections:**
+   - **Hero Explainer** - What is Fartree? Why use it?
+   - **How to Use** - Quick guide to maximize Fartree value
+   - **Featured Casts** - Pinned community highlights about Fartree
+   - **Features Showcase** - Interactive demos of key features
+   - **Roadmap Widget** - Upcoming features teaser
+   - **Stats Dashboard** - Total profiles, links, engagement
+   
+   **Technical Requirements:**
+   - New route: `/home` or update landing page
+   - Cast embedding API (Neynar)
+   - Admin panel for pinning casts (or hardcoded initially)
+   - Beautiful visual design matching Fartree aesthetic
+   
+   **Success Metrics:**
+   - Clear value proposition for new users
+   - Reduces onboarding confusion
+   - Showcases social proof (featured casts)
+   - Builds anticipation for new features
+
+#### 5. **🚀 Final MVP Polish**
+   - 📋 Remove all debug console.logs
+   - 📋 End-to-end testing in Warpcast
+   - 📋 Performance optimization
+   - 📋 Error handling audit
+   - 📋 Analytics verification
+
+---
+
+### 💰 **POST-MVP: MINIAPP INTEGRATIONS** (Phase 2)
+
+**Business Model:** B2B Integration as a Service
+- Fartree becomes the "profile layer" for other miniapps
+- Deep integrations with popular Farcaster miniapps
+- Payment in wETH for $FARTR token presale access
+
+#### **Priority 1: Clanker Integration** 🏆
+   - Auto-detect token launches (via Clanker API)
+   - Display token holdings and performance
+   - "Empire" section showing all tokens user created
+   - Deep link to Clanker for new token creation
+   - **Revenue:** Clanker pays for featured placement
+
+#### **Priority 2: Vibe Market Integration**
+   - Auto-detect Vibe Market activity
+   - Display collections owned/created
+   - Showcase top vibes with metadata
+   - Link to buy/sell vibes
+   - **Revenue:** Vibe Market partnership deal
+
+#### **Priority 3: Cura Integration**
+   - Medical/health data integrations (if applicable)
+   - Profile enhancement with Cura features
+   - Cross-promotion opportunity
+   - **Revenue:** Integration fee
+
+#### **Priority 4: Open Integration Marketplace**
+   - Other miniapps apply for Fartree integration
+   - Standardized API for auto-detection
+   - Featured placement in user profiles
+   - **Revenue:** wETH payments → $FARTR presale
+
+---
+
+### 🎨 **v2.0 Features** (Long-term Backlog)
+
+#### Enhanced Auto-Detection
+- Hypersub memberships
+- Paragraph publications  
+- Popular casts (engagement metrics)
+- @splits collaborations
+- Frame interaction tracking
+- NFT holdings (Zora, Base)
+
+#### Theme & Customization
+- Light/dark mode toggle
+- Custom color schemes
+- Profile layout options
+- Background patterns
+
+#### Social Features
+- Profile Frames for sharing
+- Collaboration requests
+- Follower insights
+- Engagement analytics
+
+#### Profile Sections v2.0
+- Bring back categorized views
+- "Your Empire" (tokens/crypto)
+- "Collabs" (partnerships)
+- "Content" (casts/articles)
+- User toggle: Simple vs. Organized
+
+---
+
+### 🎯 **MVP Completion Criteria**
+
+**Must Have (This Week):**
+- ✅ Discovery navigation works (bigint fix)
+- 📋 Links scroll smoothly on mobile
+- 📋 Share flow is intuitive
+- 📋 Home page with explainer + featured casts
+
+**Nice to Have (Next Week):**
+- 📋 Performance optimizations
+- 📋 Better loading states
+- 📋 Social proof (user testimonials)
+
+**Launch Blockers Resolved:**
+- ✅ Authentication works cross-platform
+- ✅ Profile creation flow complete
+- ✅ Discovery finds real friends
+- 🚧 Navigation to profiles (fixing now)
+
+---
+
+## 🚀 Next Session Priorities
+
+1. **✅ Deploy bigint fix** - Verify discovery shows 44 profiles
+2. **Polish discovery UX** - Smooth scrolling, loading states, empty states
+3. **Optimize links display** - Mobile scrolling perfection
+4. **Build Home page** - Explainer, featured casts, how-to guide
+5. **Final testing** - End-to-end in Warpcast
+6. **MVP LAUNCH** - Ship to production! 🎉
 
 ---
 
