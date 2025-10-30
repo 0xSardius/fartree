@@ -27,6 +27,13 @@ interface MiniAppMetadata {
   description?: string;
   primaryCategory?: string;
   tags?: string[];
+  heroImageUrl?: string;
+  tagline?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImageUrl?: string;
+  castShareUrl?: string;
+  screenshotUrl?: string;
 }
 
 interface MiniAppManifest {
@@ -102,6 +109,13 @@ export async function getFarcasterMetadata(): Promise<MiniAppManifest> {
       description: APP_DESCRIPTION,
       primaryCategory: APP_PRIMARY_CATEGORY,
       tags: APP_TAGS,
+      heroImageUrl: APP_SPLASH_URL,
+      tagline: "The Linktree for Farcaster",
+      ogTitle: `${APP_NAME} - The Linktree for Farcaster`,
+      ogDescription: APP_DESCRIPTION,
+      ogImageUrl: APP_OG_IMAGE_URL,
+      castShareUrl: APP_URL,
+      screenshotUrl: APP_SPLASH_URL,
     },
   };
 }
