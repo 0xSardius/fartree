@@ -52,7 +52,7 @@ export function cn(...inputs: ClassValue[]) {
 export function getMiniAppEmbedMetadata(ogImageUrl?: string) {
   return {
     version: "next",
-    imageUrl: ogImageUrl ?? APP_OG_IMAGE_URL,
+    imageUrl: ogImageUrl ?? APP_SPLASH_URL,
     button: {
       title: APP_BUTTON_TEXT,
       action: {
