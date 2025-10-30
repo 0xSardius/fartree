@@ -1,146 +1,163 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { WindowFrame } from "~/components/window-frame"
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
-import { Button } from "~/components/ui/Button"
-import { Card, CardContent } from "~/components/ui/card"
-import { useAuth } from "~/contexts/AuthContext"
-import { Users, LinkIcon, Sparkles, Loader2, Share2, ArrowRight, ArrowLeft, Search } from "lucide-react"
-import { sdk } from "@farcaster/miniapp-sdk"
-import { Input } from "~/components/ui/input"
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { WindowFrame } from "~/components/window-frame";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Button } from "~/components/ui/Button";
+import { Card, CardContent } from "~/components/ui/card";
+import { useAuth } from "~/contexts/AuthContext";
+import {
+  Users,
+  LinkIcon,
+  Sparkles,
+  Loader2,
+  Share2,
+  ArrowRight,
+  ArrowLeft,
+  Search,
+  RefreshCw,
+} from "lucide-react";
+import { sdk } from "@farcaster/miniapp-sdk";
+import { Input } from "~/components/ui/input";
 
 interface FriendData {
-  fid: number
-  username: string
-  display_name: string
-  pfp_url?: string
-  follower_count: number
-  following_count: number
-  power_badge: boolean
-  has_fartree: boolean
+  fid: number;
+  username: string;
+  display_name: string;
+  pfp_url?: string;
+  follower_count: number;
+  following_count: number;
+  power_badge: boolean;
+  has_fartree: boolean;
   fartree_data?: {
-    link_count: number
-    bio?: string
-    updated_at: string
-  }
+    link_count: number;
+    bio?: string;
+    updated_at: string;
+  };
 }
 
 interface DiscoverData {
-  success: boolean
-  friends_with_fartree: FriendData[]
-  friends_without_fartree: FriendData[]
-  total_friends: number
-  fartree_count: number
+  success: boolean;
+  friends_with_fartree: FriendData[];
+  friends_without_fartree: FriendData[];
+  total_friends: number;
+  fartree_count: number;
 }
 
 export default function DiscoverPage() {
-  const router = useRouter()
-  const { user, loading: authLoading, isAuthenticated } = useAuth()
-  const [loading, setLoading] = useState(true)
-  const [discoverData, setDiscoverData] = useState<DiscoverData | null>(null)
-  const [discoverError, setDiscoverError] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [searchResults, setSearchResults] = useState<FriendData[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [searchMode, setSearchMode] = useState(false)
+  const router = useRouter();
+  const { user, loading: authLoading, isAuthenticated, refetch } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [discoverData, setDiscoverData] = useState<DiscoverData | null>(null);
+  const [discoverError, setDiscoverError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<FriendData[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchMode, setSearchMode] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Enable web navigation for back button
   useEffect(() => {
     const enableBack = async () => {
       try {
-        await sdk.back.enableWebNavigation()
+        await sdk.back.enableWebNavigation();
       } catch {
         // Back navigation not supported in this context
       }
-    }
-    
-    enableBack()
-    
+    };
+
+    enableBack();
+
     return () => {
       // Cleanup: disable back navigation when leaving this page
-      sdk.back.disableWebNavigation().catch(() => {})
-    }
-  }, [])
+      sdk.back.disableWebNavigation().catch(() => {});
+    };
+  }, []);
 
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/')
+  const fetchFriends = async (forceRefresh = false) => {
+    if (!user?.fid) {
+      setLoading(false);
+      return;
     }
-  }, [authLoading, isAuthenticated, router])
 
-  useEffect(() => {
-    async function fetchFriends() {
-      if (!user?.fid) {
-        setLoading(false)
-        return
+    try {
+      if (forceRefresh) {
+        setIsRefreshing(true);
+      } else {
+        setLoading(true);
       }
 
-      try {
-        setLoading(true)
-        const response = await fetch(`/api/discover/friends?fid=${user.fid}&limit=20`, {
-          cache: 'no-store'
-        })
-        const data = await response.json()
-
-        if (data.success) {
-          setDiscoverData(data)
-        } else {
-          setDiscoverError(data.error || 'Failed to load friends')
+      const response = await fetch(
+        `/api/discover/friends?fid=${user.fid}&limit=20&t=${Date.now()}`,
+        {
+          cache: "no-store",
         }
-      } catch (err) {
-        console.error('Error fetching friends:', err)
-        setDiscoverError('Failed to load friends')
-      } finally {
-        setLoading(false)
-      }
-    }
+      );
+      const data = await response.json();
 
+      if (data.success) {
+        setDiscoverData(data);
+        setDiscoverError(null);
+      } else {
+        setDiscoverError(data.error || "Failed to load friends");
+      }
+    } catch (err) {
+      console.error("Error fetching friends:", err);
+      setDiscoverError("Failed to load friends");
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
     if (user?.fid) {
-      fetchFriends()
+      fetchFriends();
     } else if (!authLoading) {
       // Auth is done loading but no user - set loading to false
-      setLoading(false)
+      setLoading(false);
     }
-  }, [user?.fid, authLoading])
+  }, [user?.fid, authLoading]);
 
   // Handle global Farcaster user search with debouncing
   useEffect(() => {
     if (!searchQuery.trim()) {
-      setSearchMode(false)
-      setSearchResults([])
-      return
+      setSearchMode(false);
+      setSearchResults([]);
+      return;
     }
 
     // Debounce search
     const timer = setTimeout(async () => {
-      setSearchMode(true)
-      setIsSearching(true)
-      
+      setSearchMode(true);
+      setIsSearching(true);
+
       try {
-        const viewerFidParam = user?.fid ? `&viewer_fid=${user.fid}` : '';
-        const searchUrl = `/api/search/users?q=${encodeURIComponent(searchQuery)}&limit=10${viewerFidParam}`;
-        
-        const response = await fetch(searchUrl)
-        const data = await response.json()
-        
+        const viewerFidParam = user?.fid ? `&viewer_fid=${user.fid}` : "";
+        const searchUrl = `/api/search/users?q=${encodeURIComponent(
+          searchQuery
+        )}&limit=10${viewerFidParam}`;
+
+        const response = await fetch(searchUrl);
+        const data = await response.json();
+
         if (data.success) {
-          setSearchResults(data.users || [])
+          setSearchResults(data.users || []);
         } else {
-          console.error('Search error:', data.error, data.details)
-          setSearchResults([])
+          console.error("Search error:", data.error, data.details);
+          setSearchResults([]);
         }
       } catch (error) {
-        console.error('Search failed:', error)
-        setSearchResults([])
+        console.error("Search failed:", error);
+        setSearchResults([]);
       } finally {
-        setIsSearching(false)
+        setIsSearching(false);
       }
-    }, 500) // 500ms debounce
+    }, 500); // 500ms debounce
 
-    return () => clearTimeout(timer)
-  }, [searchQuery, user?.fid])
+    return () => clearTimeout(timer);
+  }, [searchQuery, user?.fid]);
 
   if (authLoading) {
     return (
@@ -150,7 +167,7 @@ export default function DiscoverPage() {
           <p className="text-fartree-text-primary">Authenticating...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (!user) {
@@ -159,13 +176,36 @@ export default function DiscoverPage() {
         <WindowFrame title="Discover Friends" className="w-full max-w-2xl">
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
             <div className="text-red-500 text-4xl mb-4">⚠️</div>
-            <h1 className="text-2xl font-bold text-fartree-text-primary mb-2">Authentication Required</h1>
-            <p className="text-fartree-text-secondary mb-6">Please sign in to discover your friends.</p>
-            <Button onClick={() => router.push('/')}>Go to Home</Button>
+            <h1 className="text-2xl font-bold text-fartree-text-primary mb-2">
+              Authentication Required
+            </h1>
+            <p className="text-fartree-text-secondary mb-6">
+              Please sign in to discover your friends.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                onClick={async () => {
+                  await refetch();
+                  // If still not authenticated after refetch, go home
+                  setTimeout(() => {
+                    if (!isAuthenticated) {
+                      router.push("/");
+                    }
+                  }, 1000);
+                }}
+                className="bg-fartree-primary-purple hover:bg-fartree-accent-purple"
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Reconnect
+              </Button>
+              <Button variant="outline" onClick={() => router.push("/")}>
+                Go to Home
+              </Button>
+            </div>
           </div>
         </WindowFrame>
       </div>
-    )
+    );
   }
 
   if (loading) {
@@ -176,7 +216,7 @@ export default function DiscoverPage() {
           <p className="text-fartree-text-primary">Loading your friends...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (discoverError) {
@@ -185,32 +225,35 @@ export default function DiscoverPage() {
         <WindowFrame title="Discover Friends" className="w-full max-w-2xl">
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
             <div className="text-red-500 text-4xl mb-4">⚠️</div>
-            <h1 className="text-2xl font-bold text-fartree-text-primary mb-2">Oops!</h1>
+            <h1 className="text-2xl font-bold text-fartree-text-primary mb-2">
+              Oops!
+            </h1>
             <p className="text-fartree-text-secondary mb-6">{discoverError}</p>
             <Button onClick={() => window.location.reload()}>Try Again</Button>
           </div>
         </WindowFrame>
       </div>
-    )
+    );
   }
 
-  const friendsWithFartree = discoverData?.friends_with_fartree || []
-  const friendsWithoutFartree = discoverData?.friends_without_fartree || []
+  const friendsWithFartree = discoverData?.friends_with_fartree || [];
+  const friendsWithoutFartree = discoverData?.friends_without_fartree || [];
 
   // Filter friends based on search query
   const filterFriends = (friends: FriendData[]) => {
-    if (!searchQuery.trim()) return friends
-    
-    const query = searchQuery.toLowerCase()
-    return friends.filter(friend => 
-      friend.username?.toLowerCase().includes(query) ||
-      friend.display_name?.toLowerCase().includes(query) ||
-      friend.fid.toString().includes(query)
-    )
-  }
+    if (!searchQuery.trim()) return friends;
 
-  const filteredFriendsWithFartree = filterFriends(friendsWithFartree)
-  const filteredFriendsWithoutFartree = filterFriends(friendsWithoutFartree)
+    const query = searchQuery.toLowerCase();
+    return friends.filter(
+      (friend) =>
+        friend.username?.toLowerCase().includes(query) ||
+        friend.display_name?.toLowerCase().includes(query) ||
+        friend.fid.toString().includes(query)
+    );
+  };
+
+  const filteredFriendsWithFartree = filterFriends(friendsWithFartree);
+  const filteredFriendsWithoutFartree = filterFriends(friendsWithoutFartree);
 
   return (
     <div className="min-h-screen bg-fartree-background flex flex-col items-center p-4 font-mono">
@@ -233,24 +276,42 @@ export default function DiscoverPage() {
                 <span className="hidden sm:inline">Back</span>
               </Button>
               <div>
-                <h1 className="text-lg font-bold text-fartree-text-primary">Discover Friends</h1>
+                <h1 className="text-lg font-bold text-fartree-text-primary">
+                  Discover Friends
+                </h1>
                 <p className="text-xs text-fartree-text-secondary">
-                  {searchMode 
-                    ? `Searching Farcaster...` 
-                    : `${discoverData?.fartree_count || 0} friends with Fartrees • ${discoverData?.total_friends || 0} closest connections`
-                  }
+                  {searchMode
+                    ? `Searching Farcaster...`
+                    : `${
+                        discoverData?.fartree_count || 0
+                      } friends with Fartrees • ${
+                        discoverData?.total_friends || 0
+                      } closest connections`}
                 </p>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/editor')}
-            >
-              My Profile
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchFriends(true)}
+                disabled={isRefreshing}
+                title="Refresh friend list"
+              >
+                <RefreshCw
+                  className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`}
+                />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push("/editor")}
+              >
+                My Profile
+              </Button>
+            </div>
           </div>
-          
+
           {/* Search Bar */}
           <div>
             <div className="relative w-full">
@@ -264,10 +325,9 @@ export default function DiscoverPage() {
               />
             </div>
             <p className="text-xs text-fartree-text-secondary mt-1 ml-1">
-              {searchMode 
-                ? `Showing search results from all of Farcaster` 
-                : `Showing your 20 closest connections • Search to find anyone on Farcaster`
-              }
+              {searchMode
+                ? `Showing search results from all of Farcaster`
+                : `Showing your 20 closest connections • Search to find anyone on Farcaster`}
             </p>
           </div>
         </div>
@@ -280,7 +340,9 @@ export default function DiscoverPage() {
               {isSearching ? (
                 <div className="text-center py-12">
                   <Loader2 className="animate-spin w-8 h-8 text-fartree-primary-purple mx-auto mb-4" />
-                  <p className="text-fartree-text-secondary">Searching Farcaster...</p>
+                  <p className="text-fartree-text-secondary">
+                    Searching Farcaster...
+                  </p>
                 </div>
               ) : searchResults.length > 0 ? (
                 <section>
@@ -313,64 +375,71 @@ export default function DiscoverPage() {
             <>
               {/* Friends with Fartree */}
               {filteredFriendsWithFartree.length > 0 && (
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-5 h-5 text-fartree-primary-purple" />
-                <h2 className="text-xl font-bold text-fartree-text-primary">
-                  Friends with Fartrees ({filteredFriendsWithFartree.length})
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredFriendsWithFartree.map((friend) => (
-                  <FriendCard
-                    key={friend.fid}
-                    friend={friend}
-                    onClick={() => router.push(`/profile/${friend.fid}`)}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
+                <section>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Sparkles className="w-5 h-5 text-fartree-primary-purple" />
+                    <h2 className="text-xl font-bold text-fartree-text-primary">
+                      Friends with Fartrees ({filteredFriendsWithFartree.length}
+                      )
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredFriendsWithFartree.map((friend) => (
+                      <FriendCard
+                        key={friend.fid}
+                        friend={friend}
+                        onClick={() => router.push(`/profile/${friend.fid}`)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
 
-          {/* Empty state for friends with Fartree */}
-          {friendsWithFartree.length === 0 && (
-            <div className="text-center py-12">
-              <Users className="w-16 h-16 text-fartree-text-secondary mx-auto mb-4 opacity-50" />
-              <h3 className="text-xl font-bold text-fartree-text-primary mb-2">
-                No friends on Fartree yet
-              </h3>
-              <p className="text-fartree-text-secondary mb-6">
-                Be the first among your friends to create a Fartree profile!
-              </p>
-            </div>
-          )}
+              {/* Empty state for friends with Fartree */}
+              {friendsWithFartree.length === 0 && (
+                <div className="text-center py-12">
+                  <Users className="w-16 h-16 text-fartree-text-secondary mx-auto mb-4 opacity-50" />
+                  <h3 className="text-xl font-bold text-fartree-text-primary mb-2">
+                    No friends on Fartree yet
+                  </h3>
+                  <p className="text-fartree-text-secondary mb-6">
+                    Be the first among your friends to create a Fartree profile!
+                  </p>
+                </div>
+              )}
 
-          {/* Friends without Fartree */}
-          {filteredFriendsWithoutFartree.length > 0 && (
-            <section>
-              <div className="flex items-center gap-2 mb-4">
-                <Share2 className="w-5 h-5 text-fartree-text-secondary" />
-                <h2 className="text-lg font-semibold text-fartree-text-secondary">
-                  Invite Friends ({filteredFriendsWithoutFartree.length})
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredFriendsWithoutFartree.map((friend) => (
-                  <InviteFriendCard key={friend.fid} friend={friend} />
-                ))}
-              </div>
-            </section>
-          )}
+              {/* Friends without Fartree */}
+              {filteredFriendsWithoutFartree.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Share2 className="w-5 h-5 text-fartree-text-secondary" />
+                    <h2 className="text-lg font-semibold text-fartree-text-secondary">
+                      Invite Friends ({filteredFriendsWithoutFartree.length})
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredFriendsWithoutFartree.map((friend) => (
+                      <InviteFriendCard key={friend.fid} friend={friend} />
+                    ))}
+                  </div>
+                </section>
+              )}
             </>
           )}
         </div>
       </WindowFrame>
     </div>
-  )
+  );
 }
 
 // Friend Card Component (with Fartree)
-function FriendCard({ friend, onClick }: { friend: FriendData; onClick: () => void }) {
+function FriendCard({
+  friend,
+  onClick,
+}: {
+  friend: FriendData;
+  onClick: () => void;
+}) {
   return (
     <Card
       className="cursor-pointer hover:border-fartree-primary-purple transition-colors"
@@ -381,7 +450,7 @@ function FriendCard({ friend, onClick }: { friend: FriendData; onClick: () => vo
           <Avatar className="w-12 h-12 border-2 border-fartree-primary-purple flex-shrink-0">
             <AvatarImage src={friend.pfp_url} alt={friend.display_name} />
             <AvatarFallback className="bg-fartree-primary-purple text-white">
-              {friend.display_name?.[0] || friend.username?.[0] || '?'}
+              {friend.display_name?.[0] || friend.username?.[0] || "?"}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
@@ -391,7 +460,9 @@ function FriendCard({ friend, onClick }: { friend: FriendData; onClick: () => vo
               </h3>
               {friend.power_badge && <span className="text-xs">⚡</span>}
             </div>
-            <p className="text-xs text-fartree-text-secondary truncate">@{friend.username}</p>
+            <p className="text-xs text-fartree-text-secondary truncate">
+              @{friend.username}
+            </p>
             {friend.fartree_data && (
               <div className="flex items-center gap-2 mt-2">
                 <div className="flex items-center gap-1 text-xs text-fartree-primary-purple">
@@ -405,35 +476,35 @@ function FriendCard({ friend, onClick }: { friend: FriendData; onClick: () => vo
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Invite Friend Card Component (without Fartree)
 function InviteFriendCard({ friend }: { friend: FriendData }) {
   const handleInvite = async () => {
-    const shareText = `Hey @${friend.username}! 👋 Check out Fartree - it's like Linktree for Farcaster. Create your Web3 profile in seconds! 🌳✨`
-    const shareUrl = window.location.origin
-    
+    const shareText = `Hey @${friend.username}! 👋 Check out Fartree - it's like Linktree for Farcaster. Create your Web3 profile in seconds! 🌳✨`;
+    const shareUrl = window.location.origin;
+
     try {
       // Use composeCast to stay within Farcaster (doesn't open new tab)
       await sdk.actions.composeCast({
         text: shareText,
         embeds: [shareUrl],
-      })
+      });
     } catch (error) {
       // Fallback: copy to clipboard
       try {
-        const inviteMessage = `${shareText}\n\n${shareUrl}`
-        await navigator.clipboard.writeText(inviteMessage)
-        alert('Invite message copied to clipboard! Share it with your friend.')
+        const inviteMessage = `${shareText}\n\n${shareUrl}`;
+        await navigator.clipboard.writeText(inviteMessage);
+        alert("Invite message copied to clipboard! Share it with your friend.");
       } catch {
-        console.error('Error inviting friend:', error)
+        console.error("Error inviting friend:", error);
       }
     }
-  }
+  };
 
   return (
-    <Card 
+    <Card
       className="opacity-60 hover:opacity-100 transition-opacity cursor-pointer hover:border-fartree-primary-purple"
       onClick={handleInvite}
     >
@@ -442,22 +513,24 @@ function InviteFriendCard({ friend }: { friend: FriendData }) {
           <Avatar className="w-10 h-10 border border-fartree-border-dark">
             <AvatarImage src={friend.pfp_url} alt={friend.display_name} />
             <AvatarFallback className="bg-fartree-border-dark text-fartree-text-secondary text-xs">
-              {friend.display_name?.[0] || friend.username?.[0] || '?'}
+              {friend.display_name?.[0] || friend.username?.[0] || "?"}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 w-full">
             <p className="text-xs font-medium text-fartree-text-primary truncate">
               {friend.display_name}
             </p>
-            <p className="text-[10px] text-fartree-text-secondary truncate">@{friend.username}</p>
+            <p className="text-[10px] text-fartree-text-secondary truncate">
+              @{friend.username}
+            </p>
           </div>
           <Button
             size="sm"
             variant="outline"
             className="w-full text-xs py-1 h-7 flex items-center justify-center gap-1"
             onClick={(e) => {
-              e.stopPropagation()
-              handleInvite()
+              e.stopPropagation();
+              handleInvite();
             }}
           >
             <Share2 className="w-3 h-3" />
@@ -466,6 +539,5 @@ function InviteFriendCard({ friend }: { friend: FriendData }) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
-

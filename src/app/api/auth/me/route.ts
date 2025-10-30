@@ -88,10 +88,14 @@ async function extractFidFromJWT(authHeader: string): Promise<number | null> {
     const client = createClient();
 
     try {
-      const domain = process.env.NEXT_PUBLIC_URL
-        ? new URL(process.env.NEXT_PUBLIC_URL).hostname
-        : "localhost:3000";
-      console.log(`🔐 Verifying JWT with domain: ${domain}`);
+      const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+      const domain = new URL(baseUrl).hostname;
+      console.log(`🔐 JWT Verification:`, {
+        baseUrl,
+        domain,
+        environment: process.env.NODE_ENV,
+        tokenPreview: `${token.substring(0, 20)}...`
+      });
 
       const payload = await client.verifyJwt({
         token,

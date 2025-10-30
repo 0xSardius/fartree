@@ -37,8 +37,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchUser = async () => {
+  const fetchUser = async (forceFetch = false) => {
     try {
+      // Check session storage for cached user (persists across navigation)
+      if (!forceFetch && typeof window !== 'undefined') {
+        const cachedUser = sessionStorage.getItem('fartree_user')
+        if (cachedUser) {
+          try {
+            const parsedUser = JSON.parse(cachedUser)
+            setUser(parsedUser)
+            setLoading(false)
+            console.log('✅ Loaded user from session cache')
+            return
+          } catch {
+            // Invalid cache, continue with fetch
+            sessionStorage.removeItem('fartree_user')
+          }
+        }
+      }
+
       setLoading(true)
       setError(null)
 
@@ -50,15 +67,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const response = await sdk.quickAuth.fetch('/api/auth/me')
         
         if (!response.ok) {
-          throw new Error(`Authentication failed: ${response.status}`)
+          console.error(`Auth fetch failed with status: ${response.status}`)
+          // Don't throw error, just set user to null
+          setUser(null)
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('fartree_user')
+          }
+          return
         }
 
         const data = await response.json()
         
         if (data.success && data.user) {
           setUser(data.user)
+          // Cache user in session storage for navigation persistence
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('fartree_user', JSON.stringify(data.user))
+          }
         } else {
-          throw new Error(data.error || 'Authentication failed')
+          console.error('Auth response missing user:', data.error)
+          setUser(null)
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('fartree_user')
+          }
         }
       } else {
         // Fallback for non-miniapp environments (web)
@@ -71,13 +102,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const data = await response.json()
           if (data.success && data.user) {
             setUser(data.user)
+            // Cache user in session storage
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('fartree_user', JSON.stringify(data.user))
+            }
           } else {
             // Not authenticated, but not an error - user needs to sign in
             setUser(null)
+            if (typeof window !== 'undefined') {
+              sessionStorage.removeItem('fartree_user')
+            }
           }
         } else {
           // Not authenticated, but not an error for web users
           setUser(null)
+          if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('fartree_user')
+          }
         }
       }
 
@@ -85,7 +126,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     } catch (err) {
       console.error('Auth error:', err)
-      setError(err instanceof Error ? err.message : 'Authentication failed')
+      // Don't set error state for navigation - just log it
+      // This prevents showing error screens on simple navigation
+      setUser(null)
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('fartree_user')
+      }
       
       // Note: sdk.actions.ready() is called once on the main app page entry point
     } finally {
@@ -93,13 +139,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Initialize auth on mount
+  // Initialize auth on mount - only once
   useEffect(() => {
     fetchUser()
   }, [])
 
   const refetch = async () => {
-    await fetchUser()
+    await fetchUser(true) // Force refetch
   }
 
   const value: AuthContextType = {
