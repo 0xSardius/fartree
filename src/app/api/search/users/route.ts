@@ -84,7 +84,8 @@ export async function GET(request: NextRequest) {
     console.log(`[Search] Found ${profilesResult.rows.length} profiles:`, profilesResult.rows.map(p => ({ fid: p.fid, username: p.username })));
 
     interface FartreeProfile {
-      fid: number;
+      fid: string;
+      username?: string;
       link_count: string;
       bio?: string;
       updated_at: string;
@@ -92,7 +93,10 @@ export async function GET(request: NextRequest) {
 
     // Enrich search results with Fartree data
     const transformedUsers = users.map((user) => {
-      const fartreeProfile = profilesResult.rows.find((p: FartreeProfile) => p.fid === user.fid);
+      // CRITICAL: Compare as strings since DB stores FIDs as strings
+      const fartreeProfile = profilesResult.rows.find((p: FartreeProfile) => String(p.fid) === String(user.fid));
+      
+      console.log(`[Search] User ${user.username} (${user.fid}): has_fartree = ${!!fartreeProfile}`);
       
       return {
         fid: user.fid,

@@ -98,7 +98,7 @@ export async function GET(request: Request) {
       profilesResult.rows.map((p: FartreeProfile) => ({ fid: p.fid, username: p.username, links: p.link_count })));
 
     interface FartreeProfile {
-      fid: number;
+      fid: string;
       username?: string;
       link_count: string;
       bio?: string;
@@ -107,7 +107,8 @@ export async function GET(request: Request) {
 
     // Enrich friend data with Fartree profile info
     const enrichedFriends = bestFriendsResponse.users.map((friend) => {
-      const fartreeProfile = profilesResult.rows.find((p: FartreeProfile) => p.fid === friend.fid);
+      // CRITICAL: Compare as strings since DB stores FIDs as strings
+      const fartreeProfile = profilesResult.rows.find((p: FartreeProfile) => String(p.fid) === String(friend.fid));
 
       return {
         fid: friend.fid,
