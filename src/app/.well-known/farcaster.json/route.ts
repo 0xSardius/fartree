@@ -4,7 +4,12 @@ import { getFarcasterMetadata } from '../../../lib/utils';
 export async function GET() {
   try {
     const config = await getFarcasterMetadata();
-    return NextResponse.json(config);
+    return NextResponse.json(config, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    });
   } catch (error) {
     console.error('Error generating metadata:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

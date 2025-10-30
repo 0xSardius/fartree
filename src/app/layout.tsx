@@ -4,10 +4,18 @@ import { getSession } from "~/auth"
 import "~/app/globals.css";
 import { Providers } from "~/app/providers";
 import { APP_NAME, APP_DESCRIPTION } from "~/lib/constants";
+import { getMiniAppEmbedMetadata } from "~/lib/utils";
 
 export const metadata: Metadata = {
   title: APP_NAME,
   description: APP_DESCRIPTION,
+  openGraph: {
+    title: APP_NAME,
+    description: APP_DESCRIPTION,
+  },
+  other: {
+    "fc:miniapp": JSON.stringify(getMiniAppEmbedMetadata()),
+  },
 };
 
 export default async function RootLayout({
