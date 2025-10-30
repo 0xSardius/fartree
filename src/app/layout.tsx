@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getSession } from "~/auth"
 import "~/app/globals.css";
 import { Providers } from "~/app/providers";
-import { APP_NAME, APP_DESCRIPTION } from "~/lib/constants";
+import { APP_NAME, APP_DESCRIPTION, APP_SPLASH_URL, APP_URL } from "~/lib/constants";
 import { getMiniAppEmbedMetadata } from "~/lib/utils";
 
 export const metadata: Metadata = {
@@ -12,6 +12,24 @@ export const metadata: Metadata = {
   openGraph: {
     title: APP_NAME,
     description: APP_DESCRIPTION,
+    url: APP_URL,
+    siteName: APP_NAME,
+    images: [
+      {
+        url: APP_SPLASH_URL,
+        width: 1200,
+        height: 1200,
+        alt: `${APP_NAME} - The Linktree for Farcaster`,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: APP_NAME,
+    description: APP_DESCRIPTION,
+    images: [APP_SPLASH_URL],
   },
   other: {
     "fc:miniapp": JSON.stringify(getMiniAppEmbedMetadata()),
