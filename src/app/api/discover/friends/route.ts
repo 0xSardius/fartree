@@ -63,8 +63,14 @@ export async function GET(request: Request) {
     // Extract FIDs from best friends - Neynar returns users directly, not nested
     const friendFids = bestFriendsResponse.users.map((user) => user.fid);
     console.log(`[Discover] Checking ${friendFids.length} friends for Fartree profiles:`, friendFids);
+    console.log(`[Discover] FID types:`, friendFids.map(f => ({ fid: f, type: typeof f })));
+
+    // First, check ALL profiles in database
+    const allProfilesCheck = await query('SELECT fid, username FROM profiles LIMIT 10');
+    console.log(`[Discover] Sample profiles in DB:`, allProfilesCheck.rows.map(p => ({ fid: p.fid, type: typeof p.fid, username: p.username })));
 
     // Query our database to see which friends have Fartree profiles
+    // Cast FIDs to BIGINT explicitly to match database schema
     const profilesResult = await query(
       `
       SELECT 
@@ -77,7 +83,7 @@ export async function GET(request: Request) {
         COUNT(pl.id) as link_count
       FROM profiles p
       LEFT JOIN profile_links pl ON p.id = pl.profile_id AND pl.is_visible = true
-      WHERE p.fid = ANY($1)
+      WHERE p.fid = ANY($1::bigint[])
       GROUP BY p.id, p.fid, p.username, p.display_name, p.bio, p.avatar_url, p.updated_at
       ORDER BY p.updated_at DESC
       `,

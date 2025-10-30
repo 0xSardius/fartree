@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
     
     // Extract FIDs from search results
     const searchFids = users.map((user) => user.fid);
+    console.log(`[Search] Checking FIDs:`, searchFids);
     
     // Query database to check which users have Fartree profiles
     const { query: dbQuery } = await import('~/lib/db');
@@ -72,11 +73,12 @@ export async function GET(request: NextRequest) {
         COUNT(pl.id) as link_count
       FROM profiles p
       LEFT JOIN profile_links pl ON p.id = pl.profile_id AND pl.is_visible = true
-      WHERE p.fid = ANY($1)
+      WHERE p.fid = ANY($1::bigint[])
       GROUP BY p.id, p.fid, p.username, p.display_name, p.bio, p.avatar_url, p.updated_at
       `,
       [searchFids]
     );
+    console.log(`[Search] Found ${profilesResult.rows.length} profiles:`, profilesResult.rows.map(p => ({ fid: p.fid, username: p.username })));
 
     interface FartreeProfile {
       fid: number;
