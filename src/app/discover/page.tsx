@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { WindowFrame } from "~/components/window-frame";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -75,41 +75,44 @@ export default function DiscoverPage() {
     };
   }, []);
 
-  const fetchFriends = async (forceRefresh = false) => {
-    if (!user?.fid) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      if (forceRefresh) {
-        setIsRefreshing(true);
-      } else {
-        setLoading(true);
+  const fetchFriends = useCallback(
+    async (forceRefresh = false) => {
+      if (!user?.fid) {
+        setLoading(false);
+        return;
       }
 
-      const response = await fetch(
-        `/api/discover/friends?fid=${user.fid}&limit=20&t=${Date.now()}`,
-        {
-          cache: "no-store",
+      try {
+        if (forceRefresh) {
+          setIsRefreshing(true);
+        } else {
+          setLoading(true);
         }
-      );
-      const data = await response.json();
 
-      if (data.success) {
-        setDiscoverData(data);
-        setDiscoverError(null);
-      } else {
-        setDiscoverError(data.error || "Failed to load friends");
+        const response = await fetch(
+          `/api/discover/friends?fid=${user.fid}&limit=20&t=${Date.now()}`,
+          {
+            cache: "no-store",
+          }
+        );
+        const data = await response.json();
+
+        if (data.success) {
+          setDiscoverData(data);
+          setDiscoverError(null);
+        } else {
+          setDiscoverError(data.error || "Failed to load friends");
+        }
+      } catch (err) {
+        console.error("Error fetching friends:", err);
+        setDiscoverError("Failed to load friends");
+      } finally {
+        setLoading(false);
+        setIsRefreshing(false);
       }
-    } catch (err) {
-      console.error("Error fetching friends:", err);
-      setDiscoverError("Failed to load friends");
-    } finally {
-      setLoading(false);
-      setIsRefreshing(false);
-    }
-  };
+    },
+    [user?.fid]
+  );
 
   useEffect(() => {
     if (user?.fid) {
