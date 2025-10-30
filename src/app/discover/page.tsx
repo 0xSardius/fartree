@@ -356,9 +356,17 @@ export default function DiscoverPage() {
                     </h2>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {searchResults.map((user) => (
-                      <InviteFriendCard key={user.fid} friend={user} />
-                    ))}
+                    {searchResults.map((user) =>
+                      user.has_fartree ? (
+                        <FriendCard
+                          key={user.fid}
+                          friend={user}
+                          onClick={() => router.push(`/profile/${user.fid}`)}
+                        />
+                      ) : (
+                        <InviteFriendCard key={user.fid} friend={user} />
+                      )
+                    )}
                   </div>
                 </section>
               ) : (

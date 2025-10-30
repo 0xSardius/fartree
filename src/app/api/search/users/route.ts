@@ -54,15 +54,57 @@ export async function GET(request: NextRequest) {
     // Transform the results to match our FriendData interface
     // Neynar returns users directly in the result object
     const users = (searchResults.result?.users || searchResults.users || []) as NeynarSearchUser[];
-    const transformedUsers = users.map((user) => ({
-      fid: user.fid,
-      username: user.username,
-      display_name: user.display_name,
-      pfp_url: user.pfp?.url || user.pfp_url, // Neynar returns pfp.url
-      power_badge: user.power_badge || false,
-      // Search results won't have fartree_data initially
-      fartree_data: null,
-    }));
+    
+    // Extract FIDs from search results
+    const searchFids = users.map((user) => user.fid);
+    
+    // Query database to check which users have Fartree profiles
+    const { query: dbQuery } = await import('~/lib/db');
+    const profilesResult = await dbQuery(
+      `
+      SELECT 
+        p.fid,
+        p.username,
+        p.display_name,
+        p.bio,
+        p.avatar_url,
+        p.updated_at,
+        COUNT(pl.id) as link_count
+      FROM profiles p
+      LEFT JOIN profile_links pl ON p.id = pl.profile_id AND pl.is_visible = true
+      WHERE p.fid = ANY($1)
+      GROUP BY p.id, p.fid, p.username, p.display_name, p.bio, p.avatar_url, p.updated_at
+      `,
+      [searchFids]
+    );
+
+    interface FartreeProfile {
+      fid: number;
+      link_count: string;
+      bio?: string;
+      updated_at: string;
+    }
+
+    // Enrich search results with Fartree data
+    const transformedUsers = users.map((user) => {
+      const fartreeProfile = profilesResult.rows.find((p: FartreeProfile) => p.fid === user.fid);
+      
+      return {
+        fid: user.fid,
+        username: user.username,
+        display_name: user.display_name,
+        pfp_url: user.pfp?.url || user.pfp_url,
+        power_badge: user.power_badge || false,
+        follower_count: 0,
+        following_count: 0,
+        has_fartree: !!fartreeProfile,
+        fartree_data: fartreeProfile ? {
+          link_count: parseInt(fartreeProfile.link_count) || 0,
+          bio: fartreeProfile.bio,
+          updated_at: fartreeProfile.updated_at,
+        } : null,
+      };
+    });
 
     return NextResponse.json({
       success: true,
