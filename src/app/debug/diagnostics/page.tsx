@@ -10,7 +10,7 @@ interface DiagnosticResult {
   test: string;
   status: "pass" | "fail" | "warning" | "loading";
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 export default function DiagnosticsPage() {
@@ -177,6 +177,7 @@ export default function DiagnosticsPage() {
     if (user?.fid) {
       runDiagnostics();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.fid]);
 
   const getStatusIcon = (status: string) => {
@@ -269,7 +270,7 @@ export default function DiagnosticsPage() {
             </h3>
             <ul className="text-sm text-fartree-text-secondary space-y-2 list-disc list-inside">
               <li>
-                <strong>No profiles found:</strong> Your friends haven't created
+                <strong>No profiles found:</strong> Your friends haven&apos;t created
                 Fartrees yet
               </li>
               <li>
