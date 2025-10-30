@@ -937,6 +937,9 @@ export default function ProfileEditorInterface() {
           </div>
         </div>
       )}
+
+      {/* Add Mini App Modal - First Time Prompt */}
+      <AddMiniAppModal />
     </div>
   )
 }

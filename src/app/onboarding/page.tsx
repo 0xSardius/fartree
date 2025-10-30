@@ -3,12 +3,13 @@
 import { useState, useEffect, useCallback } from "react"
 import { Button } from "~/components/ui/Button"
 import { WindowFrame } from "~/components/window-frame"
-import { CheckCircle, Loader2, LinkIcon, User, Sparkles, ArrowRight, ArrowLeft } from "lucide-react"
+import { CheckCircle, Loader2, LinkIcon, User, Sparkles, ArrowRight, ArrowLeft, Plus } from "lucide-react"
 import { ScanConfetti } from "~/components/animations/ScanConfetti"
 import { cn } from "~/lib/utils"
 import { useRouter } from "next/navigation"
 import { useAuth } from "~/contexts/AuthContext"
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar"
+import { useMiniApp } from "@neynar/react"
 
 type AuthUser = ReturnType<typeof useAuth>["user"]
 
@@ -24,10 +25,14 @@ export default function OnboardingFlow() {
   const [profileData, setProfileData] = useState<AuthUser>(null)
   const [scanSteps, setScanSteps] = useState<ScanStep[]>([])
   const [scanComplete, setScanComplete] = useState(false)
+  const [isAddingApp, setIsAddingApp] = useState(false)
   const router = useRouter()
   
   // Use centralized auth context
   const { user, loading: authLoading, error: authError, isAuthenticated, refetch } = useAuth()
+  
+  // Use MiniApp SDK for adding the app
+  const { actions, added } = useMiniApp()
   
   // Real auto-scanning function - defined before useEffect that uses it
   const handleAutoScan = useCallback(async () => {
@@ -134,6 +139,20 @@ export default function OnboardingFlow() {
 
   const handleBack = () => {
     setStep(step - 1)
+  }
+  
+  // Handle adding mini app to Warpcast
+  const handleAddMiniApp = async () => {
+    if (added || !actions?.addMiniApp) return
+    
+    setIsAddingApp(true)
+    try {
+      await actions.addMiniApp()
+    } catch (error) {
+      console.error("Failed to add mini app:", error)
+    } finally {
+      setIsAddingApp(false)
+    }
   }
 
   const steps = [
@@ -242,6 +261,7 @@ export default function OnboardingFlow() {
       description: "Add your tokens, mini-apps, and custom links. Drag-and-drop to reorder. Make it yours!",
       buttonText: "Go to Editor",
       action: () => router.push('/editor'),
+      showAddApp: true, // Show "Add to Warpcast" button on this step
     },
   ]
 
@@ -311,6 +331,35 @@ export default function OnboardingFlow() {
               {currentStep.buttonText} {step < steps.length && !loading && <ArrowRight className="ml-2 h-5 w-5" />}
             </span>
           </Button>
+
+          {/* Add to Warpcast button on final step */}
+          {step === 4 && !added && (
+            <Button
+              onClick={handleAddMiniApp}
+              disabled={isAddingApp}
+              className="mt-4 bg-fartree-accent-purple hover:bg-fartree-primary-purple text-white px-6 py-3 rounded-md transition-colors duration-300"
+            >
+              {isAddingApp ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-5 h-5 mr-2" />
+                  Add to Warpcast
+                </>
+              )}
+            </Button>
+          )}
+
+          {/* Success message when app is already added */}
+          {step === 4 && added && (
+            <div className="mt-4 flex items-center text-fartree-success-green">
+              <CheckCircle className="w-5 h-5 mr-2" />
+              <span>Already added to Warpcast! 🎉</span>
+            </div>
+          )}
 
           {step > 1 && (
             <Button
