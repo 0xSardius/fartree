@@ -91,6 +91,8 @@ export async function generateMetadata({ params }: { params: Promise<{ fid: stri
   
   try {
     const profile = await getProfile(fid)
+    const { getMiniAppEmbedMetadata } = await import('~/lib/utils')
+    const baseUrl = process.env.NEXT_PUBLIC_URL || 'https://fartree.vercel.app'
     
     if (!profile) {
       return {
@@ -101,6 +103,7 @@ export async function generateMetadata({ params }: { params: Promise<{ fid: stri
     
     const profileName = profile.display_name || profile.username || `User ${profile.fid}`
     const description = profile.bio || `${profileName}'s Fartree profile - Web3 links and digital identity`
+    const profileImageUrl = profile.avatar_url || `${baseUrl}/api/opengraph-image?fid=${fid}`
     
     return {
       title: `${profileName} - Fartree`,
@@ -108,14 +111,18 @@ export async function generateMetadata({ params }: { params: Promise<{ fid: stri
       openGraph: {
         title: `${profileName} - Fartree`,
         description,
-        images: profile.avatar_url ? [profile.avatar_url] : undefined,
+        images: [profileImageUrl],
         type: 'profile',
+        url: `${baseUrl}/profile/${fid}`,
       },
       twitter: {
-        card: 'summary',
+        card: 'summary_large_image',
         title: `${profileName} - Fartree`,
         description,
-        images: profile.avatar_url ? [profile.avatar_url] : undefined,
+        images: [profileImageUrl],
+      },
+      other: {
+        'fc:miniapp': JSON.stringify(getMiniAppEmbedMetadata(profileImageUrl)),
       },
     }
   } catch {
