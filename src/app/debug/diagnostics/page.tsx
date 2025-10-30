@@ -248,7 +248,7 @@ export default function DiagnosticsPage() {
                     <p className="text-sm text-fartree-text-secondary mb-2">
                       {result.message}
                     </p>
-                    {result.details && (
+                    {result.details ? (
                       <details className="text-xs">
                         <summary className="cursor-pointer text-fartree-primary-purple hover:underline">
                           Show details
@@ -257,7 +257,7 @@ export default function DiagnosticsPage() {
                           {JSON.stringify(result.details as Record<string, unknown>, null, 2)}
                         </pre>
                       </details>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </div>
