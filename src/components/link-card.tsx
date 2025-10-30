@@ -136,15 +136,15 @@ export function LinkCard({
           </div>
           {editable && onEdit && (
             <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onEdit}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onEdit}
                 className="w-7 h-7 p-0 text-fartree-text-secondary hover:text-fartree-accent-purple border-fartree-border-dark"
-              >
+                >
                 <Pencil className="w-3.5 h-3.5" />
-                <span className="sr-only">Edit</span>
-              </Button>
+                  <span className="sr-only">Edit</span>
+                </Button>
             </div>
           )}
         </div>

@@ -63,6 +63,34 @@ export default function App(
 
   // --- Effects ---
   /**
+   * Suppress SDK analytics errors (non-critical)
+   */
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const originalError = console.error;
+      console.error = (...args) => {
+        // Suppress known Farcaster infrastructure errors
+        const errorStr = args.join(' ');
+        if (
+          errorStr.includes('client.farcaster.xyz') ||
+          errorStr.includes('client.warpcast.com') ||
+          errorStr.includes('usePutMiniAppEvent') ||
+          errorStr.includes('analytics-events') ||
+          errorStr.includes('user-preferences')
+        ) {
+          // Silently ignore SDK analytics failures
+          return;
+        }
+        originalError.apply(console, args);
+      };
+      
+      return () => {
+        console.error = originalError;
+      };
+    }
+  }, []);
+  
+  /**
    * Initialize the Mini App SDK and set up context
    */
   useEffect(() => {

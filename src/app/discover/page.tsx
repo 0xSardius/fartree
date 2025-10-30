@@ -56,6 +56,7 @@ export default function DiscoverPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchMode, setSearchMode] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [navigatingToFid, setNavigatingToFid] = useState<number | null>(null);
 
   // Enable web navigation for back button
   useEffect(() => {
@@ -361,7 +362,19 @@ export default function DiscoverPage() {
                         <FriendCard
                           key={user.fid}
                           friend={user}
-                          onClick={() => router.push(`/profile/${user.fid}`)}
+                          isNavigating={navigatingToFid === user.fid}
+                          onClick={() => {
+                            console.log(
+                              `🔍 Navigating to profile: ${user.fid}`
+                            );
+                            setNavigatingToFid(user.fid);
+                            try {
+                              router.push(`/profile/${user.fid}`);
+                            } catch (error) {
+                              console.error("Navigation error:", error);
+                              setNavigatingToFid(null);
+                            }
+                          }}
                         />
                       ) : (
                         <InviteFriendCard key={user.fid} friend={user} />
@@ -399,7 +412,19 @@ export default function DiscoverPage() {
                       <FriendCard
                         key={friend.fid}
                         friend={friend}
-                        onClick={() => router.push(`/profile/${friend.fid}`)}
+                        isNavigating={navigatingToFid === friend.fid}
+                        onClick={() => {
+                          console.log(
+                            `👥 Navigating to friend profile: ${friend.fid}`
+                          );
+                          setNavigatingToFid(friend.fid);
+                          try {
+                            router.push(`/profile/${friend.fid}`);
+                          } catch (error) {
+                            console.error("Navigation error:", error);
+                            setNavigatingToFid(null);
+                          }
+                        }}
                       />
                     ))}
                   </div>
@@ -447,14 +472,30 @@ export default function DiscoverPage() {
 function FriendCard({
   friend,
   onClick,
+  isNavigating = false,
 }: {
   friend: FriendData;
   onClick: () => void;
+  isNavigating?: boolean;
 }) {
+  const handleClick = (e: React.MouseEvent) => {
+    if (isNavigating) return;
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("🖱️ FriendCard clicked!", {
+      fid: friend.fid,
+      username: friend.username,
+      display_name: friend.display_name,
+    });
+    onClick();
+  };
+
   return (
     <Card
-      className="cursor-pointer hover:border-fartree-primary-purple transition-colors"
-      onClick={onClick}
+      className={`cursor-pointer hover:border-fartree-primary-purple transition-colors ${
+        isNavigating ? "opacity-50 pointer-events-none" : ""
+      }`}
+      onClick={handleClick}
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
@@ -483,7 +524,11 @@ function FriendCard({
               </div>
             )}
           </div>
-          <ArrowRight className="w-4 h-4 text-fartree-text-secondary flex-shrink-0" />
+          {isNavigating ? (
+            <Loader2 className="w-4 h-4 text-fartree-primary-purple animate-spin flex-shrink-0" />
+          ) : (
+            <ArrowRight className="w-4 h-4 text-fartree-text-secondary flex-shrink-0" />
+          )}
         </div>
       </CardContent>
     </Card>
