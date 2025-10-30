@@ -124,6 +124,22 @@ export default function DiscoverPage() {
     }
   }, [user?.fid, authLoading, fetchFriends]);
 
+  // Debug: Log discover data when it changes
+  useEffect(() => {
+    if (discoverData) {
+      console.log("[Discover] Data loaded:", {
+        total_friends: discoverData.total_friends,
+        fartree_count: discoverData.fartree_count,
+        friends_with_fartree: discoverData.friends_with_fartree.map((f) => ({
+          fid: f.fid,
+          username: f.username,
+          has_fartree: f.has_fartree,
+          link_count: f.fartree_data?.link_count,
+        })),
+      });
+    }
+  }, [discoverData]);
+
   // Handle global Farcaster user search with debouncing
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -309,7 +325,30 @@ export default function DiscoverPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => router.push("/editor")}
+                onClick={async () => {
+                  console.log(
+                    "🧪 Testing navigation to own profile:",
+                    user?.fid
+                  );
+                  if (user?.fid) {
+                    try {
+                      // Test API first
+                      const testResponse = await fetch(
+                        `/api/debug/test-navigation?fid=${user.fid}`
+                      );
+                      const testData = await testResponse.json();
+                      console.log("🔧 API Test:", testData);
+
+                      // Then try navigation
+                      console.log("🚀 Attempting router.push...");
+                      router.push(`/profile/${user.fid}`);
+                      console.log("✅ Navigation initiated");
+                    } catch (err) {
+                      console.error("❌ Navigation failed:", err);
+                    }
+                  }
+                }}
+                title="Test: View your profile"
               >
                 My Profile
               </Button>
@@ -487,6 +526,8 @@ function FriendCard({
       username: friend.username,
       display_name: friend.display_name,
     });
+
+    // Just navigate directly - profile page will handle errors gracefully
     onClick();
   };
 

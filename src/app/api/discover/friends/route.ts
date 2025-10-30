@@ -62,6 +62,7 @@ export async function GET(request: Request) {
 
     // Extract FIDs from best friends - Neynar returns users directly, not nested
     const friendFids = bestFriendsResponse.users.map((user) => user.fid);
+    console.log(`[Discover] Checking ${friendFids.length} friends for Fartree profiles:`, friendFids);
 
     // Query our database to see which friends have Fartree profiles
     const profilesResult = await query(
@@ -83,8 +84,12 @@ export async function GET(request: Request) {
       [friendFids]
     );
 
+    console.log(`[Discover] Found ${profilesResult.rows.length} Fartree profiles:`, 
+      profilesResult.rows.map((p: FartreeProfile) => ({ fid: p.fid, username: p.username, links: p.link_count })));
+
     interface FartreeProfile {
       fid: number;
+      username?: string;
       link_count: string;
       bio?: string;
       updated_at: string;
@@ -115,6 +120,8 @@ export async function GET(request: Request) {
     // Separate friends with and without Fartrees
     const friendsWithFartree = enrichedFriends.filter((f) => f.has_fartree);
     const friendsWithoutFartree = enrichedFriends.filter((f) => !f.has_fartree);
+
+    console.log(`[Discover] Result: ${friendsWithFartree.length} with Fartree, ${friendsWithoutFartree.length} without`);
 
     return NextResponse.json({
       success: true,
