@@ -230,7 +230,7 @@ export default function DiagnosticsPage() {
           <div className="space-y-4">
             {results.length === 0 && !running && (
               <div className="text-center py-12 text-fartree-text-secondary">
-                <p>Click "Run Tests" to start diagnostics</p>
+                <p>Click &quot;Run Tests&quot; to start diagnostics</p>
               </div>
             )}
 
