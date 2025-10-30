@@ -56,15 +56,11 @@ export function getMiniAppEmbedMetadata(ogImageUrl?: string) {
     button: {
       title: APP_BUTTON_TEXT,
       action: {
-        type: "launch_frame",
+        type: "launch_miniapp",
         name: APP_NAME,
         url: APP_URL,
         splashImageUrl: APP_SPLASH_URL,
-        iconUrl: APP_ICON_URL,
         splashBackgroundColor: APP_SPLASH_BACKGROUND_COLOR,
-        description: APP_DESCRIPTION,
-        primaryCategory: APP_PRIMARY_CATEGORY,
-        tags: APP_TAGS,
       },
     },
   };
