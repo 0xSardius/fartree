@@ -20,6 +20,26 @@ export default function LandingPage() {
         const isInMiniApp = await sdk.isInMiniApp()
         if (isInMiniApp) {
           await sdk.actions.ready()
+          
+          // Check for deep link in SDK context
+          const context = await sdk.context
+          console.log(`[Landing] 📱 SDK Context:`, JSON.stringify(context, null, 2))
+          
+          // When launched from a cast embed, extract the path from the embed URL
+          if (context?.location?.type === 'cast_embed' && context.location.embed) {
+            try {
+              const embedUrl = new URL(context.location.embed)
+              const embedPath = embedUrl.pathname + embedUrl.search
+              
+              if (embedPath && embedPath !== '/') {
+                console.log(`[Landing] 🔗 Deep link from cast embed: ${embedPath}`)
+                router.push(embedPath)
+                return
+              }
+            } catch (e) {
+              console.error('[Landing] Failed to parse embed URL:', e)
+            }
+          }
         }
       } catch (error) {
         console.error('Failed to initialize app:', error)
@@ -27,16 +47,22 @@ export default function LandingPage() {
     }
     
     initializeApp()
-  }, []) // Only run once on mount
+  }, [router]) // Only run once on mount
 
   // Redirect authenticated users to the main app
   // BUT ONLY if they're on the landing page (not deep-linked to a specific page)
   useEffect(() => {
     if (isAuthenticated && user && typeof window !== 'undefined') {
       console.log(`[Landing] 🔄 Auth detected - pathname: ${window.location.pathname}`);
+      
+      // Check for deep links in multiple ways:
+      // 1. window.location (traditional web)
+      // 2. Next.js router pathname
+      const currentPath = window.location.pathname
+      
       // Only redirect if we're actually on the landing page root
       // Don't redirect if user is deep-linked to a profile or other page
-      if (window.location.pathname === '/') {
+      if (currentPath === '/') {
         console.log(`[Landing] ✅ On root path - redirecting authenticated user`);
         // Check if user has completed onboarding (has links or is returning user)
         if (user.links && user.links.length > 0) {
@@ -47,7 +73,7 @@ export default function LandingPage() {
           router.push('/onboarding') // Go to onboarding for new users
         }
       } else {
-        console.log(`[Landing] ⏭️ Skipping redirect - user on deep link: ${window.location.pathname}`);
+        console.log(`[Landing] ⏭️ Skipping redirect - user on deep link: ${currentPath}`);
       }
     }
   }, [isAuthenticated, user, router])
