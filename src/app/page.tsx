@@ -33,15 +33,21 @@ export default function LandingPage() {
   // BUT ONLY if they're on the landing page (not deep-linked to a specific page)
   useEffect(() => {
     if (isAuthenticated && user && typeof window !== 'undefined') {
+      console.log(`[Landing] 🔄 Auth detected - pathname: ${window.location.pathname}`);
       // Only redirect if we're actually on the landing page root
       // Don't redirect if user is deep-linked to a profile or other page
       if (window.location.pathname === '/') {
+        console.log(`[Landing] ✅ On root path - redirecting authenticated user`);
         // Check if user has completed onboarding (has links or is returning user)
         if (user.links && user.links.length > 0) {
+          console.log(`[Landing] → Redirecting to /editor (${user.links.length} links)`);
           router.push('/editor') // Go to editor for existing users
         } else {
+          console.log(`[Landing] → Redirecting to /onboarding (new user)`);
           router.push('/onboarding') // Go to onboarding for new users
         }
+      } else {
+        console.log(`[Landing] ⏭️ Skipping redirect - user on deep link: ${window.location.pathname}`);
       }
     }
   }, [isAuthenticated, user, router])
