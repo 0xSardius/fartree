@@ -29,8 +29,10 @@ interface ProfileData {
 // Server-side data fetching functions
 async function getProfile(identifier: string): Promise<ProfileData | null> {
   try {
-    console.log(`[Profile] 🔍 Fetching profile for identifier: "${identifier}" (type: ${typeof identifier})`);
-    
+    console.log(
+      `[Profile] 🔍 Fetching profile for identifier: "${identifier}" (type: ${typeof identifier})`
+    );
+
     // Use direct database query instead of internal API call
     const { query } = await import("~/lib/db");
 
@@ -52,13 +54,19 @@ async function getProfile(identifier: string): Promise<ProfileData | null> {
       result = await query("SELECT * FROM profiles WHERE username = $1", [
         identifier,
       ]);
-      console.log(`[Profile] ✅ Username query returned ${result.rows.length} rows`);
+      console.log(
+        `[Profile] ✅ Username query returned ${result.rows.length} rows`
+      );
     }
 
     if (result.rows.length > 0) {
-      console.log(`[Profile] 🎉 Found profile: FID ${result.rows[0].fid}, username ${result.rows[0].username}`);
+      console.log(
+        `[Profile] 🎉 Found profile: FID ${result.rows[0].fid}, username ${result.rows[0].username}`
+      );
     } else {
-      console.log(`[Profile] ❌ No profile found for identifier: "${identifier}"`);
+      console.log(
+        `[Profile] ❌ No profile found for identifier: "${identifier}"`
+      );
     }
 
     return result.rows.length > 0 ? result.rows[0] : null;
@@ -188,7 +196,11 @@ export default async function PublicProfileView({
       getProfile(fid),
       getProfileLinks(fid),
     ]);
-    console.log(`[Server] ✅ Fetch complete - Profile: ${profile ? 'FOUND' : 'NOT FOUND'}, Links: ${links?.length || 0}`);
+    console.log(
+      `[Server] ✅ Fetch complete - Profile: ${
+        profile ? "FOUND" : "NOT FOUND"
+      }, Links: ${links?.length || 0}`
+    );
   } catch (error) {
     console.error(`[Server] ❌ Error fetching profile ${fid}:`, error);
     notFound();
@@ -199,7 +211,9 @@ export default async function PublicProfileView({
     notFound();
   }
 
-  console.log(`[Server] 🎨 Rendering profile for ${profile.username} (FID: ${profile.fid})`);
+  console.log(
+    `[Server] 🎨 Rendering profile for ${profile.username} (FID: ${profile.fid})`
+  );
 
   console.log(
     `[Server] Successfully loaded profile for ${profile.username} (FID: ${fid})`
