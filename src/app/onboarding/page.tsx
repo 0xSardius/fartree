@@ -159,24 +159,32 @@ export default function OnboardingFlow() {
     {
       id: 1,
       title: "Welcome to Fartree!",
-      icon: <Sparkles className="w-16 h-16 text-fartree-primary-purple mb-6" />,
+      icon: authLoading ? (
+        <Loader2 className="w-16 h-16 text-fartree-primary-purple animate-spin mb-6" />
+      ) : (
+        <Sparkles className="w-16 h-16 text-fartree-primary-purple mb-6" />
+      ),
       description: isAuthenticated 
         ? `Welcome back, ${user?.display_name || user?.username}! Let's kickstart your profile with your Farcaster data.`
-        : "The Linktree for Farcaster. Beautiful link-in-bio profiles for creators.",
+        : authLoading
+          ? "Connecting to your Farcaster account..."
+          : "The Linktree for Farcaster. Beautiful link-in-bio profiles for creators.",
       buttonText: authLoading 
         ? "Connecting..." 
         : isAuthenticated 
           ? "Continue Setup" 
-          : "Connect Farcaster Account",
+          : "Get Started",
       action: () => {
         if (isAuthenticated) {
           setStep(2)
           handleAutoScan()
         } else {
-          // Quick Auth should happen automatically in miniapp environment
-          console.log("Waiting for Quick Auth...")
+          // Quick Auth happens automatically via AuthContext
+          // Trigger a refetch to expedite the process
+          refetch()
         }
       },
+      disabled: authLoading, // Disable button while loading
     },
     {
       id: 2,
