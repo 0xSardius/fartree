@@ -39,8 +39,9 @@ async function getProfile(identifier: string): Promise<ProfileData | null> {
 
     let result;
     if (isNumeric(identifier)) {
+      // CRITICAL: FIDs are stored as strings in the database
       result = await query("SELECT * FROM profiles WHERE fid = $1", [
-        parseInt(identifier),
+        identifier, // Keep as string to match database
       ]);
     } else {
       result = await query("SELECT * FROM profiles WHERE username = $1", [
@@ -67,8 +68,9 @@ async function getProfileLinks(identifier: string): Promise<ProfileLink[]> {
     // First get the profile ID
     let profileResult;
     if (isNumeric(identifier)) {
+      // CRITICAL: FIDs are stored as strings in the database
       profileResult = await query("SELECT id FROM profiles WHERE fid = $1", [
-        parseInt(identifier),
+        identifier, // Keep as string to match database
       ]);
     } else {
       profileResult = await query(
