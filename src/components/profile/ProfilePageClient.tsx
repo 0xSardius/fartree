@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "~/components/ui/Button";
 import { WindowFrame } from "~/components/window-frame";
+import { sdk } from "@farcaster/miniapp-sdk";
 
 interface ProfilePageClientProps {
   fid: string;
@@ -15,7 +16,7 @@ interface ProfilePageClientProps {
  * Client-side wrapper for the profile page that handles:
  * - Loading states during server rendering
  * - Error boundaries for failed renders
- * - Navigation back button
+ * - Farcaster back button navigation (for in-app links)
  * - Debug logging
  */
 export function ProfilePageClient({ fid, children }: ProfilePageClientProps) {
@@ -43,6 +44,30 @@ export function ProfilePageClient({ fid, children }: ProfilePageClientProps) {
 
     window.addEventListener("error", handleError);
     return () => window.removeEventListener("error", handleError);
+  }, []);
+
+  // Back button navigation for Farcaster-native links
+  useEffect(() => {
+    const setupBackButton = async () => {
+      try {
+        const capabilities = await sdk.getCapabilities();
+        if (capabilities.includes('back')) {
+          await sdk.back.enableWebNavigation();
+          console.log('✅ Back navigation enabled for profile page');
+        }
+      } catch (error) {
+        console.log('⚠️ Back navigation not available:', error);
+      }
+    };
+
+    setupBackButton();
+
+    // Cleanup: disable back navigation when leaving the profile page
+    return () => {
+      sdk.back.disableWebNavigation().catch(() => {
+        // Silently fail if disabling doesn't work
+      });
+    };
   }, []);
 
   if (hasError) {
