@@ -107,6 +107,17 @@ export default function App({ title }: AppProps = { title: "Fartree" }) {
           const miniAppContext = await sdk.context;
           setContext(miniAppContext as unknown as Record<string, unknown>);
 
+          // Enable back navigation globally for all Fartree pages
+          try {
+            const capabilities = await sdk.getCapabilities();
+            if (capabilities.includes("back")) {
+              await sdk.back.enableWebNavigation();
+              console.log("✅ Back navigation enabled globally");
+            }
+          } catch (error) {
+            console.log("⚠️ Back navigation not available:", error);
+          }
+
           // Note: sdk.actions.ready() is called once on the main app page entry point
           // This component just gets the context for display purposes
         } else {
