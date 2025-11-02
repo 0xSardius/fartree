@@ -560,7 +560,7 @@ export default function ProfileEditorInterface() {
             <Button
               onClick={handleSaveProfile}
               disabled={saving || !profile || !user?.fid}
-              className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary flex-1 md:flex-none disabled:opacity-50"
+              className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-white font-semibold flex-1 md:flex-none disabled:opacity-50"
             >
               {saving ? (
                 <>
@@ -692,7 +692,7 @@ export default function ProfileEditorInterface() {
                   setShowAddLinkModal(true);
                 }}
                 disabled={addingLink}
-                className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary disabled:opacity-50"
+                className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-white font-semibold disabled:opacity-50"
               >
                 <Plus className="w-4 h-4 mr-2" /> Add New Link
               </Button>
@@ -716,7 +716,7 @@ export default function ProfileEditorInterface() {
                       setShowAddLinkModal(true);
                     }}
                     disabled={addingLink}
-                    className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary disabled:opacity-50"
+                    className="bg-fartree-primary-purple hover:bg-fartree-accent-purple text-white font-semibold disabled:opacity-50"
                   >
                     <Plus className="w-4 h-4 mr-2" /> Add Your First Link
                   </Button>
@@ -941,7 +941,7 @@ export default function ProfileEditorInterface() {
                 disabled={
                   addingLink || !newLinkTitle.trim() || !newLinkUrl.trim()
                 }
-                className="flex-1 bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary disabled:opacity-50"
+                className="flex-1 bg-fartree-primary-purple hover:bg-fartree-accent-purple text-white font-semibold disabled:opacity-50"
               >
                 {addingLink ? "Adding..." : "Add Link"}
               </Button>
@@ -1043,7 +1043,7 @@ export default function ProfileEditorInterface() {
                 disabled={
                   updatingLink || !editLinkTitle.trim() || !editLinkUrl.trim()
                 }
-                className="flex-1 bg-fartree-primary-purple hover:bg-fartree-accent-purple text-fartree-text-primary disabled:opacity-50"
+                className="flex-1 bg-fartree-primary-purple hover:bg-fartree-accent-purple text-white font-semibold disabled:opacity-50"
               >
                 {updatingLink ? "Updating..." : "Update Link"}
               </Button>

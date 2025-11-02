@@ -94,7 +94,7 @@ body {
   }
   
   .btn-outline {
-    @apply border border-gray-300 bg-transparent hover:bg-gray-50 focus:ring-gray-500 dark:border-gray-600 dark:hover:bg-gray-800;
+    @apply border-2 border-fartree-border-dark bg-transparent text-fartree-text-primary font-semibold hover:bg-fartree-window-header focus:ring-2 focus:ring-fartree-primary-purple;
   }
 
   /* Global input styles */
