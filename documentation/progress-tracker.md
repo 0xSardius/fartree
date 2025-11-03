@@ -281,32 +281,443 @@ _Last Updated: October 11, 2025_
 
 ### 🎉 **MVP COMPLETION** (Next 2-3 Sessions)
 
-#### 4. **🏠 Fartree Home Page** - **NEW PRIORITY**
+#### 4. **🏠 Fartree Home Page Architecture** - **ACTIVE DISCUSSION** 🔥
 
-**Purpose:** Education, community, updates
+**Goal:** Create a valuable home page that serves both as a landing hub and provides utility beyond just editing
+
+**Architecture Options to Consider:**
+
+##### **Option A: Home as Central Hub** ⭐ **RECOMMENDED**
+
+```
+User Flow:
+1. User opens Fartree → Lands on `/home`
+2. Home shows: Quick stats, trending Fartrees, featured profiles, analytics preview
+3. Action buttons: "Edit My Fartree", "Discover Friends", "View My Profile"
+4. Home becomes the "app dashboard" - check stats, explore community, manage profile
+```
+
+**Pros:**
+
+- Home feels like an "app" not just a tool
+- Discovery of other Fartrees happens naturally
+- Analytics/trending features have a home
+- Encourages repeat visits beyond just editing
+- Social proof (featured users) builds community
+
+**Cons:**
+
+- Extra click to reach editor
+- Needs compelling content to justify the stop
 
 **Content Sections:**
 
-- **Hero Explainer** - What is Fartree? Why use it?
-- **How to Use** - Quick guide to maximize Fartree value
-- **Featured Casts** - Pinned community highlights about Fartree
-- **Features Showcase** - Interactive demos of key features
-- **Roadmap Widget** - Upcoming features teaser
-- **Stats Dashboard** - Total profiles, links, engagement
+- **Your Stats Widget** - Quick metrics (total clicks, top link, recent activity)
+- **Trending Fartrees** - Most clicked profiles this week
+- **Featured Profiles** - Curated showcase (manual or algorithm)
+- **Quick Actions** - Edit, Discover, Share buttons
+- **What's New** - Latest Fartree features/updates
+- **Leaderboard** - Top profiles by clicks/engagement
 
-**Technical Requirements:**
+##### **Option B: Editor-First Landing**
 
-- New route: `/home` or update landing page
-- Cast embedding API (Neynar)
-- Admin panel for pinning casts (or hardcoded initially)
-- Beautiful visual design matching Fartree aesthetic
+```
+User Flow:
+1. User opens Fartree → Lands directly on `/editor`
+2. Editor is the main interface
+3. Home/community features in sidebar or secondary nav
+4. Power user focused - "get in, edit, get out"
+```
 
-**Success Metrics:**
+**Pros:**
 
-- Clear value proposition for new users
-- Reduces onboarding confusion
-- Showcases social proof (featured casts)
-- Builds anticipation for new features
+- Zero friction to main task (editing links)
+- Familiar for Linktree users
+- Less development needed
+- Editor is the core value prop
+
+**Cons:**
+
+- Misses opportunity for discovery
+- No community engagement
+- Less sticky - users only visit to edit
+- Trending/social features feel tacked on
+
+##### **Option C: Smart Routing (Hybrid)**
+
+```
+User Flow:
+1. First-time users → Onboarding flow
+2. Returning users with no links → Editor (get them started)
+3. Returning users with links → Home (show them what's happening)
+4. Edit button prominent everywhere
+```
+
+**Pros:**
+
+- Adapts to user context
+- New users get straight to value
+- Active users see community features
+- Best of both worlds
+
+**Cons:**
+
+- More complex routing logic
+- Could feel inconsistent
+- A/B testing needed to optimize
+
+##### **Option D: Home as Marketing + `/app` Hub**
+
+```
+Structure:
+- `/` = Marketing landing (logged-out users)
+- `/app` or `/home` = Main hub (logged-in users)
+- Clear separation of marketing vs. utility
+```
+
+**Pros:**
+
+- Clean separation of concerns
+- Marketing can be optimized independently
+- App feels more premium ("welcome to the app")
+
+**Cons:**
+
+- Extra route to maintain
+- Redirect complexity
+
+---
+
+**Key Questions to Decide:**
+
+1. **What's our retention goal?**
+
+   - Daily active users checking stats? → Option A (Home Hub)
+   - Weekly editors updating links? → Option B (Editor-First)
+
+2. **What creates stickiness?**
+
+   - Social features (trending, discovery)? → Option A
+   - Just utility (link management)? → Option B
+
+3. **What's the viral loop?**
+
+   - Discovery of cool Fartrees? → Option A (Home showcases profiles)
+   - Seeing someone's profile → creating your own? → Option B is fine
+
+4. **What other features are planned?**
+   - Widgets, analytics, trending? → Needs Option A (Home Hub)
+   - Just better editing? → Option B works
+
+---
+
+**Home Page Content Ideas** (for Option A)
+
+**Must-Have Sections:**
+
+- **Hero Section**: Your personal stats at a glance
+- **Quick Actions**: 3 big buttons (Edit, Discover, Share)
+- **Trending Section**: 5-10 trending Fartrees with metrics
+- **What's New**: Changelog widget or featured update
+
+**Nice-to-Have Sections:**
+
+- **Featured Creators**: Manually curated "Fartree of the Week"
+- **Analytics Deep Dive**: Chart showing your growth
+- **Community Feed**: Recent updates from friends' Fartrees
+- **Suggested Connections**: "Users like you also follow..."
+- **Tips & Tricks**: Rotating educational content
+
+**Interactive Elements:**
+
+- **Search Bar**: Jump to any Fartree by username
+- **Notification Badge**: "3 new visitors to your profile"
+- **Quick Edit Widget**: Add a link without opening full editor
+
+---
+
+**Technical Implementation Notes:**
+
+```typescript
+// Smart routing on root landing page
+if (!isAuthenticated) {
+  // Show marketing landing page
+  return <LandingPage />;
+}
+
+// Authenticated user routing
+if (!user.has_completed_onboarding) {
+  router.push("/onboarding");
+} else if (homePageEnabled) {
+  router.push("/home"); // New central hub
+} else {
+  router.push("/editor"); // Classic Linktree style
+}
+```
+
+**Database Schema Additions:**
+
+```sql
+-- For trending/analytics features
+CREATE TABLE fartree_views (
+  id SERIAL PRIMARY KEY,
+  profile_fid BIGINT,
+  viewer_fid BIGINT,
+  viewed_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE featured_profiles (
+  profile_fid BIGINT PRIMARY KEY,
+  featured_at TIMESTAMP,
+  featured_by TEXT, -- admin username
+  reason TEXT -- "Fartree of the week"
+);
+```
+
+---
+
+**Next Steps:**
+
+1. **Decide on Architecture** - Which option resonates?
+2. **Wireframe Key Screens** - What does home actually show?
+3. **Define Success Metrics** - DAU, time on site, profiles viewed?
+4. **Implement MVP Home** - Start with basic version
+5. **A/B Test** - Try both approaches with real users?
+
+**Time Estimate:**
+
+- Simple home hub: 1 session
+- Full-featured hub with trending/analytics: 2-3 sessions
+
+---
+
+#### 4b. **💎 What Fartree Needs to Become Truly Valuable** - **STRATEGIC FRAMEWORK**
+
+**Current State:** Functional Linktree clone with Farcaster integration ✅  
+**Goal:** Indispensable onchain identity hub that users check daily
+
+**The Stickiness Formula:**
+
+```
+Stickiness = (Reasons to Return) × (Value Per Visit) × (Network Effects)
+```
+
+##### **Reasons to Return** 📈
+
+**Current:** "I need to add/edit a link" (occasional)
+
+**Needed:**
+
+1. **Real-time Analytics**
+
+   - "Who clicked my links today?"
+   - Push notifications: "Your Zora token widget got 50 views!"
+   - Weekly summary emails with insights
+   - **Result:** Daily check-ins to see performance
+
+2. **Dynamic Content That Changes**
+
+   - Trending profiles (updates daily)
+   - New Fartrees from friends (notification feed)
+   - Featured profile rotation
+   - **Result:** FOMO - "What's happening on Fartree today?"
+
+3. **Social Interactions**
+
+   - Comments on profiles (via Farcaster)
+   - "X followed your Fartree"
+   - "Y visited your profile"
+   - **Result:** Social feedback loop
+
+4. **Revenue/Monetization Tracking**
+   - Tips received today
+   - Token-gated link unlocks
+   - Affiliate earnings from widgets
+   - **Result:** Financial incentive to check regularly
+
+##### **Value Per Visit** 💰
+
+**Current:** Edit links, preview profile (functional)
+
+**Needed:**
+
+1. **Actionable Insights**
+
+   - "Your SOL address link got 100 clicks but 0 donations - add a tip widget?"
+   - "Users who clicked Link A also clicked Link B - consider grouping them"
+   - "Your top traffic source is /channelname - engage there more"
+   - **Result:** Each visit teaches something useful
+
+2. **Quick Wins**
+
+   - One-click widget additions (auto-detected)
+   - Quick link reordering without opening editor
+   - Template gallery: "Apply this trending layout"
+   - **Result:** Accomplish something in 30 seconds
+
+3. **Discovery That Matters**
+   - "Profiles similar to yours" (find your tribe)
+   - "Your mutual friends follow these Fartrees"
+   - "Top profiles in your niche"
+   - **Result:** Valuable connections made
+
+##### **Network Effects** 🌐
+
+**Current:** Individual profiles (silo'd)
+
+**Needed:**
+
+1. **Cross-Promotion Built-In**
+
+   - "Featured on @username's Fartree" badge
+   - Collaborative Fartrees (team/project pages)
+   - Fartree collections: "Best AI builders on Farcaster"
+   - **Result:** Incentive to promote each other
+
+2. **Platform-Level Features**
+
+   - Fartree Directory (browse by category)
+   - Leaderboards by niche
+   - "Verified Creator" badges
+   - **Result:** Better Fartree = better discovery
+
+3. **Data Network Effects**
+   - More users = better trending algorithm
+   - More widgets = better auto-detection
+   - More clicks = better analytics
+   - **Result:** Platform gets smarter over time
+
+---
+
+##### **The "Holy Shit" Moments** ✨
+
+**What makes users evangelize Fartree?**
+
+1. **Auto-Detection Magic**
+
+   - Opens Fartree → "We found your Clanker token!"
+   - One click to add beautiful widget
+   - **Reaction:** "How did it know?!"
+
+2. **Revenue Surprise**
+
+   - Gets notification: "You earned 0.05 ETH in tips this week"
+   - Wasn't expecting monetization
+   - **Reaction:** "Fartree is making me money!"
+
+3. **Social Proof**
+
+   - "Your Fartree was featured by @bigcreator"
+   - Profile views spike 10x
+   - **Reaction:** "Fartree got me discovered!"
+
+4. **Competitive Advantage**
+   - Other creators ask "How did you make your profile so good?"
+   - Answer: "It's my Fartree"
+   - **Reaction:** "I need to tell everyone about this"
+
+---
+
+##### **Critical Features for Success** (Prioritized)
+
+**Tier 1: Must Have for Stickiness** 🔴
+
+1. ✅ Real-time click analytics dashboard
+2. ✅ Trending/featured profiles on home
+3. ❌ Widget system with auto-detection (Zora, Clanker, Hypersub)
+4. ❌ Tip jar / monetization feature
+5. ❌ Push notifications for engagement
+
+**Tier 2: Strong Differentiators** 🟡 6. ❌ Fartree Directory (browse all profiles) 7. ❌ Social interactions (comments, follows) 8. ❌ Token-gated links 9. ❌ Weekly analytics email 10. ❌ Quick-add widget suggestions
+
+**Tier 3: Long-term Moats** 🟢 11. ❌ AI insights ("Optimize your profile for...") 12. ❌ Collaborative Fartrees 13. ❌ NFT achievement system 14. ❌ Fartree API for developers 15. ❌ White-label for projects
+
+---
+
+##### **What Makes Fartree "Indispensable"?**
+
+**For Creators:**
+
+- "Where I manage my onchain identity"
+- "How I monetize my following"
+- "My hub that connects everything I build"
+
+**For Visitors:**
+
+- "Where I discover cool Farcaster people"
+- "How I support my favorite creators"
+- "The directory for Farcaster's best"
+
+**For Builders:**
+
+- "Where I showcase my projects"
+- "My landing page for all my launches"
+- "Proof of my onchain activity"
+
+---
+
+##### **Competitive Analysis: What Are We Better At?**
+
+**vs. Linktree:**
+
+- ✅ Native Farcaster integration
+- ✅ Onchain widgets (crypto-native)
+- ✅ Auto-detection from wallet/FID
+- ❌ Not better at: Templates, themes, analytics (yet)
+
+**vs. Bento/Others:**
+
+- ✅ Farcaster social graph
+- ✅ Mini app environment
+- ✅ Web3 identity focus
+- ❌ Not better at: Visual customization
+
+**Unique Positioning:**
+
+- **"The onchain identity hub for Farcaster"**
+- Not trying to be generic Linktree
+- All features should leverage Farcaster/Base/onchain
+
+---
+
+##### **The North Star Metric**
+
+**Proposed:** Daily Active Profiles (DAP)
+
+- Measures stickiness
+- Indicates users getting value beyond one-time setup
+- Correlates with features being useful
+
+**Secondary Metrics:**
+
+- Widget adoption rate (auto-detection success)
+- Profile → editor conversion (discovery working)
+- Actions taken on widgets (monetization success)
+- Shares of Fartree profiles (viral loop)
+
+---
+
+**Decision Point:** Where do we focus first?
+
+**Path A: Social/Discovery** (Build community)
+
+- Trending, featured, directory
+- Comments and interactions
+- Time: 2-3 sessions
+
+**Path B: Monetization** (Creator value)
+
+- Tip jar, token-gated links
+- Revenue dashboard
+- Time: 2-3 sessions
+
+**Path C: Widgets** (Technical differentiation)
+
+- Auto-detection system
+- 3-5 initial widgets
+- Time: 3-4 sessions
+
+**Recommendation:** Start with **Home Page (Hub)** + **Trending** to create the "app" feeling, then add **Widgets** for differentiation, then **Monetization** for retention.
 
 #### 5. **🚀 Final MVP Polish**
 
@@ -362,6 +773,176 @@ if (isAuthenticated && user) {
 - Educational content for new users
 
 **Time Estimate:** 1-2 sessions
+
+---
+
+### 🎨 **WIDGET SYSTEM & ONCHAIN FEATURES** (Phase 2)
+
+**Vision:** Transform Fartree from static links to an interactive onchain identity hub with auto-detected widgets
+
+#### **Widget System Architecture**
+
+**Core Concept:** Auto-detect user's onchain activity and suggest relevant interactive widgets
+
+**Widget Flow:**
+
+1. User connects wallet → Fartree scans onchain activity
+2. System detects what they've created/participated in
+3. Suggests relevant widgets to add to profile
+4. Visitors can take actions directly from widgets
+
+**Technical Structure:**
+
+```typescript
+interface Widget {
+  id: string;
+  type: 'zora-token' | 'clanker-token' | 'nft-gallery' | 'hypersub' | ...;
+  auto_detected: boolean;
+  enabled: boolean;
+  position: number;
+  config: WidgetConfig;
+  data: WidgetData; // Cached onchain data
+}
+```
+
+#### **Phase 2A: Creator Widgets** 🎯 **HIGH PRIORITY**
+
+1. **Zora Creator Token Widget**
+
+   - Auto-detect if user launched a creator token
+   - Display: token name, supply, current price, mini chart
+   - **Actions**: Buy tokens button → deep link to Zora
+   - API: Zora API
+   - **Stickiness**: Creators check token performance, share widget
+
+2. **Clanker Token Widget**
+
+   - Detect tokens launched via Clanker
+   - Show: token stats, holder count, DEX links
+   - **Actions**: Buy/sell, add to wallet, view chart
+   - API: Clanker API (or scan Farcaster casts)
+   - **Stickiness**: Token creators promote their Fartree
+
+3. **Hypersub Widget**
+   - Detect if user has a Hypersub
+   - Show: subscriber count, benefits preview
+   - **Actions**: Subscribe button (Coinbase SDK)
+   - API: Hypersub API
+   - **Stickiness**: Creators track subscribers
+
+#### **Phase 2B: Social & Community Widgets**
+
+4. **Farcaster Channels Widget**
+
+   - Auto-detect channels user created/moderates
+   - Show: member count, recent activity
+   - **Actions**: Join channel, view on Warpcast
+   - API: Neynar API (already integrated!)
+
+5. **NFT Gallery Widget**
+
+   - Auto-suggest highest-value collection
+   - Gallery grid view with hover previews
+   - **Actions**: View on OpenSea, make offer
+   - API: Simplehash or Alchemy NFT API
+
+6. **Purple DAO Badge**
+   - Auto-detect Purple membership
+   - Display badge with join date
+   - **Actions**: Learn more, become member
+
+#### **Phase 2C: Monetization Widgets** 💰
+
+7. **Tip Jar Widget**
+
+   - Accept ETH, Base tokens, USDC
+   - "Buy me a coffee" but onchain
+   - **Actions**: Send tip (Coinbase SDK)
+   - **Stickiness**: Creators check tips daily
+
+8. **Token-Gated Links**
+
+   - Premium links only for NFT/token holders
+   - "Unlock with 10,000 $DEGEN"
+   - **Actions**: Verify ownership, unlock content
+   - **Stickiness**: Users manage access lists
+
+9. **Paid Links/Paywall**
+   - Charge micropayments for link access
+   - Revenue dashboard for creators
+   - **Actions**: Pay to unlock
+   - **Stickiness**: Revenue tracking
+
+#### **Phase 2D: Interactive & Creative Widgets**
+
+10. **Frame Integration**
+
+    - Embed Farcaster Frames in profile
+    - Polls, games, mints within Fartree
+    - **Actions**: Interact with Frame
+    - **Stickiness**: Dynamic interactive content
+
+11. **Cast Feed Widget**
+
+    - Show recent casts on profile
+    - "Latest from @username"
+    - **Actions**: Like, recast, reply
+    - **Stickiness**: Auto-updates with activity
+
+12. **Onchain Link Lottery**
+    - Random visitors win NFTs/tokens
+    - Gamifies link sharing
+    - **Actions**: Enter lottery, claim prize
+    - **Stickiness**: Users set up prizes, check winners
+
+#### **Phase 2E: Analytics & Proof Widgets**
+
+13. **Onchain Click Analytics**
+
+    - Store milestones onchain
+    - "Verifiable engagement metrics"
+    - **Actions**: View proof on Basescan
+    - **Stickiness**: Proof of reach for sponsorships
+
+14. **Link Performance NFTs**
+    - Mint commemorative NFTs for milestones
+    - "This link got 1000 clicks" achievement
+    - **Actions**: Mint achievement NFT
+    - **Stickiness**: Collectible memories
+
+#### **Widget Detection Service Design**
+
+```typescript
+async function detectWidgets(fid: number, wallets: string[]) {
+  const detected = [];
+
+  // Check Zora
+  const zoraTokens = await checkZoraCreatorTokens(wallets);
+  if (zoraTokens.length)
+    detected.push({ type: "zora-token", data: zoraTokens });
+
+  // Check Clanker
+  const clankerTokens = await checkClankerLaunches(fid);
+  if (clankerTokens.length)
+    detected.push({ type: "clanker-token", data: clankerTokens });
+
+  // Check Hypersub
+  const hypersubs = await checkHypersubCreators(wallets);
+  if (hypersubs.length) detected.push({ type: "hypersub", data: hypersubs });
+
+  // ... more checks
+
+  return detected;
+}
+```
+
+#### **Success Metrics for Widgets**
+
+- **Engagement**: % of users who enable suggested widgets
+- **Actions**: Visitor interactions per widget (buys, follows, tips)
+- **Retention**: Return visits to manage/update widgets
+- **Monetization**: Revenue from token-gated/paid features
+- **Viral**: Widget shares → new Fartree signups
 
 ---
 
