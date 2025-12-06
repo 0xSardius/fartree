@@ -568,7 +568,7 @@ function FriendCard({
           {isNavigating ? (
             <Loader2 className="w-4 h-4 text-fartree-primary-purple animate-spin flex-shrink-0" />
           ) : (
-            <ArrowRight className="w-4 h-4 text-fartree-text-secondary flex-shrink-0" />
+          <ArrowRight className="w-4 h-4 text-fartree-text-secondary flex-shrink-0" />
           )}
         </div>
       </CardContent>
