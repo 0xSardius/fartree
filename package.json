@@ -54,7 +54,7 @@
     "dotenv": "^16.6.1",
     "lucide-react": "^0.469.0",
     "mipd": "^0.0.7",
-    "next": "^16.0.7",
+    "next": "16.0.10",
     "react": "^19",
     "react-dom": "^19",
     "tailwind-merge": "^2.6.0",
